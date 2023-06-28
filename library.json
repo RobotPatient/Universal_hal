@@ -1,0 +1,8 @@
+{
+    "name":"Universal_hall",
+    "build": {
+        "srcDir": ".",
+        "extraScript": "pio_build_configure.py"
+    }
+}
+
