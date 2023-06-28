@@ -20,13 +20,6 @@ typedef enum {
   kGPIONoPull
 } GPIOPull;
 
-typedef enum {
-  kGPIOEventOut,
-  kGPIOEventSet,
-  kGPIOEventClr,
-  kGPIOEventTgl
-} GPIOInputEvent;
-
 
 typedef struct {
   unsigned char pin_num;
