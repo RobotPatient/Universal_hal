@@ -72,7 +72,7 @@ void SetGPIOPinSamplingMode(const GPIOPin pin, GPIOSamplingMode sampling_mode) {
   }
 }
 
-GPIO_ERR GetGPIOPinLevel(GPIOPort port_num, const unsigned char pin_num) {
+GPIOPinLevel GetGPIOPinLevel(const GPIOPin pin) {
   return (PORT->Group[port_num].OUT.reg >> pin_num) & 1;
 }
 
