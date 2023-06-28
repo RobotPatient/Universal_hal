@@ -8,6 +8,11 @@ typedef enum {
     kGPIODirOutput
 }GPIOPinDirection;
 
+typedef enum {
+    kGPIOLow,
+    kGPIOHigh,
+}GPIOPinLevel;
+
 #if SUPPORT_PIN_PULL
 void SetGPIOPull(const GPIOPin pin, GPIOPull PullMode);
 #endif
@@ -36,5 +41,7 @@ void SetGPIOPinDirection(const GPIOPin pin, const unsigned char direction);
 void SetGPIOPinLevel(const GPIOPin pin, const unsigned char level);
 
 GPIOPinDirection GetGPIOPinDirection(const GPIOPin pin);
+
+GPIOPinLevel GetGPIOPinLevel(GPIOPin pin);
 
 #endif

@@ -35,3 +35,7 @@ gpio_put(pin.pin_num, level);
 GPIOPinDirection GetGPIOPinDirection(const GPIOPin pin) {
 return gpio_get_dir(pin.pin_num);
 }
+
+GPIOPinLevel GetGPIOPinLevel(GPIOPin pin) {
+    return gpio_get(pin.pin_num);
+}
