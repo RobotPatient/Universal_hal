@@ -12,6 +12,7 @@ path = join(os.getcwd()+"/hal_gpio/platform/", platform)
 if(os.path.exists(path)):
     hal_var_found = True
     env.Append(CPPPATH=[realpath("hal_gpio/"), realpath(join("hal_gpio/platform/", platform))])
+    env.Append(CPPPATH=[realpath("hal_i2c"), realpath(join("hal_i2c/platform/", platform))])
     env.Replace(SRC_FILTER=["+<hal_gpio/gpio.h>","+<hal_gpio/gpio_error_handling.h>", "+<*/platform/%s/*>" % platform])
 else:
     print("ERROR! MCU: %s specified in pio config is not supported" % platform)

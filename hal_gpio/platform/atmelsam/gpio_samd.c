@@ -73,7 +73,7 @@ void SetGPIOPinSamplingMode(const GPIOPin pin, GPIOSamplingMode sampling_mode) {
 }
 
 GPIOPinLevel GetGPIOPinLevel(const GPIOPin pin) {
-  return (PORT->Group[port_num].IN.reg >> pin_num) & 1;
+  return (PORT->Group[pin.port_num].IN.reg >> pin.pin_num) & 1;
 }
 
 GPIOPinDirection GetGPIOPinDirection(const GPIOPin pin) {
