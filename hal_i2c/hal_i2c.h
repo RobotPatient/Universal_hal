@@ -11,7 +11,7 @@ void i2c_set_baudrate(I2CInst* I2C_instance, unsigned long baudate);
 
 void i2c_set_slave_mode(I2CInst* I2C_instance, unsigned short addr);
 
-void i2c_write_blocking(I2CInst* I2C_instance, const unsigned short addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit);
+void i2c_write_blocking(I2CInst* I2C_instance, const unsigned char addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 
 void i2c_write_non_blocking(I2CInst* I2C_instance, const unsigned short addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 

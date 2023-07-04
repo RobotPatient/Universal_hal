@@ -25,7 +25,8 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
 ***********************************************************************************************/
-#include <hal_gpio.h>
+#include <../../hal_gpio.h>
+#include "gpio_platform_specific.h"
 #include <sam.h>
 
 void SetGPIOPinLevel(const GPIOPin pin, const unsigned char level) {
