@@ -1,7 +1,8 @@
 #ifndef I2C_MASTER_PLATFORM_SPECIFIC
 #define I2C_MASTER_PLATFORM_SPECIFIC
 
-#include <sam.h>
+#include <samd21g18a.h>
+#include <atmel_irq.h>
 
 typedef enum {
     I2COpModeMaster,
@@ -32,11 +33,11 @@ typedef enum {
 typedef struct {
 SercomNum Sercom_inst_num;
 Sercom* SercomInst;
-CLKGEN ClockGen;
+CLKGEN ClockGenSlow;
+CLKGEN ClockGenFast;
 I2COperatingMode OpMode;
 unsigned short I2CAddr;
 }I2CInst;
-
 
 
 
