@@ -10,12 +10,15 @@ if(Data->CurrAction == SERCOMACT_I2C_DATA_TRANSMIT && Data->buf_cnt < Data->buf_
 	((Sercom*)hw)->I2CM.INTFLAG.reg = 0x01;
     ((Sercom*)hw)->I2CM.CTRLB.reg &= ~SERCOM_I2CM_CTRLB_ACKACT;
 	((Sercom*)hw)->I2CM.CTRLB.reg |= (SERCOM_I2CM_CTRLB_CMD(0x3));
+	Data->CurrAction = SERCOMACT_NONE;
 }
 }
 
 void SERCOM5_Handler(void)
 {
+	if(SERCOMData[5].CurrInterface == SERCOM_INT_I2CM) {
     i2c_master_handler(SERCOM5, &SERCOMData[5]);
+	}
 }
 
 void SERCOM4_Handler(void)
@@ -26,17 +29,23 @@ void SERCOM4_Handler(void)
 }
 void SERCOM3_Handler(void)
 {
+	if(SERCOMData[3].CurrInterface == SERCOM_INT_I2CM) {
     i2c_master_handler(SERCOM3, &SERCOMData[3]);
+	}
 }
 
 void SERCOM2_Handler(void)
 {
+	if(SERCOMData[2].CurrInterface == SERCOM_INT_I2CM) {
     i2c_master_handler(SERCOM2, &SERCOMData[2]);
+	}
 }
 
 void SERCOM1_Handler(void)
 {
+	if(SERCOMData[1].CurrInterface == SERCOM_INT_I2CM) {
     i2c_master_handler(SERCOM1, &SERCOMData[1]);
+	}
 }
 
 
@@ -94,6 +103,7 @@ while (GCLK->STATUS.bit.SYNCBUSY)
 const bool SlaveConfiguration = (I2C_instance->OpMode == I2COpModeSlave && I2C_instance->I2CAddr != 0);
 if(SlaveConfiguration) {
     i2c_set_slave_mode(I2C_instance, I2C_instance->I2CAddr);
+	SERCOMData[I2C_instance->Sercom_inst_num].CurrInterface = SERCOM_INT_I2CS;
 } else {
     Sercom* SercomInst = I2C_instance->SercomInst;
     const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
@@ -131,15 +141,15 @@ if(SlaveConfiguration) {
 		}
 	}
 	SercomInst->I2CM.INTENSET.reg = SERCOM_I2CM_INTENSET_MB;
-}	
 	SERCOMData[I2C_instance->Sercom_inst_num].CurrInterface = SERCOM_INT_I2CM;
+}	
 	const enum IRQn irq_type = (SERCOM0_IRQn + I2C_instance->Sercom_inst_num);
 	NVIC_EnableIRQ(irq_type);
 	NVIC_SetPriority(irq_type, 2);
 }
 
 void i2c_deinit(I2CInst* I2C_instance) {
-
+	disableSercom(I2C_instance->SercomInst);
 }
 
 void i2c_set_baudrate(I2CInst* I2C_instance, unsigned long baudate) {
@@ -165,12 +175,12 @@ SercomInst->I2CS.ADDR.reg = (0 << SERCOM_I2CS_ADDR_ADDRMASK_Pos       /* Address
 	                      | 0 << SERCOM_I2CS_ADDR_TENBITEN_Pos /* Ten Bit Addressing Enable: disabled */
 	                      | 0 << SERCOM_I2CS_ADDR_GENCEN_Pos   /* General Call Address Enable: disabled */
                           | (addr) << SERCOM_I2CS_ADDR_ADDR_Pos);
-
-SercomInst->I2CS.INTENSET.reg = SERCOM_I2CS_INTENSET_AMATCH;
+SercomInst->I2CS.CTRLA.reg |= SERCOM_I2CS_CTRLA_ENABLE;
+SercomInst->I2CS.INTENSET.reg = SERCOM_I2CS_INTENSET_AMATCH | SERCOM_I2CS_INTENSET_PREC;
 }
 
-void i2c_write_blocking(I2CInst* I2C_instance, const unsigned char addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit) {
-	//i2c_enable(I2C_instance->SercomInst);
+
+void i2c_write_non_blocking(I2CInst* I2C_instance, const unsigned short addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit) {
 	sercomi2cm_wait_for_sync((I2C_instance->SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 	SERCOMData[I2C_instance->Sercom_inst_num].buf = write_buff;
 	SERCOMData[I2C_instance->Sercom_inst_num].buf_size = size;
@@ -180,9 +190,12 @@ void i2c_write_blocking(I2CInst* I2C_instance, const unsigned char addr, const u
 	sercomi2cm_wait_for_sync((I2C_instance->SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
 
-void i2c_write_non_blocking(I2CInst* I2C_instance, const unsigned short addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit) {
-
+void i2c_write_blocking(I2CInst* I2C_instance, const unsigned char addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit) {
+	i2c_write_non_blocking(I2C_instance, addr, write_buff, size, stop_bit);
+	while(SERCOMData[I2C_instance->Sercom_inst_num].CurrAction != SERCOMACT_NONE);
 }
+
+
 
 char i2c_read_blocking(I2CInst* I2C_instance, const unsigned short addr, unsigned char* read_buff) {
  return -1;
