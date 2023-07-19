@@ -3,7 +3,11 @@
 #include <i2c_platform_specific.h>
 #include <stdbool.h>
 
+void i2c_master_send_data_irq(const void *const hw)  __attribute__((weak));
+void i2c_master_recv_data_irq(const void *const hw) __attribute__((weak));
 
+void i2c_slave_adressmatch_irq(const void *const hw)  __attribute__((weak)) ;
+void i2c_slave_stop_irq(const void *const hw)  __attribute__((weak)) ;
 void i2c_slave_data_recv_irq(const void *const hw)  __attribute__((weak)) ;
 void i2c_slave_data_send_irq(const void *const hw)  __attribute__((weak)) ;
 

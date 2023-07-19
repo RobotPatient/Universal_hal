@@ -2,8 +2,6 @@
 #include <stddef.h>
 #include <sercom_dep.h>
 
-uint8_t data[10];
-uint8_t i =0;
 void i2c_master_handler(const void *const hw, SercomData_t* Data) {
 if(Data->CurrAction == SERCOMACT_I2C_DATA_TRANSMIT && Data->buf_cnt < Data->buf_size && Data->buf != NULL) {
 	((Sercom*)hw)->I2CM.DATA.reg = Data->buf[Data->buf_cnt];
@@ -18,15 +16,33 @@ if(Data->CurrAction == SERCOMACT_I2C_DATA_TRANSMIT && Data->buf_cnt < Data->buf_
 
 void i2c_slave_handler(const void *const hw, SercomData_t* Data) {
     Sercom* SercomInst = ((Sercom*)hw);
-    if(SercomInst->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_AMATCH)
-        SercomInst->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_AMATCH;
-    if(SercomInst->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_PREC)
-        SercomInst->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_PREC;
-    if(SercomInst->I2CS.STATUS.bit.DIR)
+    const bool addressMatchInt = SercomInst->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_AMATCH;
+    const bool stopInt = SercomInst->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_PREC;
+    const bool dataReadyInt = SercomInst->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_DRDY;
+    const bool isReadTransaction = SercomInst->I2CS.STATUS.bit.DIR;
+    if(addressMatchInt) {
+        i2c_slave_adressmatch_irq(hw);
+    }
+    if(stopInt) {
+        i2c_slave_stop_irq(hw);
+    }
+    if(dataReadyInt && isReadTransaction) {
         i2c_slave_data_send_irq(hw);
-    else if (SercomInst->I2CS.STATUS.bit.DIR == 0)
+    }
+    if(dataReadyInt && !isReadTransaction) {
         i2c_slave_data_recv_irq(hw);
+    }
+}
 
+void i2c_master_send_data_irq(const void *const hw) {
+    ((Sercom*)hw)->I2CM.INTFLAG.reg = 0x01;
+    ((Sercom*)hw)->I2CM.CTRLB.reg &= ~SERCOM_I2CM_CTRLB_ACKACT;
+    ((Sercom*)hw)->I2CM.CTRLB.reg |= (SERCOM_I2CM_CTRLB_CMD(0x3));
+}
+void i2c_master_recv_data_irq(const void *const hw) {
+    ((Sercom*)hw)->I2CM.INTFLAG.reg = 0x01;
+    ((Sercom*)hw)->I2CM.CTRLB.reg &= ~SERCOM_I2CM_CTRLB_ACKACT;
+    ((Sercom*)hw)->I2CM.CTRLB.reg |= (SERCOM_I2CM_CTRLB_CMD(0x3));
 }
 
 void i2c_slave_data_recv_irq(const void *const hw) {
@@ -35,6 +51,13 @@ void i2c_slave_data_recv_irq(const void *const hw) {
 
 void i2c_slave_data_send_irq(const void *const hw) {
     ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_DRDY;
+}
+
+void i2c_slave_stop_irq(const void *const hw) {
+    ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_PREC;
+}
+void i2c_slave_adressmatch_irq(const void *const hw) {
+    ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_AMATCH;
 }
 
 void SERCOM5_Handler(void)
