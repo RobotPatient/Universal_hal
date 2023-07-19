@@ -4,8 +4,6 @@
 #include "sam.h"
 
 
-void i2c_slave_handler(const void *const hw);
-
 void SERCOM5_Handler(void);
 
 void SERCOM4_Handler(void);
