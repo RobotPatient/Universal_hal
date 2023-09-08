@@ -4,8 +4,9 @@
 #include <stdint.h>
 typedef enum {
     SERCOMACT_NONE,
-    SERCOMACT_I2C_DATA_TRANSMIT,
-    SERCOMACT_I2C_DATA_RECEIVE
+    SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP,
+    SERCOMACT_I2C_DATA_TRANSMIT_STOP,
+    SERCOMACT_I2C_DATA_RECEIVE_STOP
 }SercomActions_t;
 
 typedef enum {
@@ -16,20 +17,6 @@ typedef enum {
     SERCOM_INT_UART
 }SercomInterfaceType_t;
 
-typedef struct {
-const uint8_t* buf;
-uint8_t buf_size;
-uint8_t buf_cnt;
-SercomActions_t CurrAction;
-SercomInterfaceType_t CurrInterface;
-}SercomData_t;
 
-SercomData_t SERCOMData[6] = {{NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT},
-                              {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT},
-                              {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT},
-                              {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT},
-                              {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT},
-                              {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT}};
 
-void i2c_master_handler(const void *const hw, SercomData_t* Data);
 #endif

@@ -23,9 +23,9 @@ void i2c_write_blocking(const I2CInst* I2C_instance, const unsigned char addr, c
 
 void i2c_write_non_blocking(const I2CInst* I2C_instance, const unsigned short addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 
-char i2c_read_blocking(const I2CInst* I2C_instance, const unsigned short addr, unsigned char* read_buff);
+void i2c_read_blocking(const I2CInst* I2C_instance, const unsigned short addr, unsigned char* read_buff, const unsigned char amount_of_bytes);
 
-char i2c_read_non_blocking(const I2CInst* I2C_instance, const unsigned short addr, unsigned char* read_buff);
+void i2c_read_non_blocking(const I2CInst* I2C_instance, const unsigned short addr, unsigned char* read_buff, const unsigned char amount_of_bytes);
 
 
 #endif
