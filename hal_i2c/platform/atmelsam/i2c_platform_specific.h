@@ -2,7 +2,7 @@
 #define I2C_MASTER_PLATFORM_SPECIFIC
 
 #include <samd21g18a.h>
-#include <atmel_irq.h>
+#include <stddef.h>
 
 typedef enum {
     I2COpModeMaster,
@@ -40,7 +40,6 @@ i2c_operating_mode_t operating_mode;
 unsigned short i2c_slave_addr;
 } i2c_periph_inst_t;
 
-
 typedef struct {
     uint8_t transaction_type;
     uint8_t instance_num;
@@ -49,6 +48,16 @@ typedef struct {
     uint8_t buf_size;
     uint8_t buf_cnt;
 } bustransaction_t;
+
+typedef enum {
+    SERCOMACT_NONE,
+    SERCOMACT_IDLE_I2CS,
+    SERCOMACT_IDLE_I2CM,
+    SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP,
+    SERCOMACT_I2C_DATA_TRANSMIT_STOP,
+    SERCOMACT_I2C_DATA_RECEIVE_STOP
+}busactions_t;
+
 
 
 #endif
