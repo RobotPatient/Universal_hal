@@ -3,6 +3,13 @@
 #include <atmel_default_irq_handlers.h>
 #include <hal_i2c.h>
 
+/**
+ * @brief Each SERCOM peripheral gets its own SercomBusTransaction.
+ *        This will eventually be replaced with a ringbuffer implementation
+ *        so the non-blocking functions can function as they should.
+ *
+ * @TODO Replace this implementation with a ringbuffer
+ */
 volatile bustransaction_t  SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
 {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
 {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
@@ -10,7 +17,7 @@ volatile bustransaction_t  SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 
 {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
 {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
 
-/*
+/**
  * @brief Macros used in ISR for acknowledging and finishing the transaction
  * SERCOM_I2C_MASTER_RECV_ACK_AND_REQ_NEW_BYTE will send an acknowledgment bit to the slave device and request the next byte to read
  * SERCOM_I2C_MASTER_NACK_AND_STOP will send a NACK to the slave device and stops the transaction by sending a stop bit.
@@ -19,7 +26,11 @@ volatile bustransaction_t  SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 
 #define SERCOM_I2C_MASTER_NACK_AND_STOP  SERCOM_I2CM_CTRLB_CMD(3) | SERCOM_I2CM_CTRLB_ACKACT | SERCOM_I2CM_CTRLB_SMEN
 
 
-
+/**
+ * @brief Default IRQ Handler for the I2C master data send interrupt
+ * @param hw Pointer to the HW peripheral to be manipulated
+ * @param Transaction The current transaction information
+ */
 void i2c_master_data_send_irq(const void *const hw, volatile bustransaction_t* Transaction ) {
     Sercom* sercom_instance = ((Sercom*)hw);
     const bool write_buffer_exists = (Transaction->write_buffer != NULL);
