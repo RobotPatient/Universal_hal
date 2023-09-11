@@ -1,15 +1,15 @@
 {
-    "name":"Universal_hall",
-    "description": "Universal hall library with cross-platform compatibility",
+    "name":"Universal_hal",
+    "description": "Universal hal library with cross-platform compatibility",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Hoog-V/Universal_hall"
+        "url": "https://github.com/Hoog-V/Universal_hal"
     },
     "authors":
             [{
                 "name": "Victor Hogeweij",
                 "email": "hogeweyv@gmail.com",
-                "url": "https://github.com/Hoog-V/Universal_hall",
+                "url": "https://github.com/Hoog-V/Universal_hal",
                 "maintainer": true
             }],
     "build": {
