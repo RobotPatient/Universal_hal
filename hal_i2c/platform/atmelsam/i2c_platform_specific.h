@@ -7,7 +7,7 @@
 typedef enum {
     I2COpModeMaster,
     I2COpModeSlave
-}I2COperatingMode;
+} i2c_operating_mode_t;
 
 typedef enum {
     SERCOM_NUM_0,
@@ -16,7 +16,7 @@ typedef enum {
     SERCOM_NUM_3,
     SERCOM_NUM_4,
     SERCOM_NUM_5
-} SercomNum;
+} sercom_num_t;
 
 typedef enum {
     CLKGEN_0,
@@ -28,18 +28,27 @@ typedef enum {
     CLKGEN_6,
     CLKGEN_7,
     CLKGEN_8
-} CLKGEN;
+} clk_gen_num_t;
 
 typedef struct {
-SercomNum Sercom_inst_num;
-Sercom* SercomInst;
-CLKGEN ClockGenSlow;
-CLKGEN ClockGenFast;
-uint32_t ClockFrequency;
-I2COperatingMode OpMode;
-unsigned short I2CAddr;
-}I2CInst;
+sercom_num_t sercom_inst_num;
+Sercom* sercom_inst;
+clk_gen_num_t clk_gen_slow;
+clk_gen_num_t clk_gen_fast;
+uint32_t fast_clk_gen_frequency;
+i2c_operating_mode_t operating_mode;
+unsigned short i2c_slave_addr;
+} i2c_periph_inst_t;
 
+
+typedef struct {
+    uint8_t transaction_type;
+    uint8_t instance_num;
+    const uint8_t* write_buffer;
+    uint8_t* read_buffer;
+    uint8_t buf_size;
+    uint8_t buf_cnt;
+} bustransaction_t;
 
 
 #endif
