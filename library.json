@@ -1,5 +1,17 @@
 {
     "name":"Universal_hall",
+    "description": "Universal hall library with cross-platform compatibility",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Hoog-V/Universal_hall"
+    },
+    "authors":
+            [{
+                "name": "Victor Hogeweij",
+                "email": "hogeweyv@gmail.com",
+                "url": "https://github.com/Hoog-V/Universal_hall",
+                "maintainer": true
+            }],
     "build": {
         "srcDir": ".",
         "extraScript": "pio_build_configure.py"
