@@ -35,6 +35,7 @@ SercomNum Sercom_inst_num;
 Sercom* SercomInst;
 CLKGEN ClockGenSlow;
 CLKGEN ClockGenFast;
+uint32_t ClockFrequency;
 I2COperatingMode OpMode;
 unsigned short I2CAddr;
 }I2CInst;

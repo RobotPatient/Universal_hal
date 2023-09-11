@@ -1,6 +1,9 @@
 #include <hal_i2c.h>
 #include <stddef.h>
 #include <sercom_dep.h>
+
+
+#define calculate_baudrate(clock_freq, baud_freq) (clock_freq/(2*baud_freq)) - (10*clock_freq/(2*clock_freq)) - 5
 typedef struct {
     const uint8_t* write_buf;
     uint8_t* read_buf;
@@ -17,14 +20,14 @@ volatile SercomData_t SERCOMData[6] = {{NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_D
                                        {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT},
                                        {NULL, 0, 0, SERCOMACT_NONE, SERCOM_INT_DEINIT}};
 
-static inline void sercomi2cm_wait_for_sync(const void *const hw, const uint32_t reg)
+static inline void i2c_master_wait_for_sync(const void *const hw, const uint32_t reg)
 {
     while (((Sercom *)hw)->I2CM.SYNCBUSY.reg & reg) {
     };
 }
 
 uint16_t sercomi2cm_read_STATUS_BUSSTATE_bf(const void *const hw) {
-    sercomi2cm_wait_for_sync(hw, SERCOM_I2CM_SYNCBUSY_SYSOP);
+    i2c_master_wait_for_sync(hw, SERCOM_I2CM_SYNCBUSY_SYSOP);
     return (((Sercom *)hw)->I2CM.STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE_Msk) >> SERCOM_I2CM_STATUS_BUSSTATE_Pos;
 }
 
@@ -43,7 +46,7 @@ void wait_for_idle_busstate(Sercom *SercomInst){
     }
     /*
      * Wait an additional 20 cycles
-     * There seems to be internal buffering inside the sercom peripheral stacking transactions.
+     * There seems to be internal buffering inside the sercom peripheral, which seems to be stacking transactions.
      * To overcome this an extra delay has been added. Otherwise, read or write transactions will be collected and stacked
      * after each other.
      * TODO: Change this delay to flag/checking other means of overcoming this problem
@@ -69,6 +72,8 @@ void i2c_master_handler(const void *const hw, volatile SercomData_t* Data) {
         const bool StopBit = (Data->CurrAction != SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP);
         if(StopBit){
             SercomInst->I2CM.CTRLB.reg |= SERCOM_I2CM_CTRLB_CMD(3) | SERCOM_I2CM_CTRLB_ACKACT;
+        } else {
+            SercomInst->I2CM.INTFLAG.reg = SERCOM_I2CM_INTFLAG_MB;
         }
         Data->CurrAction = SERCOMACT_NONE;
         Data->buf_cnt = 0;
@@ -170,18 +175,18 @@ static inline void sercomi2cs_wait_for_sync(const void *const hw, const uint32_t
 static inline void disableSercom(const void *const hw) {
     ((Sercom*)hw)->I2CM.CTRLA.reg &= ~SERCOM_I2CM_CTRLA_ENABLE;
     const uint32_t waitflags = (SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
-    sercomi2cm_wait_for_sync(hw, waitflags);
+    i2c_master_wait_for_sync(hw, waitflags);
 }
 
 
 
 static inline void hri_sercomi2cm_clear_STATUS_reg(const void *const hw, uint16_t mask) {
 	 ((Sercom*)hw)->I2CM.STATUS.reg = mask;
-	 sercomi2cm_wait_for_sync(hw, SERCOM_I2CM_SYNCBUSY_SYSOP);
+    i2c_master_wait_for_sync(hw, SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
 
 
-void i2c_init(const I2CInst* I2C_instance, const unsigned long baudate) {
+void i2c_init(const I2CInst* I2C_instance, const unsigned long baudrate) {
     const bool InvalidSercomInstNum = (I2C_instance->Sercom_inst_num < 0 || I2C_instance->Sercom_inst_num > 5);
     const bool InvalidSercomInst = (I2C_instance->SercomInst == NULL);
     const bool InvalidClockGen = (I2C_instance->ClockGenSlow < 0 || I2C_instance->ClockGenSlow > 6 || I2C_instance->ClockGenFast < 0 || I2C_instance->ClockGenFast > 6);
@@ -213,7 +218,7 @@ if(SlaveConfiguration) {
     if(SercomEnabled) disableSercom(SercomInst);
     SercomInst->I2CM.CTRLA.reg =  (SERCOM_I2CM_CTRLA_SWRST |SERCOM_I2CM_CTRLA_MODE(5));
     const uint32_t waitflags = (SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
-    sercomi2cm_wait_for_sync(SercomInst, waitflags);
+    i2c_master_wait_for_sync(SercomInst, waitflags);
     SercomInst->I2CM.CTRLA.reg = ( 0 << SERCOM_I2CM_CTRLA_LOWTOUTEN_Pos      /* SCL Low Time-Out: disabled */
 	        | 0 << SERCOM_I2CM_CTRLA_INACTOUT_Pos /* Inactive Time-Out: 0 */
 	        | 0 << SERCOM_I2CM_CTRLA_SCLSM_Pos    /* SCL Clock Stretch Mode: disabled */
@@ -225,13 +230,13 @@ if(SlaveConfiguration) {
 	        | 0 << SERCOM_I2CM_CTRLA_RUNSTDBY_Pos /* Run In Standby: disabled */
 	        | 5 << SERCOM_I2CM_CTRLA_MODE_Pos);
 
-    sercomi2cm_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
-    SercomInst->I2CM.BAUD.reg = 0xFF;
+    i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
+    SercomInst->I2CM.BAUD.reg = calculate_baudrate(I2C_instance->ClockFrequency, baudrate);
 	int timeout         = 65535;
 	int timeout_attempt = 4;
 	SercomInst->I2CM.CTRLA.reg |= SERCOM_I2CM_CTRLA_ENABLE;
     SercomInst->I2CM.CTRLB.reg |= SERCOM_I2CM_CTRLB_SMEN;
-	sercomi2cm_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
+    i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
 	while (sercomi2cm_read_STATUS_BUSSTATE_bf(SercomInst) != 0x1) {
 		timeout--;
 
@@ -255,8 +260,12 @@ void i2c_deinit(const I2CInst* I2C_instance) {
 	disableSercom(I2C_instance->SercomInst);
 }
 
-void i2c_set_baudrate(const I2CInst* I2C_instance, const unsigned long baudate) {
-
+void i2c_set_baudrate(const I2CInst* I2C_instance, const unsigned long baudrate) {
+    Sercom* SercomInst = I2C_instance->SercomInst;
+    wait_for_idle_busstate(SercomInst);
+    i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
+    disableSercom(SercomInst);
+    i2c_init(I2C_instance, baudrate);
 }
 
 void i2c_set_slave_mode(const I2CInst* I2C_instance, const unsigned short addr) {
@@ -289,13 +298,13 @@ void i2c_write_non_blocking(const I2CInst* I2C_instance, const unsigned short ad
     const SercomNum Sercom_inst_num = I2C_instance->Sercom_inst_num;
     volatile SercomData_t  * TransactionData = &SERCOMData[Sercom_inst_num];
     while((SercomInst->I2CM.STATUS.bit.BUSSTATE != 0x1) && SERCOMData[Sercom_inst_num].CurrAction != SERCOMACT_NONE && SercomInst->I2CM.INTFLAG.reg == 0);
-    sercomi2cm_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 	TransactionData->write_buf = write_buff;
 	TransactionData->buf_size = size;
 	TransactionData->CurrAction = stop_bit ? SERCOMACT_I2C_DATA_TRANSMIT_STOP : SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP;
     TransactionData->buf_cnt = 0;
     SercomInst->I2CM.ADDR.reg = (addr << 1);
-	sercomi2cm_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
 
 void i2c_write_blocking(const I2CInst* I2C_instance, const unsigned char addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit) {
@@ -317,11 +326,11 @@ void i2c_read_non_blocking(const I2CInst* I2C_instance, const unsigned short add
     wait_for_idle_busstate(SercomInst);
     const SercomNum Sercom_inst_num = I2C_instance->Sercom_inst_num;
     volatile SercomData_t  * TransactionData = &SERCOMData[Sercom_inst_num];
-    sercomi2cm_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     TransactionData->read_buf = read_buff;
     TransactionData->buf_size = amount_of_bytes;
     TransactionData->CurrAction = SERCOMACT_I2C_DATA_RECEIVE_STOP;
     TransactionData->buf_cnt = 0;
     SercomInst->I2CM.ADDR.reg = (addr << 1) | 1;
-    sercomi2cm_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
