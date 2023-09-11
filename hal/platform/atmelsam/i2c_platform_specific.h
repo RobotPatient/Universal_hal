@@ -17,7 +17,7 @@
 #ifndef I2C_MASTER_PLATFORM_SPECIFIC
 #define I2C_MASTER_PLATFORM_SPECIFIC
 
-#include <samd21g18a.h>
+#include <sam.h>
 #include <stddef.h>
 
 typedef enum {
