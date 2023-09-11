@@ -41,6 +41,7 @@ return gpio_get_function(pin.pin_num);
 }
 
 void SetGPIOPinDirection(const GPIOPin pin, const unsigned char direction) {
+gpio_set_function(pin.pin_num, GPIO_FUNC_SIO);
 gpio_set_dir(pin.pin_num, direction);
 }
 
@@ -55,3 +56,9 @@ return gpio_get_dir(pin.pin_num);
 GPIOPinLevel GetGPIOPinLevel(GPIOPin pin) {
     return gpio_get(pin.pin_num);
 }
+
+void ToggleGPIOPin(const GPIOPin pin) {
+    uint32_t mask = 1ul << pin.pin_num;
+    gpio_xor_mask(mask);
+}
+
