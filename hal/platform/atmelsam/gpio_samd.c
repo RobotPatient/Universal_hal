@@ -1,4 +1,4 @@
-/**
+/*
  *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");

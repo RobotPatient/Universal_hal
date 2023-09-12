@@ -1,0 +1,62 @@
+site_name: Universal_hal
+plugins:
+  - mkdoxy:
+      projects:
+        hal/: # name of project must be alphanumeric + numbers (without spaces)
+          src-dirs: hal/
+          full-doc: True
+          doxy-cfg:
+            FILE_PATTERNS: "*.cpp *.h*"
+            RECURSIVE: True
+            EXTRACT_ALL: True
+markdown_extensions:
+  - toc
+  - tables
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true 
+  - pymdownx.details
+  - pymdownx.blocks.admonition:
+      types:
+      - new
+      - settings
+      - note
+      - abstract
+      - info
+      - tip
+      - success
+      - question
+      - warning
+      - failure
+      - danger
+      - bug
+      - example
+      - quote
+theme: material
+features:
+  - content.tabs.link
+nav:
+  - Home: "index.md"
+  - API:
+      - Universal_hal:
+        - "Links": "hal/links.md"
+        - "Classes":
+          - "Class List": "hal/annotated.md"
+          - "Class Index": "hal/classes.md"
+          - "Class Hierarchy": "hal/hierarchy.md"
+          - "Class Members": "hal/class_members.md"
+          - "Class Member Functions": "hal/class_member_functions.md"
+          - "Class Member Variables": "hal/class_member_variables.md"
+        - "Namespaces":
+          - "Namespace List": "hal/namespaces.md"
+          - "Namespace Members": "hal/namespace_members.md"
+          - "Namespace Member Functions": "hal/namespace_member_functions.md"
+          - "Namespace Member Variables": "hal/namespace_member_variables.md"
+          - "Namespace Member Typedefs": "hal/namespace_member_typedefs.md"
+          - "Namespace Member Enumerations": "hal/namespace_member_enums.md"
+        - "Functions": "hal/functions.md"
+        - "Variables": "hal/variables.md"
+        - "Macros": "hal/macros.md"
+        - "Files": "hal/files.md"
+
