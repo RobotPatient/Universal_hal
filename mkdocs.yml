@@ -6,7 +6,7 @@ plugins:
           src-dirs: "hal/ hal/platform/atmelsam/"
           full-doc: True
           doxy-cfg:
-            FILE_PATTERNS: "*.cpp *.h*"
+            FILE_PATTERNS: "*.c *.h*"
             RECURSIVE: False
             EXTRACT_ALL: True
 markdown_extensions:
