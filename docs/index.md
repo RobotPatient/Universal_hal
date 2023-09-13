@@ -12,7 +12,7 @@ Both have their upsides and downsides. **This framework strives to achieve a mid
 
 Arduino is one of the most well-known embedded projects in existence. It is very beginner friendly and works very well for quick prototyping.
 
-One of the downsides with Arduino was the reliance on the BSP of the manufacturer and the messy codebase that comes with it. Also it has its own language based on c++, this of course requires a c++ compiler. Not every microcontroller manufacturer uses an architecture that supports c++.
+One of the downsides with Arduino is the reliance on the BSP/HAL of the manufacturer and the messy codebase that comes with it. Also it has its own language based on c++, this of course requires a c++ compiler. Not every microcontroller manufacturer uses an architecture that supports c++.
 
 ### Zephyr os
 
@@ -24,13 +24,13 @@ To achieve this efficiency it uses overlay files (with custom build-system) for 
 
 The making of this framework started because of the struggles I experienced when using the START/ASF/Arduino framework on the Microchip SAMD series of microcontrollers. 
 
-The START/ASF framework provided all the necessary functions for the project but was burdened by a convoluted codebase and demanded modifications to function smoothly on Windows without relying on Microchip Studio/MPLAB IDE (only make, no CMake support).  
+The START/ASF framework provided all the necessary functions for the project but was burdened by a convoluted codebase and demanded modifications to function smoothly on Windows without relying on Microchip Studio/MPLAB IDE (only make, no CMake support).
 
 To mitigate this a CMake wrapper was built which used all sources and headers that were listed in the make file of the example projects. 
 
 But then a question arose from the project client: "can this library also be used with platformio?". The answer to that question would be no, use Arduino. Regrettably, Arduino abstracted the ASF hardware abstraction layer (HAL) to a degree incompatible with the original ASF HAL. Furthermore, the Arduino framework lacked certain essential features required for our project. Zephyr OS was not even considered due to its steep learning curve and unconventional build system.
 
-If I would wrap ASF as a platform io library, I would have problems with symbols being redefined and the whole thing not compiling without a small rebuilt of the ASF HAL. Then I would end up with what [Adafruit]([GitHub - adafruit/Adafruit_ASFcore: ASF core files for Zero](https://github.com/adafruit/Adafruit_ASFcore)) has done, taking the core files out of the ASF library and wrapping it into my own. However, this method posed its own set of risks, especially if the manufacturer released a new version of the ASF library, potentially causing API breaks and resulting in a cluttered codebase.
+If I would wrap ASF as a platform io library, I would have problems with symbols being redefined and the whole thing not compiling without a small rebuilt of the ASF HAL. Then I would end up with what [Adafruit](https://github.com/adafruit/Adafruit_ASFcore) has done, taking the core files out of the ASF library and wrapping it into my own. However, this method posed its own set of risks, especially if the manufacturer released a new version of the ASF library, potentially causing API breaks and resulting in a cluttered codebase.
 
 > "A complex system that works is invariably found to have evolved from a simple system that worked. A complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system." ~ John Gall
 

@@ -28,13 +28,14 @@ Additionally, if you wish to introduce a new concept or idea before diving into 
 
 In terms of code reviews, please be prepared for your code and ideas to undergo thorough examination, often resulting in constructive criticism and suggestions for improvement. This review process may require you to make adjustments to your code before it can be merged with the main project. It's important to understand that this critique is aimed at achieving the best possible solution for the Universal HAL project. Don't be discouraged by criticism; everyone involved shares the common goal of enhancing the project.
 
-If you have any questions or need clarification regarding your contributions, feel free to create an issue on the Universal HAL GitHub repository page.
+If you have any questions or need clarification regarding contributions, feel free to create an issue on the Universal HAL GitHub repository page.
 
+### Feature Requests
 
+If you're unable or prefer not to contribute to this project through code, you can still make a valuable contribution by sharing your ideas or desired features. I strongly recommend opening a GitHub Issue for this purpose. Doing so allows maintainers and contributors to engage in discussions about the idea or feature, and if it proves beneficial, it can be considered for inclusion in the project's roadmap.
 
-## Code style
-
-
+### Code style
+For our code style, click on the tab code style in the navigation pane on the left.
 
 ## Software principles
 

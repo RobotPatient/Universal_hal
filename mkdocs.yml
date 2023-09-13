@@ -47,4 +47,7 @@ nav:
         - "Variables": "atmelsam/variables.md"
         - "Macros": "atmelsam/macros.md"
         - "Files": "atmelsam/files.md"
+  - Contributing:
+    - 'General': 'contributing.md'
+    - 'Code style': 'code_style.md'
 
