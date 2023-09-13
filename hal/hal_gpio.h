@@ -39,9 +39,9 @@ void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
 
 void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
 
-const gpio_level_t get_gpio_pin_level(const gpio_pin_t pin);
+gpio_level_t get_gpio_pin_level(const gpio_pin_t pin);
 
-const gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin);
+gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin);
 
 void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
 

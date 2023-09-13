@@ -22,7 +22,6 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 #include <sam.h>
-#include <stdbool.h>
 #include "gpio_platform_specific.h"
 #include "hal_gpio.h"
 
@@ -30,57 +29,72 @@
 #define GPIO_OPT_PULL_DOWN_POS           3
 #define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 5
 
+#define VALUE_CONTAINS_MASK(NUM, MASK) (NUM & MASK)
+#define BIT_IS_SET(VAL, BIT_NUM) (VAL >> BIT_NUM) & 1
+#define SHIFT_N(N) 1 << N
+
+#define PIN_IS_EVEN_NUMBER(x) (x % 2) == 0
+
 void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
     if (level) {
-        PORT->Group[pin.port_num].OUTSET.reg = (1 << pin.pin_num);
+        PORT->Group[pin.port_num].OUTSET.reg = SHIFT_N(pin.pin_num);
     } else {
-        PORT->Group[pin.port_num].OUTCLR.reg = (1 << pin.pin_num);
+        PORT->Group[pin.port_num].OUTCLR.reg = SHIFT_N(pin.pin_num);
     }
 }
 
 void toggle_gpio_pin_output(const gpio_pin_t pin) {
-    PORT->Group[pin.port_num].OUTTGL.reg = 1 << pin.pin_num;
+    PORT->Group[pin.port_num].OUTTGL.reg = SHIFT_N(pin.pin_num);
 }
 
-const gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
-    return (PORT->Group[pin.port_num].IN.reg >> pin.pin_num) & 1;
+gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
+    const gpio_level_t res = BIT_IS_SET(PORT->Group[pin.port_num].IN.reg, pin.pin_num);
+    return res;
+}
+
+static inline void prv_set_function(const gpio_pin_t pin, const uint8_t function) {
+    PORT->Group[pin.port_num].PINCFG[pin.pin_num].bit.PMUXEN = 0x01; /* Enable the pin mux function */
+    /* There is a separate pin mux for even and odd pins (See datasheet) */
+    if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
+        PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].bit.PMUXE = function;
+    } else {
+        PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].bit.PMUXO = function;
+    }
+}
+
+static inline void prv_set_dir(const gpio_pin_t pin, const uint8_t direction) {
+    PORT->Group[pin.port_num].PINCFG[pin.pin_num].bit.PMUXEN = 0;
+    if (direction == GPIO_MODE_OUTPUT) {
+        PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg &= ~(PORT_PINCFG_INEN);
+        PORT->Group[pin.port_num].DIRSET.reg = SHIFT_N(pin.pin_num);
+    } else {
+        PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = PORT_PINCFG_INEN;
+        PORT->Group[pin.port_num].DIRCLR.reg = SHIFT_N(pin.pin_num);
+    }
 }
 
 void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     const uint8_t pin_mode_is_direction = (pin_mode >= GPIO_MODE_INPUT);
     if (pin_mode_is_direction) {
-        PORT->Group[pin.port_num].PINCFG[pin.pin_num].bit.PMUXEN = 0;
-        if (pin_mode == GPIO_MODE_OUTPUT) {
-            PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg &= ~(PORT_PINCFG_INEN);
-            PORT->Group[pin.port_num].DIRSET.reg = 1 << pin.pin_num;
-        } else {
-            PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = PORT_PINCFG_INEN;
-            PORT->Group[pin.port_num].DIRCLR.reg = 1 << pin.pin_num;
-        }
+        prv_set_dir(pin, pin_mode);
     } else {
-        PORT->Group[pin.port_num].PINCFG[pin.pin_num].bit.PMUXEN = 0x01; /* Enable the pin mux function */
-        /* There is a seperate pin mux for even and odd pin numbers (See datasheet) */
-        if (pin.pin_num % 2 == 0) {
-            PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].bit.PMUXE = pin_mode;
-        } else {
-            PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].bit.PMUXO = pin_mode;
-        }
+        prv_set_function(pin, pin_mode);
     }
 }
 
-const gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
+gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
     const uint8_t pincfg_reg = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
     if (pincfg_reg & PORT_PINCFG_PMUXEN) {
-        const uint8_t PMUX_RESULT = PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].reg;
-        if (pin.pin_num % 2) {
-            const uint8_t res = PMUX_RESULT & 0xF;
+        const uint8_t pmux_reg = PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].reg;
+        if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
+            const uint8_t res = VALUE_CONTAINS_MASK(pmux_reg, 0xF);
             return res;
         } else {
-            const uint8_t res = (PMUX_RESULT >> 4) & 0xF;
+            const uint8_t res = VALUE_CONTAINS_MASK((pmux_reg >> 4), 0xF);
             return res;
         }
     } else {
-        const uint32_t pin_is_set_as_output_pin = PORT->Group[pin.port_num].DIR.reg;
+        const uint32_t pin_is_set_as_output_pin = PORT->Group[pin.port_num].DIR.reg & (1 << pin.pin_num);
         if (pin_is_set_as_output_pin) {
             return GPIO_MODE_OUTPUT;
         } else {
@@ -91,37 +105,37 @@ const gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
 
 void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     const uint8_t prev_pincfg_val = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
-    const uint8_t non_settable_opt = ((prev_pincfg_val & PORT_PINCFG_PMUXEN) | (prev_pincfg_val & PORT_PINCFG_INEN));
-    const uint8_t pullup = (opt & GPIO_OPT_PULL_UP);
-    const uint8_t pullen = ((opt & GPIO_OPT_PULL_DOWN) >> 1 | (pullup));
-    const uint8_t reg_val = non_settable_opt | pullen | (opt & GPIO_OPT_DRIVE_STRENGTH_STRONG);
+    const uint8_t non_settable_opt = (VALUE_CONTAINS_MASK(prev_pincfg_val, PORT_PINCFG_PMUXEN) | VALUE_CONTAINS_MASK(prev_pincfg_val, PORT_PINCFG_INEN));
+    const uint8_t pull_up_en = VALUE_CONTAINS_MASK(opt, GPIO_OPT_PULL_UP);
+    const uint8_t pull_en = ((VALUE_CONTAINS_MASK(opt, GPIO_OPT_PULL_DOWN) >> 1) |(pull_up_en));
+    const uint8_t sampling_opt_set = VALUE_CONTAINS_MASK(opt, GPIO_OPT_SAMPLE_CONTINUOUSLY);
+    const uint8_t reg_val = non_settable_opt | pull_en | VALUE_CONTAINS_MASK(opt, GPIO_OPT_DRIVE_STRENGTH_STRONG);
     PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = reg_val;
 
-    if (pullup && pullen) {
-        PORT->Group[pin.port_num].OUTSET.reg = 1 << pin.pin_num;
+    if (pull_up_en && pull_en) {
+        PORT->Group[pin.port_num].OUTSET.reg = SHIFT_N(pin.pin_num);
     }
 
-    const uint8_t sampling_opt_set = opt & GPIO_OPT_SAMPLE_CONTINUOUSLY;
     uint32_t res = PORT->Group[pin.port_num].CTRL.reg;
     if (sampling_opt_set) {
-        res |= 1 << pin.pin_num;
+        res |= SHIFT_N(pin.pin_num);
         PORT->Group[pin.port_num].CTRL.reg = res;
     } else {
-        res &= ~(1 << pin.pin_num);
+        res &= ~(SHIFT_N(pin.pin_num));
         PORT->Group[pin.port_num].CTRL.reg = res;
     }
 }
 
 gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
     const uint8_t pincfg_register = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
-    const uint8_t pullup_en = (PORT->Group[pin.port_num].OUT.reg & (1 << pin.pin_num)) >> pin.pin_num;
-    const uint8_t pulldown_en = (pullup_en == 0) << GPIO_OPT_PULL_DOWN_POS;
-    const uint8_t sampling_opt_en = (PORT->Group[pin.port_num].CTRL.reg & (1 << pin.pin_num)) >> (pin.pin_num);
+    const uint8_t pull_up_en = BIT_IS_SET(PORT->Group[pin.port_num].OUT.reg, pin.pin_num);
+    const uint8_t pull_down_en = (pull_up_en == 0) << GPIO_OPT_PULL_DOWN_POS;
+    const uint8_t sampling_opt_en = BIT_IS_SET(PORT->Group[pin.port_num].CTRL.reg, pin.pin_num);
 
-    uint8_t res  = (pincfg_register & GPIO_OPT_DRIVE_STRENGTH_STRONG)  | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
+    uint8_t res = VALUE_CONTAINS_MASK(pincfg_register, GPIO_OPT_DRIVE_STRENGTH_STRONG) | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
 
-    if (pincfg_register & PORT_PINCFG_PULLEN) {
-        res |= (pulldown_en) | (pullup_en << GPIO_OPT_PULL_UP_POS);
+    if (VALUE_CONTAINS_MASK(pincfg_register, PORT_PINCFG_PULLEN)) {
+        res |= (pull_down_en) | (pull_up_en << GPIO_OPT_PULL_UP_POS);
         return res;
     }
 
