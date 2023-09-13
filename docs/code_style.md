@@ -48,7 +48,7 @@ When file is saved, vscode will try to invoke the clang-format and format the co
 This repository contains always up-to-date `.clang-format` file with rules matching explained ones.
 You can place the folder in the root or your project or even in the root of your software development projects -> use one file for all!
 Some configurations shall be enabled:
-![VSCode configuration](images/vscode-settings.png)
+![VSCode configuration](assets/vscode-settings.png)
 
 ## Conventions used
 
@@ -592,9 +592,13 @@ Here are listed most obvious and important general rules. Please check them care
 ## Structures, enumerations, typedefs
 
 - Structure or enumeration name MUST be lowercase with optional underscore `_` character between words
+
 - Structure or enumeration may contain `typedef` keyword
+
 - All structure members MUST be lowercase
+
 - All enumeration members SHOULD be uppercase
+
 - Structure/enumeration MUST follow doxygen documentation syntax
   When structure is declared, it may use one of `3` different options:
 1. When structure is declared with *name only*, it *MUST not* contain `_t` suffix after its name.
@@ -821,7 +825,7 @@ Here are listed most obvious and important general rules. Please check them care
   }
   ```
   
-#### Switch statement
+  #### Switch statement
 
 - Add *single indent* for every `case` statement
 
