@@ -24,44 +24,28 @@
 
 #ifndef I2C_MASTER_PLATFORM_SPECIFIC
 #define I2C_MASTER_PLATFORM_SPECIFIC
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <sam.h>
 #include <stddef.h>
 
-typedef enum {
-    I2COpModeMaster,
-    I2COpModeSlave
-} i2c_operating_mode_t;
+typedef enum { I2COpModeMaster, I2COpModeSlave } i2c_operating_mode_t;
 
-typedef enum {
-    SERCOM_NUM_0,
-    SERCOM_NUM_1,
-    SERCOM_NUM_2,
-    SERCOM_NUM_3,
-    SERCOM_NUM_4,
-    SERCOM_NUM_5
-} sercom_num_t;
+typedef enum { SERCOM_NUM_0, SERCOM_NUM_1, SERCOM_NUM_2, SERCOM_NUM_3, SERCOM_NUM_4, SERCOM_NUM_5 } sercom_num_t;
 
-typedef enum {
-    CLKGEN_0,
-    CLKGEN_1,
-    CLKGEN_2,
-    CLKGEN_3,
-    CLKGEN_4,
-    CLKGEN_5,
-    CLKGEN_6,
-    CLKGEN_7,
-    CLKGEN_8
-} clk_gen_num_t;
+typedef enum { CLKGEN_0, CLKGEN_1, CLKGEN_2, CLKGEN_3, CLKGEN_4, CLKGEN_5, CLKGEN_6, CLKGEN_7, CLKGEN_8 } clk_gen_num_t;
 
 typedef struct {
-sercom_num_t sercom_inst_num;
-Sercom* sercom_inst;
-clk_gen_num_t clk_gen_slow;
-clk_gen_num_t clk_gen_fast;
-uint32_t fast_clk_gen_frequency;
-i2c_operating_mode_t operating_mode;
-unsigned short i2c_slave_addr;
+    sercom_num_t sercom_inst_num;
+    Sercom* sercom_inst;
+    clk_gen_num_t clk_gen_slow;
+    clk_gen_num_t clk_gen_fast;
+    uint32_t fast_clk_gen_frequency;
+    i2c_operating_mode_t operating_mode;
+    unsigned short i2c_slave_addr;
 } i2c_periph_inst_t;
 
 typedef struct {
@@ -80,8 +64,9 @@ typedef enum {
     SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP,
     SERCOMACT_I2C_DATA_TRANSMIT_STOP,
     SERCOMACT_I2C_DATA_RECEIVE_STOP
-}busactions_t;
+} busactions_t;
 
-
-
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif

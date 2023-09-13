@@ -24,63 +24,49 @@
 
 #ifndef GPIO_PLATFORM_SPECIFIC
 #define GPIO_PLATFORM_SPECIFIC
-
-#define HAS_NO_GPIO_PORT_DESIGNATORS 0
-#define SUPPORT_DRIVE_STRENGTH_SETTING 1
-#define SUPPORT_PINMUX 1
-#define SUPPORT_PIN_TOGGLE 1
-#define SUPPORT_PIN_SAMPLING_MODE_SELECT 1
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef enum {
-   kGPIOPortA,
-   kGPIOPortB,
-   kGPIOPortC
-} GPIOPort;
+    GPIO_LOW,
+    GPIO_HIGH,
+} gpio_level_t;
+
+typedef enum { GPIO_PORT_A, GPIO_PORT_B, GPIO_PORT_C } gpio_port_t;
 
 typedef enum {
-    kGPIONormalDriveStrength,
-    kGPIOStrongDriveStrength
-} GPIODriveStrength;
-
-typedef enum {
-  kGPIOFunctionA = 0x0,
-  kGPIOFunctionB = 0x1,
-  kGPIOFunctionC = 0x2,
-  kGPIOFunctionD = 0x3,
-  kGPIOFunctionE = 0x4,
-  kGPIOFunctionF = 0x5,
-  kGPIOFunctionG = 0x6,
-  kGPIOFunctionH = 0x7,
-  kGPIOFunctionI = 0x8,
-  kGPIOFunctionJ = 0x9,
-  kGPIOFunctionK = 0xA,
-  kGPIOFunctionL = 0xB,
-  kGPIOFunctionM = 0xC,
-  kGPIOFunctionN = 0xD
-} GPIOPinFunction;
-
-typedef enum {
-  kGPIOPullDown,
-  kGPIOPullUp,
-  kGPIONoPull
-} GPIOPull;
-
-typedef enum {
-  kGPIOSampleOnDemand,
-  kGPIOSampleContinuously
-} GPIOSamplingMode;
-
-typedef enum {
-  kGPIOEventOut,
-  kGPIOEventSet,
-  kGPIOEventClr,
-  kGPIOEventTgl
-} GPIOInputEvent;
-
+    GPIO_MODE_A,
+    GPIO_MODE_B,
+    GPIO_MODE_C,
+    GPIO_MODE_D,
+    GPIO_MODE_E,
+    GPIO_MODE_F,
+    GPIO_MODE_G,
+    GPIO_MODE_H,
+    GPIO_MODE_I,
+    GPIO_MODE_J,
+    GPIO_MODE_K,
+    GPIO_MODE_L,
+    GPIO_MODE_N,
+    GPIO_MODE_INPUT,
+    GPIO_MODE_OUTPUT,
+} gpio_mode_t;
 
 typedef struct {
-  GPIOPort port_num;
-  unsigned char pin_num;
-} GPIOPin;
+    gpio_port_t port_num;
+    uint8_t pin_num;
+} gpio_pin_t;
 
+typedef enum {
+    GPIO_OPT_PULL_UP = 4,
+    GPIO_OPT_PULL_DOWN = 8,
+    GPIO_OPT_SAMPLE_CONTINUOUSLY = 32,
+    GPIO_OPT_DRIVE_STRENGTH_STRONG = 64,
+} gpio_opt_t;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif

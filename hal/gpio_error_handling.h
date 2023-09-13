@@ -24,9 +24,16 @@
 
 #ifndef GPIO_ERROR_HANDLING
 #define GPIO_ERROR_HANDLING
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef const char GPIO_ERR;
 
-enum GPIO_ERR_CODES {ERROR = -1, OK = 0};
+enum GPIO_ERR_CODES { ERROR = -1, OK = 0 };
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif

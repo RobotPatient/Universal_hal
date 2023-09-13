@@ -25,15 +25,16 @@
 #ifndef ATMELSAMD21_UNIVERSAL_HAL_H
 #define ATMELSAMD21_UNIVERSAL_HAL_H
 
+/* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
-#include "hal_i2c.h"
 #include "hal_gpio.h"
+#include "hal_i2c.h"
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 #endif //ATMELSAMD21_UNIVERSAL_HAL_H

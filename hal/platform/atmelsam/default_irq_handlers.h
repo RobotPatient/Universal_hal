@@ -16,6 +16,10 @@
 
 #ifndef ATMELSAMD21_DEFAULT_IRQ_HANDLERS_H
 #define ATMELSAMD21_DEFAULT_IRQ_HANDLERS_H
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 void SERCOM0_Handler(void) __attribute__((used));
 void SERCOM1_Handler(void) __attribute__((used));
@@ -25,4 +29,8 @@ void SERCOM4_Handler(void) __attribute__((used));
 void SERCOM5_Handler(void) __attribute__((used));
 
 extern volatile bustransaction_t SercomBusTrans[6];
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif //ATMELSAMD21_DEFAULT_IRQ_HANDLERS_H

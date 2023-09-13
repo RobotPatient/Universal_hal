@@ -26,15 +26,18 @@
 #include <gpio_platform_specific.h>
 #include <gpio.h>
 
-void SetGPIOPinDriveStrength(const GPIOPin pin, GPIODriveStrength driver_strength) {
+void
+set_gpio_pin_driver_strength(const GPIOPin pin, GPIODriveStrength driver_strength) {
     gpio_set_drive_strength(pin.pin_num, driver_strength);
 }
 
-GPIODriveStrength GetGPIODriveStrength(const GPIOPin pin) {
+GPIODriveStrength
+get_gpio_driver_strength(const GPIOPin pin) {
     return gpio_get_drive_strength(pin.pin_num);
 }
 
-void SetGPIOPinFunction(const GPIOPin pin, GPIOPinFunction pin_function) {
+void
+set_gpio_pin_function(const GPIOPin pin, GPIOPinFunction pin_function) {
     gpio_set_function(pin.pin_num, pin_function);
 }
 
@@ -44,28 +47,32 @@ void SetGPIOPull(const GPIOPin pin, GPIOPull PullMode) {
     gpio_set_pulls(pin.pin_num, up, down);
 }
 
-GPIOPinFunction GetGPIOPinFunction(const GPIOPin pin) {
+GPIOPinFunction
+get_gpio_pin_function(const GPIOPin pin) {
 return gpio_get_function(pin.pin_num);
 }
 
-void SetGPIOPinDirection(const GPIOPin pin, const unsigned char direction) {
+void set_gpio_pin_mode(const gpio_pin_t pin, const unsigned char direction) {
 gpio_set_function(pin.pin_num, GPIO_FUNC_SIO);
 gpio_set_dir(pin.pin_num, direction);
 }
 
-void SetGPIOPinLevel(const GPIOPin pin, const unsigned char level) {
+void set_gpio_pin_lvl(const GPIOPin pin, const unsigned char level) {
 gpio_put(pin.pin_num, level);
 }
 
-GPIOPinDirection GetGPIOPinDirection(const GPIOPin pin) {
+GPIOPinDirection
+get_gpio_pin_direction(const GPIOPin pin) {
 return gpio_get_dir(pin.pin_num);
 }
 
-GPIOPinLevel GetGPIOPinLevel(GPIOPin pin) {
+GPIOPinLevel
+get_gpio_pin_level(const GPIOPin pin) {
     return gpio_get(pin.pin_num);
 }
 
-void ToggleGPIOPin(const GPIOPin pin) {
+void
+toggle_gpio_pin_output(const GPIOPin pin) {
     uint32_t mask = 1ul << pin.pin_num;
     gpio_xor_mask(mask);
 }

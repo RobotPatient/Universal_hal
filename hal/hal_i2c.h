@@ -23,6 +23,11 @@
 */
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <i2c_platform_specific.h>
 #include <stdbool.h>
 
@@ -72,7 +77,8 @@ void i2c_set_slave_mode(const i2c_periph_inst_t* I2C_instance, const unsigned sh
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_write_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned char addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit);
+void i2c_write_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned char addr,
+                        const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -84,7 +90,8 @@ void i2c_write_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned ch
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_write_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, const unsigned char* write_buff, const unsigned char size, bool stop_bit);
+void i2c_write_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr,
+                            const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -94,7 +101,8 @@ void i2c_write_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigne
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_read_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, unsigned char* read_buff, const unsigned char amount_of_bytes);
+void i2c_read_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, unsigned char* read_buff,
+                       const unsigned char amount_of_bytes);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
@@ -104,7 +112,8 @@ void i2c_read_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned sho
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_read_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, unsigned char* read_buff, const unsigned char amount_of_bytes);
+void i2c_read_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, unsigned char* read_buff,
+                           const unsigned char amount_of_bytes);
 
 /**
  * @brief IRQ handler for I2C host data receive interrupt.
@@ -117,7 +126,7 @@ void i2c_read_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void i2c_master_data_recv_irq(const void *const hw, volatile bustransaction_t *Transaction) __attribute__((weak));
+void i2c_master_data_recv_irq(const void* const hw, volatile bustransaction_t* Transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C host data send interrupt.
@@ -130,7 +139,7 @@ void i2c_master_data_recv_irq(const void *const hw, volatile bustransaction_t *T
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void i2c_master_data_send_irq(const void *const hw, volatile bustransaction_t *Transaction) __attribute__((weak));
+void i2c_master_data_send_irq(const void* const hw, volatile bustransaction_t* Transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client address match interrupt.
@@ -142,7 +151,7 @@ void i2c_master_data_send_irq(const void *const hw, volatile bustransaction_t *T
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_address_match_irq(const void *const hw, volatile bustransaction_t *Transaction)  __attribute__((weak)) ;
+void i2c_slave_address_match_irq(const void* const hw, volatile bustransaction_t* Transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client stop interrupt.
@@ -154,7 +163,7 @@ void i2c_slave_address_match_irq(const void *const hw, volatile bustransaction_t
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_stop_irq(const void *const hw, volatile bustransaction_t *Transaction)  __attribute__((weak)) ;
+void i2c_slave_stop_irq(const void* const hw, volatile bustransaction_t* Transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client receive interrupt.
@@ -166,7 +175,7 @@ void i2c_slave_stop_irq(const void *const hw, volatile bustransaction_t *Transac
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_recv_irq(const void *const hw, volatile bustransaction_t *Transaction)  __attribute__((weak)) ;
+void i2c_slave_data_recv_irq(const void* const hw, volatile bustransaction_t* Transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client send interrupt.
@@ -178,8 +187,9 @@ void i2c_slave_data_recv_irq(const void *const hw, volatile bustransaction_t *Tr
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_send_irq(const void *const hw, volatile bustransaction_t *Transaction)  __attribute__((weak)) ;
+void i2c_slave_data_send_irq(const void* const hw, volatile bustransaction_t* Transaction) __attribute__((weak));
 
-
-
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif

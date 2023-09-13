@@ -24,48 +24,30 @@
 
 #ifndef GPIO_HPP
 #define GPIO_HPP
-#include <gpio_platform_specific.h>
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <gpio_error_handling.h>
-
-typedef enum {
-    kGPIODirInput,
-    kGPIODirOutput
-}GPIOPinDirection;
-
-typedef enum {
-    kGPIOLow,
-    kGPIOHigh,
-}GPIOPinLevel;
-
-#if SUPPORT_PIN_PULL
-void SetGPIOPull(const GPIOPin pin, GPIOPull PullMode);
-#endif
-
-#if SUPPORT_DRIVE_STRENGTH_SETTING
-void SetGPIOPinDriveStrength(const GPIOPin pin, GPIODriveStrength driver_strength);
-GPIODriveStrength GetGPIODriveStrength(const GPIOPin pin);
-#endif
+#include <gpio_platform_specific.h>
 
 
-#if SUPPORT_PINMUX
-void SetGPIOPinFunction(const GPIOPin pin, GPIOPinFunction pin_function);
-GPIOPinFunction GetGPIOPinFunction(const GPIOPin pin);
-#endif
+void toggle_gpio_pin_output(const gpio_pin_t pin);
 
-#if SUPPORT_PIN_SAMPLING_MODE_SELECT
-void SetGPIOPinSamplingMode(const GPIOPin pin, GPIOSamplingMode sampling_mode);
-#endif
+void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
 
-#if SUPPORT_PIN_TOGGLE
-void ToggleGPIOPin(const GPIOPin pin);
-#endif
+void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
 
-void SetGPIOPinDirection(const GPIOPin pin, const unsigned char direction);
+const gpio_level_t get_gpio_pin_level(const gpio_pin_t pin);
 
-void SetGPIOPinLevel(const GPIOPin pin, const unsigned char level);
+const gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin);
 
-GPIOPinDirection GetGPIOPinDirection(const GPIOPin pin);
+void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
 
-GPIOPinLevel GetGPIOPinLevel(GPIOPin pin);
+gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif
