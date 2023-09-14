@@ -97,7 +97,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdbool.h>
 #include "i2c_platform_specific.h"
 
 typedef enum {
