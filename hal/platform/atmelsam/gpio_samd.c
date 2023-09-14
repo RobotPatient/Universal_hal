@@ -34,13 +34,13 @@ void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
     if (level) {
         /*
          * GPIO LEVEL HIGH: Set the OUTSET register to (1 << pin_num).
-         * This will set a high output state if pin is set to output direction
+         * This will set a high output state if a pin is set to the output direction
          * or manually enable pull-ups if the pin is set to output and PULLEN bit is set.
          */
         PORT->Group[pin.port_num].OUTSET.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
     } else {
         /* GPIO LEVEL LOW: Set the OUTCLR register to (1 << pin_num).
-         * This will set a low output state if pin is set to output direction.
+         * This will set a low output state if pin is set to the output direction.
          */
         PORT->Group[pin.port_num].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
     }
@@ -50,14 +50,14 @@ void toggle_gpio_pin_output(const gpio_pin_t pin) {
     /*
      * The OUTTGL register gets set with a value of (1 << pin_num).
      * This will toggle the output status of the given pin.
-     * @note This will cause unwanted behaviour if pin is set as input instead of output.
+     * @note This will cause unwanted behavior if a pin is set as input instead of output.
      */
     PORT->Group[pin.port_num].OUTTGL.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
 }
 
 gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
     /*
-     * The IN register will be read and the bit corresponding to the pin get returned.
+     * The IN register will be read, and the bit corresponding to the pin gets returned.
      * This gives the current input status of the pin.
      */
     const gpio_level_t res = BIT_IS_SET(PORT->Group[pin.port_num].IN.reg, pin.pin_num);
@@ -152,8 +152,8 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
      * The pull-up register and drive_strength bit positions are aligned with the position
      * in the pincfg register. Thus, minimal operations are needed to translate flags to setting bits.
      *
-     * The PULL_DOWN option differs one bit position from the PULL_UP option, and PULL_UP is aligned with PULL_EN flag.
-     * To enable PULL_EN flag we need to just shift one bit to enable the PULL_EN flag :)
+     * The PULL_DOWN option differs one-bit position from the PULL_UP option, and PULL_UP is aligned with the PULL_EN flag.
+     * To enable the PULL_EN flag, we need to just shift one bit to enable the PULL_EN flag :)
      */
     const uint8_t pull_up_en = BITMASK_COMPARE(opt, GPIO_OPT_PULL_UP);
     const uint8_t pull_en = ((BITMASK_COMPARE(opt, GPIO_OPT_PULL_DOWN) >> 1) | (pull_up_en));
@@ -161,8 +161,8 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = reg_val;
 
     /*
-     * When the pull-up option is set we need to do one extra operation.
-     * Set the OUTSET register, to disable the default pull_down and enable pull_up.
+     * When the pull-up option is set, we need to do one extra operation.
+     * Set the OUTSET register to disable the default pull_down and enable pull_up.
      */
     if (pull_up_en && pull_en) {
         PORT->Group[pin.port_num].OUTSET.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
@@ -199,7 +199,7 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
          */
         const uint8_t pull_up_en = BIT_IS_SET(PORT->Group[pin.port_num].OUT.reg, pin.pin_num);
         const uint8_t pull_down_en = (pull_up_en == 0) << GPIO_OPT_PULL_DOWN_POS; /* PULL_UP is not set, then it must be a PULL_DOWN */
-        res |= (pull_down_en) | (pull_up_en << GPIO_OPT_PULL_UP_POS);             /* Add flags to end result */
+        res |= (pull_down_en) | (pull_up_en << GPIO_OPT_PULL_UP_POS);             /* Add flags to the end result */
         return res;
     }
 
@@ -208,7 +208,7 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
 
 void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
     /*
-     * Check whether pin given is set as output or input. If set as output make it an input.
+     * Check whether pin given is set as output or input. If set as output, make it an input.
      */
     const uint32_t pin_is_set_as_output = BITMASK_COMPARE(PORT->Group[pin.port_num].DIR.reg, SHIFT_ONE_LEFT_BY_N(pin.pin_num));
     if (pin_is_set_as_output) {
@@ -216,7 +216,7 @@ void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
     }
 
     /*
-     * Set the pin-mux to GPIO_MODE_A which is the EIC group on most of SAMD microcontroller lines
+     * Set the pin-mux to GPIO_MODE_A which is the EIC group on most of the SAMD microcontroller lines
      */
     prv_set_function(pin, GPIO_MODE_A);
 
@@ -234,7 +234,7 @@ void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
 
     /*
      * EIC is divided within two sections: GPIO_CONFIG0 AND GPIO_CONFIG1 because the system is limited to 32-bit register sizes.
-     * Therefore, we need to decide on basis of the channel selected which CONFIG register to write.
+     * Therefore, we need to decide on the basis of the channel selected which CONFIG register to write.
      */
     if (irq_opt.irq_channel <= GPIO_IRQ_CHANNEL_7) {
         /*
