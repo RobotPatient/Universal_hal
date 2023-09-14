@@ -51,68 +51,68 @@ void i2c_init(const i2c_periph_inst_t* i2c_instance, const unsigned long baudrat
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-void i2c_deinit(const i2c_periph_inst_t* I2C_instance);
+void i2c_deinit(const i2c_periph_inst_t* i2c_instance);
 
 /**
  * @brief Function to set the baud-rate after the peripheral has been initialized with I2C.
- * @param I2C_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param baudrate The I2C Clock frequency to be used in transactions (only used in host mode)
  */
-void i2c_set_baudrate(const i2c_periph_inst_t* I2C_instance, const unsigned long baudrate);
+void i2c_set_baudrate(const i2c_periph_inst_t* i2c_instance, const unsigned long baudrate);
 
 /**
  * @brief Function to enable slave mode after the peripheral has already been initialized in host-mode
- * @param I2C_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param addr The I2C slave address to used
  */
-void i2c_set_slave_mode(const i2c_periph_inst_t* I2C_instance, const unsigned short addr);
+void i2c_set_slave_mode(const i2c_periph_inst_t* i2c_instance, const unsigned short addr);
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
  *        This function does only work in host-mode.
- * @param I2C_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param write_buff Pointer to the write buffer with all the bytes that have to be written
  * @param size The amount of bytes which have to be written
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_write_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned char addr,
+void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned char addr,
                         const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
  *        This function does only work in host-mode.
- * @param I2C_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param write_buff Pointer to the write buffer with all the bytes that have to be written
  * @param size The amount of bytes which have to be written
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_write_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr,
+void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr,
                             const unsigned char* write_buff, const unsigned char size, bool stop_bit);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
  *        This function does only work in host-mode.
- * @param I2C_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_read_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, unsigned char* read_buff,
+void i2c_read_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, unsigned char* read_buff,
                        const unsigned char amount_of_bytes);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
  *        This function does only work in host-mode.
- * @param I2C_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_read_non_blocking(const i2c_periph_inst_t* I2C_instance, const unsigned short addr, unsigned char* read_buff,
+void i2c_read_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, unsigned char* read_buff,
                            const unsigned char amount_of_bytes);
 
 /**
