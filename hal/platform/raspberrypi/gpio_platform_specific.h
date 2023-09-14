@@ -31,17 +31,9 @@ extern "C" {
 
 #include <gpio.h>
 
-#define SUPPORT_PIN_PULL                 1
-#define HAS_NO_GPIO_PORT_DESIGNATORS     1
-#define SUPPORT_DRIVE_STRENGTH_SETTING   1
-#define SUPPORT_PINMUX                   1
-#define SUPPORT_PIN_TOGGLE               1
-#define SUPPORT_PIN_SAMPLING_MODE_SELECT 0
-
-#define GPIODriveStrength                enum gpio_drive_strength
-
-#define GPIOPinFunction                  enum gpio_function
-
+/*
+ * @todo RASPBERRY PI PICO NEEDS COMPLETE REWORK!
+ */
 typedef enum { kGPIOPullBusKeep, kGPIOPullDown, kGPIOPullUp, kGPIONoPull } GPIOPull;
 
 typedef struct {

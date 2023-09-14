@@ -107,12 +107,13 @@ void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
 }
 
 static inline gpio_mode_t prv_get_function(const gpio_pin_t pin) {
-    const uint8_t pmux_reg = PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].reg;
+    uint8_t pmux_reg, res;
+    pmux_reg = PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].reg;
     if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
-        const uint8_t res = GET_LOWER_4_BITS_OF_BYTE(pmux_reg);
+        res = GET_LOWER_4_BITS_OF_BYTE(pmux_reg);
         return res;
     } else {
-        const uint8_t res = GET_UPPER_4_BITS_OF_BYTE(pmux_reg);
+        res = GET_UPPER_4_BITS_OF_BYTE(pmux_reg);
         return res;
     }
 }
@@ -136,17 +137,20 @@ gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
 }
 
 static inline uint8_t get_non_settable_pincfg_options(const gpio_pin_t pin) {
-    const uint8_t prev_pincfg_val = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
-    const uint8_t non_settable_opt = (BITMASK_COMPARE(prev_pincfg_val, PORT_PINCFG_PMUXEN) | BITMASK_COMPARE(prev_pincfg_val, PORT_PINCFG_INEN));
+    uint8_t prev_pincfg_val, non_settable_opt;
+    prev_pincfg_val = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
+    non_settable_opt = (BITMASK_COMPARE(prev_pincfg_val, PORT_PINCFG_PMUXEN) | BITMASK_COMPARE(prev_pincfg_val, PORT_PINCFG_INEN));
     return non_settable_opt;
 }
 
 void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+    uint32_t res;
+    uint8_t  non_settable_pincfg_options, pull_up_en, pull_en, reg_val, sampling_opt_set;
     /*
      * Some bits in the pincfg register are not set by this function and should not be changed.
      * These bits are retrieved with this function to be included in the final reg_val later.
      */
-    const uint8_t non_settable_pincfg_options = get_non_settable_pincfg_options(pin);
+    non_settable_pincfg_options = get_non_settable_pincfg_options(pin);
     /*
      * Do some trickery. The enum with gpio options has PULL_DOWN and PULL_UP defined.
      * The pull-up register and drive_strength bit positions are aligned with the position
@@ -155,9 +159,9 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
      * The PULL_DOWN option differs one-bit position from the PULL_UP option, and PULL_UP is aligned with the PULL_EN flag.
      * To enable the PULL_EN flag, we need to just shift one bit to enable the PULL_EN flag :)
      */
-    const uint8_t pull_up_en = BITMASK_COMPARE(opt, GPIO_OPT_PULL_UP);
-    const uint8_t pull_en = ((BITMASK_COMPARE(opt, GPIO_OPT_PULL_DOWN) >> 1) | (pull_up_en));
-    const uint8_t reg_val = non_settable_pincfg_options | pull_en | BITMASK_COMPARE(opt, GPIO_OPT_DRIVE_STRENGTH_STRONG);
+    pull_up_en = BITMASK_COMPARE(opt, GPIO_OPT_PULL_UP);
+    pull_en = ((BITMASK_COMPARE(opt, GPIO_OPT_PULL_DOWN) >> 1) | (pull_up_en));
+    reg_val = non_settable_pincfg_options | pull_en | BITMASK_COMPARE(opt, GPIO_OPT_DRIVE_STRENGTH_STRONG);
     PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = reg_val;
 
     /*
@@ -172,8 +176,8 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
      * The sampling options are not set in the pincfg and require to be written to
      * the CTRL register. That is what this section does.
      */
-    const uint8_t sampling_opt_set = BITMASK_COMPARE(opt, GPIO_OPT_SAMPLE_CONTINUOUSLY);
-    uint32_t      res = PORT->Group[pin.port_num].CTRL.reg;
+    sampling_opt_set = BITMASK_COMPARE(opt, GPIO_OPT_SAMPLE_CONTINUOUSLY);
+    res = PORT->Group[pin.port_num].CTRL.reg;
     if (sampling_opt_set) {
         res |= SHIFT_ONE_LEFT_BY_N(pin.pin_num);
         PORT->Group[pin.port_num].CTRL.reg = res;
@@ -184,21 +188,22 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
 }
 
 gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
+    uint8_t pincfg_register, sampling_opt_en, res, pull_up_en, pull_down_en;
     /*
      * Get the pincfg register to extract the PULL_EN and DRIVE_STR bits from.
      */
-    const uint8_t pincfg_register = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
+    pincfg_register = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
 
-    const uint8_t sampling_opt_en = BIT_IS_SET(PORT->Group[pin.port_num].CTRL.reg, pin.pin_num);
+    sampling_opt_en = BIT_IS_SET(PORT->Group[pin.port_num].CTRL.reg, pin.pin_num);
 
-    uint8_t res = BITMASK_COMPARE(pincfg_register, GPIO_OPT_DRIVE_STRENGTH_STRONG) | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
+    res = BITMASK_COMPARE(pincfg_register, GPIO_OPT_DRIVE_STRENGTH_STRONG) | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
 
     if (BITMASK_COMPARE(pincfg_register, PORT_PINCFG_PULLEN)) {
         /*
          * Pull-up requires out register to be set... This will be used to distinguish whether a pull-up or pull-down is set.
          */
-        const uint8_t pull_up_en = BIT_IS_SET(PORT->Group[pin.port_num].OUT.reg, pin.pin_num);
-        const uint8_t pull_down_en = (pull_up_en == 0) << GPIO_OPT_PULL_DOWN_POS; /* PULL_UP is not set, then it must be a PULL_DOWN */
+        pull_up_en = BIT_IS_SET(PORT->Group[pin.port_num].OUT.reg, pin.pin_num);
+        pull_down_en = (pull_up_en == 0) << GPIO_OPT_PULL_DOWN_POS; /* PULL_UP is not set, then it must be a PULL_DOWN */
         res |= (pull_down_en) | (pull_up_en << GPIO_OPT_PULL_UP_POS);             /* Add flags to the end result */
         return res;
     }
@@ -207,10 +212,11 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
 }
 
 void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
+    uint32_t pin_is_set_as_output, filter_mask, trigger_mask;
     /*
      * Check whether pin given is set as output or input. If set as output, make it an input.
      */
-    const uint32_t pin_is_set_as_output = BITMASK_COMPARE(PORT->Group[pin.port_num].DIR.reg, SHIFT_ONE_LEFT_BY_N(pin.pin_num));
+    pin_is_set_as_output = BITMASK_COMPARE(PORT->Group[pin.port_num].DIR.reg, SHIFT_ONE_LEFT_BY_N(pin.pin_num));
     if (pin_is_set_as_output) {
         prv_set_dir(pin, GPIO_MODE_INPUT);
     }
@@ -241,18 +247,18 @@ void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
          * Calculate the bit_positions of the filter_mask and trigger_mask bits for the specific pin-channel
          * and convert it in to a mask.
          */
-        const uint32_t filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING)
+        filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING)
                                      << ((irq_opt.irq_channel * 4) + (EIC_CONFIG_FILTEN0_Pos));
-        const uint32_t trigger_mask = irq_opt.irq_condition << (4 * irq_opt.irq_channel);
+        trigger_mask = irq_opt.irq_condition << (4 * irq_opt.irq_channel);
         EIC->CONFIG[0].reg |= filter_mask | trigger_mask;
     } else if (irq_opt.irq_channel <= GPIO_IRQ_CHANNEL_15) {
-        const uint32_t filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING)
+        filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING)
                                      << (((irq_opt.irq_channel - GPIO_IRQ_CHANNEL_8) * 4) + (EIC_CONFIG_FILTEN0_Pos));
-        const uint32_t trigger_mask = irq_opt.irq_condition << (4 * (irq_opt.irq_channel - GPIO_IRQ_CHANNEL_8));
+        trigger_mask = irq_opt.irq_condition << (4 * (irq_opt.irq_channel - GPIO_IRQ_CHANNEL_8));
         EIC->CONFIG[1].reg |= filter_mask | trigger_mask;
     } else {
-        const uint32_t filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING) << EIC_NMICTRL_NMIFILTEN_Pos;
-        const uint32_t trigger_mask = irq_opt.irq_condition;
+        filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING) << EIC_NMICTRL_NMIFILTEN_Pos;
+        trigger_mask = irq_opt.irq_condition;
         EIC->NMICTRL.reg = filter_mask | trigger_mask;
     }
 
