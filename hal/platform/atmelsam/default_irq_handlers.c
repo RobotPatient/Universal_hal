@@ -32,7 +32,7 @@
  *        This will eventually be replaced with a ringbuffer implementation
  *        so the non-blocking functions can function as they should.
  *
- * @TODO Replace this implementation with a ringbuffer
+ * @todo Replace this implementation with a ringbuffer
  */
 volatile bustransaction_t SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
                                                {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
