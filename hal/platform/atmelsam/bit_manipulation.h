@@ -1,6 +1,6 @@
 /**
-* \file            hal_gpio.h
-* \brief           GPIO module include file
+* \file            bit_manipulation.h
+* \brief           Header file with useful macro's for bit manipulation
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -22,35 +22,23 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#ifndef GPIO_HPP
-#define GPIO_HPP
+#ifndef ATMELSAMD21_BIT_MANIPULATION_H
+#define ATMELSAMD21_BIT_MANIPULATION_H
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include <gpio_error_handling.h>
-#include <gpio_platform_specific.h>
+#define BITMASK_COMPARE(NUM, MASK)       (NUM & MASK)
+#define BIT_IS_SET(VAL, BIT_NUM)         (VAL >> BIT_NUM) & 1
+#define SHIFT_ONE_LEFT_BY_N(N)           1 << N
 
-void toggle_gpio_pin_output(const gpio_pin_t pin);
+#define GET_LOWER_4_BITS_OF_BYTE(x)      BITMASK_COMPARE(x, 0xF)
+#define GET_UPPER_4_BITS_OF_BYTE(x)      BITMASK_COMPARE((x >> 4), 0xF)
 
-void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
-
-void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
-
-gpio_level_t get_gpio_pin_level(const gpio_pin_t pin);
-
-gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin);
-
-void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
-
-gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin);
-
-void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt);
-
-void gpio_irq_handler(const void* const hw) __attribute__((weak));
+#define PIN_IS_EVEN_NUMBER(x)            (x % 2) == 0
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif
+#endif //ATMELSAMD21_BIT_MANIPULATION_H

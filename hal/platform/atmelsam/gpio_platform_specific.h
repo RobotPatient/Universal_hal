@@ -66,6 +66,49 @@ typedef enum {
     GPIO_OPT_DRIVE_STRENGTH_STRONG = 64,
 } gpio_opt_t;
 
+typedef enum {
+    GPIO_IRQ_CHANNEL_0,
+    GPIO_IRQ_CHANNEL_1,
+    GPIO_IRQ_CHANNEL_2,
+    GPIO_IRQ_CHANNEL_3,
+    GPIO_IRQ_CHANNEL_4,
+    GPIO_IRQ_CHANNEL_5,
+    GPIO_IRQ_CHANNEL_6,
+    GPIO_IRQ_CHANNEL_7,
+    GPIO_IRQ_CHANNEL_8,
+    GPIO_IRQ_CHANNEL_9,
+    GPIO_IRQ_CHANNEL_10,
+    GPIO_IRQ_CHANNEL_11,
+    GPIO_IRQ_CHANNEL_12,
+    GPIO_IRQ_CHANNEL_13,
+    GPIO_IRQ_CHANNEL_14,
+    GPIO_IRQ_CHANNEL_15,
+    GPIO_IRQ_NMI
+} gpio_irq_channel_t;
+
+typedef enum {
+    GPIO_IRQ_NONE,
+    GPIO_IRQ_COND_RISING_EDGE,
+    GPIO_IRQ_COND_FALLING_EDGE,
+    GPIO_IRQ_COND_BOTH_EDGES,
+    GPIO_IRQ_COND_HIGH_LVL,
+    GPIO_IRQ_COND_LOW_LVL
+} gpio_irq_condition_t;
+
+typedef enum{
+    GPIO_IRQ_EXTRA_NONE,
+    GPIO_IRQ_EXTRA_FILTERING,
+    GPIO_IRQ_USE_EVENTS,
+    GPIO_IRQ_WAKE_FROM_SLEEP
+}gpio_irq_extra_opt_t;
+
+typedef struct {
+gpio_irq_channel_t irq_channel;
+gpio_irq_condition_t irq_condition;
+gpio_irq_extra_opt_t irq_extra_opt;
+} gpio_irq_opt_t;
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

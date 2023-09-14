@@ -28,7 +28,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <i2c_platform_specific.h>
+#include "i2c_platform_specific.h"
 #include <stdbool.h>
 
 /**
