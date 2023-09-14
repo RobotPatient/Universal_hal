@@ -79,7 +79,7 @@
  * const uint8_t reg_addr[2] = {0x02, 0x07};
  *
  * i2c_init(&i2c_periph, F_I2C_CLOCK);
- * i2c_write_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, reg_addr, sizeof(reg_addr), 1);
+ * i2c_write_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, reg_addr, sizeof(reg_addr), I2C_STOP_BIT);
  * uint8_t result;
  * i2c_read_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, &result, sizeof(result));
  *@endcode
@@ -99,6 +99,11 @@ extern "C" {
 
 #include <stdbool.h>
 #include "i2c_platform_specific.h"
+
+typedef enum {
+    I2C_NO_STOP_BIT,
+    I2C_STOP_BIT
+}i2c_stop_bit_t;
 
 /**
  * @brief Function to initialize the specified HW peripheral with I2C functionality.
@@ -147,7 +152,7 @@ void i2c_set_slave_mode(const i2c_periph_inst_t* i2c_instance, unsigned short ad
  *                                                                       Value 0 is without stop-bit
  */
 void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size,
-                        unsigned char stop_bit);
+                        i2c_stop_bit_t stop_bit);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -160,7 +165,7 @@ void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char add
  *                                                                       Value 0 is without stop-bit
  */
 void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size,
-                            unsigned char stop_bit);
+                            i2c_stop_bit_t stop_bit);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -188,12 +193,12 @@ void i2c_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short
  *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
  *       and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param Transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
  *                    The info will be automatically supplied when using the i2c_write and i2c_read functions below
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void i2c_master_data_recv_irq(const void* hw, volatile bustransaction_t* Transaction) __attribute__((weak));
+void i2c_master_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C host data send interrupt.
@@ -201,12 +206,12 @@ void i2c_master_data_recv_irq(const void* hw, volatile bustransaction_t* Transac
  *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
  *        and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param Transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
  *                    The info will be automatically supplied when using the i2c_write and i2c_read functions below.
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void i2c_master_data_send_irq(const void* hw, volatile bustransaction_t* Transaction) __attribute__((weak));
+void i2c_master_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client address match interrupt.
@@ -214,11 +219,11 @@ void i2c_master_data_send_irq(const void* hw, volatile bustransaction_t* Transac
  *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
  *        and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param Transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* Transaction) __attribute__((weak));
+void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client stop interrupt.
@@ -226,11 +231,11 @@ void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* Tran
  *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
  *        and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param Transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* Transaction) __attribute__((weak));
+void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client receive interrupt.
@@ -238,11 +243,11 @@ void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* Transaction) 
  *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
  *        and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param Transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* Transaction) __attribute__((weak));
+void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client send interrupt.
@@ -250,11 +255,11 @@ void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* Transact
  *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
  *        and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param Transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_send_irq(const void* hw, volatile bustransaction_t* Transaction) __attribute__((weak));
+void i2c_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }

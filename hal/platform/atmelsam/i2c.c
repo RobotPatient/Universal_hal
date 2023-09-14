@@ -237,7 +237,7 @@ SercomInst->I2CS.CTRLA.reg |= SERCOM_I2CS_CTRLA_ENABLE;
 SercomInst->I2CS.INTENSET.reg = SERCOM_I2CS_INTENSET_AMATCH | SERCOM_I2CS_INTENSET_PREC | SERCOM_I2CS_INTENSET_DRDY;
 }
 
-void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, const unsigned char* write_buff, size_t size, unsigned char stop_bit) {
+void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
     const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
@@ -252,7 +252,7 @@ void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigne
     i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
 
-void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned char addr, const unsigned char* write_buff, size_t size, unsigned char stop_bit) {
+void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
 	i2c_write_non_blocking(i2c_instance, addr, write_buff, size, stop_bit);
     wait_for_idle_busstate(SercomInst);

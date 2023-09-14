@@ -49,23 +49,23 @@ volatile bustransaction_t SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0
 /**
  * @brief Default IRQ Handler for the I2C master data send interrupt
  * @param hw Pointer to the HW peripheral to be manipulated
- * @param Transaction The current transaction information
+ * @param transaction The current transaction information
  */
-void i2c_master_data_send_irq(const void* const hw, volatile bustransaction_t* Transaction) {
+void i2c_master_data_send_irq(const void* const hw, volatile bustransaction_t* transaction) {
     Sercom*    sercom_instance = ((Sercom*)hw);
-    const bool write_buffer_exists = (Transaction->write_buffer != NULL);
-    const bool has_bytes_left_to_write = (Transaction->buf_cnt < Transaction->buf_size);
+    const bool write_buffer_exists = (transaction->write_buffer != NULL);
+    const bool has_bytes_left_to_write = (transaction->buf_cnt < transaction->buf_size);
     if (write_buffer_exists && has_bytes_left_to_write) {
-        sercom_instance->I2CM.DATA.reg = Transaction->write_buffer[Transaction->buf_cnt++];
+        sercom_instance->I2CM.DATA.reg = transaction->write_buffer[transaction->buf_cnt++];
     } else {
-        const bool send_stop_bit = (Transaction->transaction_type != SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP);
+        const bool send_stop_bit = (transaction->transaction_type != SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP);
         if (send_stop_bit) {
             sercom_instance->I2CM.CTRLB.reg = SERCOM_I2C_MASTER_NACK_AND_STOP;
         } else {
             sercom_instance->I2CM.INTFLAG.reg = SERCOM_I2CM_INTFLAG_MB;
         }
-        Transaction->transaction_type = SERCOMACT_IDLE_I2CM;
-        Transaction->buf_cnt = 0;
+        transaction->transaction_type = SERCOMACT_IDLE_I2CM;
+        transaction->buf_cnt = 0;
     }
 }
 
@@ -84,21 +84,21 @@ void i2c_slave_stop_irq(const void* const hw, volatile bustransaction_t* Transac
     Transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_slave_address_match_irq(const void* const hw, volatile bustransaction_t* Transaction) {
+void i2c_slave_address_match_irq(const void* const hw, volatile bustransaction_t* transaction) {
     ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_AMATCH;
-    Transaction->transaction_type = SERCOMACT_IDLE_I2CS;
+    transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_master_data_recv_irq(const void* const hw, volatile bustransaction_t* Transaction) {
+void i2c_master_data_recv_irq(const void* const hw, volatile bustransaction_t* transaction) {
     Sercom* sercom_instance = ((Sercom*)hw);
-    if (Transaction->read_buffer != NULL && Transaction->buf_cnt < Transaction->buf_size) {
-        Transaction->read_buffer[Transaction->buf_cnt++] = sercom_instance->I2CM.DATA.reg;
-        const bool last_byte_read = Transaction->buf_cnt >= Transaction->buf_size;
+    if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size) {
+        transaction->read_buffer[transaction->buf_cnt++] = sercom_instance->I2CM.DATA.reg;
+        const bool last_byte_read = transaction->buf_cnt >= transaction->buf_size;
         sercom_instance->I2CM.CTRLB.reg = last_byte_read ? SERCOM_I2C_MASTER_NACK_AND_STOP : SERCOM_I2C_MASTER_RECV_ACK_AND_REQ_NEW_BYTE;
     } else {
         sercom_instance->I2CM.CTRLB.reg = SERCOM_I2C_MASTER_NACK_AND_STOP;
-        Transaction->transaction_type = SERCOMACT_IDLE_I2CM;
-        Transaction->buf_cnt = 0;
+        transaction->transaction_type = SERCOMACT_IDLE_I2CM;
+        transaction->buf_cnt = 0;
     }
 }
 
