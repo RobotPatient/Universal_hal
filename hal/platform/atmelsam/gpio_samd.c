@@ -57,7 +57,7 @@ void toggle_gpio_pin_output(const gpio_pin_t pin) {
 
 gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
     /*
-     * The IN register will be read and the bit corresponding to the pin number get returned.
+     * The IN register will be read and the bit corresponding to the pin get returned.
      * This gives the current input status of the pin.
      */
     const gpio_level_t res = BIT_IS_SET(PORT->Group[pin.port_num].IN.reg, pin.pin_num);
@@ -70,10 +70,10 @@ static inline void prv_set_function(const gpio_pin_t pin, const uint8_t function
     //    PORT->Group[pin.pin_num].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
     /* There is a separate pin-mux for even and odd pins (See datasheet)
      * Pin.pin.num has to be shifted to the right by two to divide in two,
-     * Then the corresponding even or oneven register can be written.
+     * Then the corresponding even or uneven register can be written.
      *
      * Writing to the PMUXE or PMUXO register sets the function corresponding to
-     * the PORT FUNCTION MULTIPLEXING table 7-1. This value goes from group A..H
+     * the PORT FUNCTION MULTIPLEXING table 7-1. This value goes from group A...H
      * and is mapped to numbers using the function enum.
      */
     if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
@@ -150,7 +150,7 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     /*
      * Do some trickery. The enum with gpio options has PULL_DOWN and PULL_UP defined.
      * The pull-up register and drive_strength bit positions are aligned with the position
-     * in the pincfg register. Thus minimal operations are needed to translate flags to setting bits.
+     * in the pincfg register. Thus, minimal operations are needed to translate flags to setting bits.
      *
      * The PULL_DOWN option differs one bit position from the PULL_UP option, and PULL_UP is aligned with PULL_EN flag.
      * To enable PULL_EN flag we need to just shift one bit to enable the PULL_EN flag :)
@@ -195,7 +195,7 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
 
     if (BITMASK_COMPARE(pincfg_register, PORT_PINCFG_PULLEN)) {
         /*
-         * Pull-up requires out register to be set.. This will be used to distinguish whether a pull-up or pull-down is set.
+         * Pull-up requires out register to be set... This will be used to distinguish whether a pull-up or pull-down is set.
          */
         const uint8_t pull_up_en = BIT_IS_SET(PORT->Group[pin.port_num].OUT.reg, pin.pin_num);
         const uint8_t pull_down_en = (pull_up_en == 0) << GPIO_OPT_PULL_DOWN_POS; /* PULL_UP is not set, then it must be a PULL_DOWN */
@@ -234,7 +234,7 @@ void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
 
     /*
      * EIC is divided within two sections: GPIO_CONFIG0 AND GPIO_CONFIG1 because the system is limited to 32-bit register sizes.
-     * Therefore we need to decide on basis of the channel selected which CONFIG register to write.
+     * Therefore, we need to decide on basis of the channel selected which CONFIG register to write.
      */
     if (irq_opt.irq_channel <= GPIO_IRQ_CHANNEL_7) {
         /*
