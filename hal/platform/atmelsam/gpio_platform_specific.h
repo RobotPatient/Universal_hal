@@ -29,13 +29,30 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @brief The SAMD series support two GPIO levels,
+ *        LOW AND HIGH... Use this when using the
+ *        set_gpio_pin_level() or get_gpio_pin_level() functions.
+ */
 typedef enum {
     GPIO_LOW,
     GPIO_HIGH,
 } gpio_level_t;
 
-typedef enum { GPIO_PORT_A, GPIO_PORT_B, GPIO_PORT_C } gpio_port_t;
+/**
+ * @brief The SAMD series have a minimum of two GPIO ports.
+ *        MACRO's for the specific device can be placed to expand the list.
+ */
+typedef enum {
+    GPIO_PORT_A,
+    GPIO_PORT_B
+} gpio_port_t;
 
+/**
+ * @brief The supported GPIO modes of the SAMD, GPIO_MODE A...N are PIN-MUX options,
+ *        The other two options are just for pin direction (INPUT or OUTPUT).
+ *        The default startup-option of the SAMD is input w/o pull (-up or -down) options
+ */
 typedef enum {
     GPIO_MODE_A,
     GPIO_MODE_B,
@@ -54,11 +71,24 @@ typedef enum {
     GPIO_MODE_OUTPUT,
 } gpio_mode_t;
 
+/**
+ * @brief A pin on the SAMD series consists of a PORT letter with a number, to imitate this as closely as possible a port_num and pin_num is used:
+ *        PA11 -> GPIO_PORT_A, 11
+ */
 typedef struct {
     gpio_port_t port_num;
-    uint8_t pin_num;
+    uint8_t     pin_num;
 } gpio_pin_t;
 
+/**
+ * @brief The SAMD series have some special options:
+ *        GPIO_OPT_PULL_UP: enables a internal pull-up on an input pin.
+ *        GPIO_OPT_PULL_DOWN: enables a internal pull-down on an input pin.
+ *        GPIO_OPT_SAMPLE_CONTINUOUSLY: enables continuously monitoring on input pins instead of on-demand (sips more energy)
+ *        GPIO_OPT_DRIVE_STRENGTH_STRONG: enables stronger drive current on the selected (output) pin (20mA instead of 2mA) (is enabled on startup)
+ * @note Not selecting a option in the set_gpio_pin_option() function disables the option prematurely.
+ * @note If you want multiple options OR them together like this: options = GPIO_OPT_PULL_UP | GPIO_OPT_SAMPLE_CONTINUOUSLY;
+ */
 typedef enum {
     GPIO_OPT_PULL_UP = 4,
     GPIO_OPT_PULL_DOWN = 8,
@@ -66,6 +96,11 @@ typedef enum {
     GPIO_OPT_DRIVE_STRENGTH_STRONG = 64,
 } gpio_opt_t;
 
+/**
+ * @brief The SAMD series use a specific IRQ peripheral for mapping IO pins to IRQ channels.
+ *        Look in the datasheet which pin in group A of the pin-mux belongs to which input channel.
+ *        Most of the times if the pin number is under 15 it maps directly to the IRQ channel number, except 8 which is probably NMI.
+ */
 typedef enum {
     GPIO_IRQ_CHANNEL_0,
     GPIO_IRQ_CHANNEL_1,
@@ -86,6 +121,9 @@ typedef enum {
     GPIO_IRQ_NMI
 } gpio_irq_channel_t;
 
+/**
+ * @brief The SAMD series support the following signal conditions on which a GPIO irq can be triggered.
+ */
 typedef enum {
     GPIO_IRQ_NONE,
     GPIO_IRQ_COND_RISING_EDGE,
@@ -95,19 +133,32 @@ typedef enum {
     GPIO_IRQ_COND_LOW_LVL
 } gpio_irq_condition_t;
 
-typedef enum{
+/**
+ * @brief These are extra options the SAMD series support besides the normal options:
+ *        GPIO_IRQ_EXTRA_NONE: Will disable all other special functions
+ *        GPIO_IRQ_EXTRA_FILTERING: Will enable extra filtering on the input pin
+ *        GPIO_IRQ_USE_EVENTS: Will use the event system instead of the EIC of the SAMD
+ *        GPIO_IRQ_WAKE_FROM_SLEEP: When set interrupts will wake the MCU up from sleep modes
+ */
+typedef enum {
     GPIO_IRQ_EXTRA_NONE,
     GPIO_IRQ_EXTRA_FILTERING,
     GPIO_IRQ_USE_EVENTS,
     GPIO_IRQ_WAKE_FROM_SLEEP
-}gpio_irq_extra_opt_t;
+} gpio_irq_extra_opt_t;
 
+/**
+ * @brief The options which need to be set to get gpio interrupts working on the SAMD series:
+ *        irq_channel: The channel which belongs to the input pin
+ *        irq_condition: The condition to trigger the IRQ on
+ *        irq_extra_opt: Extra options which the SAMD controller supports.
+ * @note For minimal functionality at least set the irq_channel and irq_condition options.
+ */
 typedef struct {
-gpio_irq_channel_t irq_channel;
-gpio_irq_condition_t irq_condition;
-gpio_irq_extra_opt_t irq_extra_opt;
+    gpio_irq_channel_t   irq_channel;
+    gpio_irq_condition_t irq_condition;
+    gpio_irq_extra_opt_t irq_extra_opt;
 } gpio_irq_opt_t;
-
 
 #ifdef __cplusplus
 }
