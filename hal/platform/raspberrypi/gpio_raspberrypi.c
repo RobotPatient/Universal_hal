@@ -1,5 +1,5 @@
 /**
-* \file            gpio_samd.c
+* \file            gpio_raspberrypi.c
 * \brief           Source file which implements the standard GPIO API functions
 */
 /*
