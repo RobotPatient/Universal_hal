@@ -21,7 +21,53 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-
+/**
+ * The GPIO Module
+ *
+ * Possibilities:
+ * - Configuring the GPIO direction and pin-muxes (set_gpio_pin_mode)
+ * @note pin-mux and direction options differ for each microcontroller variant.
+ *       The enum name gpio_mode_t will still be the same. Keep this in mind.
+ * - Configuring the GPIO output level (set_gpio_pin_lvl)
+ * @note Some microcontrollers will support HIGH impedance mode. 
+ *       This will be incorporated in to the gpio_level_t enum.
+ * - Configuring GPIO options which are non-standard (like pull-ups, pull-downs, etc.)
+ * @note The non-standard gpio options differ for almost every other microcontroller variant.
+ * - Configuring GPIO interrupts
+ * @note For all the pins, one standard ISR handler is used (gpio_irq_handler). Keep this in mind.
+ * @note When implementing this gpio_irq_handler just implement the header in your source file like this:
+ * @code 
+ * void gpio_irq_handler(const void* const hw) {
+ * // Platform specific code to handle the request
+ * }
+ * @endcode
+ * - Reading GPIO input & output levels
+ * - Reading the GPIO pin-mux and direction options
+ * - Reading which non-standard gpio options are set
+ * 
+ * Impossibilities:
+ * - Although the interface is very generic, the ISR is fully dependent on platform specific code.
+ *   Keep this in mind when using the ISR.
+ * - To make implementations easier, the choice of having one ISR for all the pins was made.
+ *   This means that when you're setting multiple ISR's you need to read from the HW peripheral which
+ *   pins are triggered.
+ * @todo Maybe add a generic interface for the ISR, as some peripherals can be very complex to use.
+ * - Some microcontrollers have ERRATA issues, these might sill cause problems when using this module. 
+ *   When that is the case the problems will be listed on the wiki (https://hoog-v.github.io/Universal_hal/).
+ * - Some microcontrollers use pin numbers, others use a combination of numbers and letters 
+ *   and others use only numbers seperated with a dot (.). This module can't easily guess how to interpret the data.
+ *   Therefore a gpio_pin_t struct was brought in to life, which has a platform specific declaration for each mcu variant.
+ *   Just keep in mind that you have to make sure your pin declarations are up-to-date. 
+ *   Especially while porting between mcu variants.
+ * 
+ * Using this module:
+ * 1. Define a gpio pin: const gpio_pin_t blinky_led = {.port_name= <pin_number>,
+ *                                                      .pin_number=<pin_number>};
+ *    or depending on if your mcu only has pin numbers: const gpio_pin_t blinky_led = {.pin_number = <pin_number>};
+ * 2. Set the gpio pin mode: set_gpio_pin_mode(blinky_led, GPIO_MODE_OUTPUT);
+ * 3. Set the gpio pin level: set_gpio_pin_lvl(blinky_led, GPIO_HIGH);
+ *    or toggle the gpio: toggle_gpio_pin_output(blinky_led);
+ */
 #ifndef GPIO_HPP
 #define GPIO_HPP
 /* Extern c for compiling with c++*/
