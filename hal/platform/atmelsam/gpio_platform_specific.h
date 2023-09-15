@@ -1,78 +1,166 @@
+/**
+* \file            gpio_platform_specific.h
+* \brief           Include file with peripheral specific settings for the GPIO module
+*/
 /*
- *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
+*  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*  http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+*
+* This file is part of the Universal Hal Framework.
+*
+* Author:          Victor Hogeweij <hogeweyv@gmail.com>
+*/
 
 #ifndef GPIO_PLATFORM_SPECIFIC
 #define GPIO_PLATFORM_SPECIFIC
+/* Extern c for compiling with c++*/
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#define HAS_NO_GPIO_PORT_DESIGNATORS 0
-#define SUPPORT_DRIVE_STRENGTH_SETTING 1
-#define SUPPORT_PINMUX 1
-#define SUPPORT_PIN_TOGGLE 1
-#define SUPPORT_PIN_SAMPLING_MODE_SELECT 1
-
+/**
+ * @brief The SAMD series support two GPIO levels,
+ *        LOW AND HIGH... Use this when using the
+ *        set_gpio_pin_level() or get_gpio_pin_level() functions.
+ */
 typedef enum {
-   kGPIOPortA,
-   kGPIOPortB,
-   kGPIOPortC
-} GPIOPort;
+    GPIO_LOW,
+    GPIO_HIGH,
+} gpio_level_t;
 
+/**
+ * @brief The SAMD series have a minimum of two GPIO ports.
+ *        MACRO's for the specific device can be placed to expand the list.
+ */
 typedef enum {
-    kGPIONormalDriveStrength,
-    kGPIOStrongDriveStrength
-} GPIODriveStrength;
+    GPIO_PORT_A,
+    GPIO_PORT_B
+} gpio_port_t;
 
+/**
+ * @brief The supported GPIO modes of the SAMD, GPIO_MODE A...N are PIN-MUX options,
+ *        The other two options are just for pin direction (INPUT or OUTPUT).
+ *        The default startup-option of the SAMD is input w/o pull (-up or -down) options
+ */
 typedef enum {
-  kGPIOFunctionA = 0x0,
-  kGPIOFunctionB = 0x1,
-  kGPIOFunctionC = 0x2,
-  kGPIOFunctionD = 0x3,
-  kGPIOFunctionE = 0x4,
-  kGPIOFunctionF = 0x5,
-  kGPIOFunctionG = 0x6,
-  kGPIOFunctionH = 0x7,
-  kGPIOFunctionI = 0x8,
-  kGPIOFunctionJ = 0x9,
-  kGPIOFunctionK = 0xA,
-  kGPIOFunctionL = 0xB,
-  kGPIOFunctionM = 0xC,
-  kGPIOFunctionN = 0xD
-} GPIOPinFunction;
+    GPIO_MODE_A,
+    GPIO_MODE_B,
+    GPIO_MODE_C,
+    GPIO_MODE_D,
+    GPIO_MODE_E,
+    GPIO_MODE_F,
+    GPIO_MODE_G,
+    GPIO_MODE_H,
+    GPIO_MODE_I,
+    GPIO_MODE_J,
+    GPIO_MODE_K,
+    GPIO_MODE_L,
+    GPIO_MODE_N,
+    GPIO_MODE_INPUT,
+    GPIO_MODE_OUTPUT,
+} gpio_mode_t;
 
-typedef enum {
-  kGPIOPullDown,
-  kGPIOPullUp,
-  kGPIONoPull
-} GPIOPull;
-
-typedef enum {
-  kGPIOSampleOnDemand,
-  kGPIOSampleContinuously
-} GPIOSamplingMode;
-
-typedef enum {
-  kGPIOEventOut,
-  kGPIOEventSet,
-  kGPIOEventClr,
-  kGPIOEventTgl
-} GPIOInputEvent;
-
-
+/**
+ * @brief A pin on the SAMD series consists of a PORT letter with a number, to imitate this as closely as possible a port_num and pin_num is used:
+ *        PA11 -> GPIO_PORT_A, 11
+ */
 typedef struct {
-  GPIOPort port_num;
-  unsigned char pin_num;
-} GPIOPin;
+    gpio_port_t port_num;
+    uint8_t     pin_num;
+} gpio_pin_t;
 
+/**
+ * @brief The SAMD series have some special options:
+ *        GPIO_OPT_PULL_UP: enables a internal pull-up on an input pin.
+ *        GPIO_OPT_PULL_DOWN: enables a internal pull-down on an input pin.
+ *        GPIO_OPT_SAMPLE_CONTINUOUSLY: enables continuously monitoring on input pins instead of on-demand (sips more energy)
+ *        GPIO_OPT_DRIVE_STRENGTH_STRONG: enables stronger drive current on the selected (output) pin (20mA instead of 2mA) (is enabled on startup)
+ * @note Not selecting a option in the set_gpio_pin_option() function disables the option prematurely.
+ * @note If you want multiple options OR them together like this: options = GPIO_OPT_PULL_UP | GPIO_OPT_SAMPLE_CONTINUOUSLY;
+ */
+typedef enum {
+    GPIO_OPT_PULL_UP = 4,
+    GPIO_OPT_PULL_DOWN = 8,
+    GPIO_OPT_SAMPLE_CONTINUOUSLY = 32,
+    GPIO_OPT_DRIVE_STRENGTH_STRONG = 64,
+} gpio_opt_t;
+
+/**
+ * @brief The SAMD series use a specific IRQ peripheral for mapping IO pins to IRQ channels.
+ *        Look in the datasheet which pin in group A of the pin-mux belongs to which input channel.
+ *        Most of the times if the pin number is under 15 it maps directly to the IRQ channel number, except 8 which is probably NMI.
+ */
+typedef enum {
+    GPIO_IRQ_CHANNEL_0,
+    GPIO_IRQ_CHANNEL_1,
+    GPIO_IRQ_CHANNEL_2,
+    GPIO_IRQ_CHANNEL_3,
+    GPIO_IRQ_CHANNEL_4,
+    GPIO_IRQ_CHANNEL_5,
+    GPIO_IRQ_CHANNEL_6,
+    GPIO_IRQ_CHANNEL_7,
+    GPIO_IRQ_CHANNEL_8,
+    GPIO_IRQ_CHANNEL_9,
+    GPIO_IRQ_CHANNEL_10,
+    GPIO_IRQ_CHANNEL_11,
+    GPIO_IRQ_CHANNEL_12,
+    GPIO_IRQ_CHANNEL_13,
+    GPIO_IRQ_CHANNEL_14,
+    GPIO_IRQ_CHANNEL_15,
+    GPIO_IRQ_NMI
+} gpio_irq_channel_t;
+
+/**
+ * @brief The SAMD series support the following signal conditions on which a GPIO irq can be triggered.
+ */
+typedef enum {
+    GPIO_IRQ_NONE,
+    GPIO_IRQ_COND_RISING_EDGE,
+    GPIO_IRQ_COND_FALLING_EDGE,
+    GPIO_IRQ_COND_BOTH_EDGES,
+    GPIO_IRQ_COND_HIGH_LVL,
+    GPIO_IRQ_COND_LOW_LVL
+} gpio_irq_condition_t;
+
+/**
+ * @brief These are extra options the SAMD series support besides the normal options:
+ *        GPIO_IRQ_EXTRA_NONE: Will disable all other special functions
+ *        GPIO_IRQ_EXTRA_FILTERING: Will enable extra filtering on the input pin
+ *        GPIO_IRQ_USE_EVENTS: Will use the event system instead of the EIC of the SAMD
+ *        GPIO_IRQ_WAKE_FROM_SLEEP: When set interrupts will wake the MCU up from sleep modes
+ */
+typedef enum {
+    GPIO_IRQ_EXTRA_NONE,
+    GPIO_IRQ_EXTRA_FILTERING,
+    GPIO_IRQ_USE_EVENTS,
+    GPIO_IRQ_WAKE_FROM_SLEEP
+} gpio_irq_extra_opt_t;
+
+/**
+ * @brief The options which need to be set to get gpio interrupts working on the SAMD series:
+ *        irq_channel: The channel which belongs to the input pin
+ *        irq_condition: The condition to trigger the IRQ on
+ *        irq_extra_opt: Extra options which the SAMD controller supports.
+ * @note For minimal functionality at least set the irq_channel and irq_condition options.
+ */
+typedef struct {
+    gpio_irq_channel_t   irq_channel;
+    gpio_irq_condition_t irq_condition;
+    gpio_irq_extra_opt_t irq_extra_opt;
+} gpio_irq_opt_t;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif

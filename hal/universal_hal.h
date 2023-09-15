@@ -1,6 +1,6 @@
 /**
-* \file            gpio_error_handling.h
-* \brief           Error handling for GPIO include file
+* \file            universal_hal.h
+* \brief           Universal hal modules include file
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -22,18 +22,19 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#ifndef GPIO_ERROR_HANDLING
-#define GPIO_ERROR_HANDLING
+#ifndef ATMELSAMD21_UNIVERSAL_HAL_H
+#define ATMELSAMD21_UNIVERSAL_HAL_H
+
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef const char GPIO_ERR;
-
-enum GPIO_ERR_CODES { ERROR = -1, OK = 0 };
+#include "hal_gpio.h"
+#include "hal_i2c.h"
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif
+
+#endif //ATMELSAMD21_UNIVERSAL_HAL_H
