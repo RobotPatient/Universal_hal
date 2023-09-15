@@ -38,7 +38,7 @@
 #define GPIO_OPT_PULL_DOWN_POS           1
 #define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 4
 
-#define REMOVE_IO_OFFSET(x) x - GPIO_MODE_INPUT
+#define REMOVE_IO_OFFSET(x)              x - GPIO_MODE_INPUT
 
 void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
     gpio_put(pin, level);
@@ -50,9 +50,8 @@ void toggle_gpio_pin_output(const gpio_pin_t pin) {
 }
 
 gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
-return gpio_get(pin.pin_num);
+    return gpio_get(pin.pin_num);
 }
-
 
 void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     check_gpio_param(pin.pin_num);
@@ -62,7 +61,7 @@ void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     // Zero all fields apart from fsel; we want this IO to do what the peripheral tells it.
     // This doesn't affect e.g. pullup/pulldown, as these are in pad controls.
     if (BITMASK_COMPARE(pin_mode, GPIO_MODE_INPUT) || BITMASK_COMPARE(pin_mode, GPIO_MODE_OUTPUT)) {
-        iobank0_hw->io[gpio].ctrl = 0 << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
+        iobank0_hw->io[gpio].ctrl = GPIO_MODE_F5 << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
         gpio_set_dir(pin.pin_num, REMOVE_IO_OFFSET(pin_mode));
     } else {
         iobank0_hw->io[gpio].ctrl = fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
@@ -71,10 +70,10 @@ void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
 
 gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
     uint8_t function;
-    
+
     function = gpio_get_function(pin.pin_num);
-    if(function == 0) {
-        function = gpio_get_dir(pin.pin_num)+GPIO_MODE_INPUT;
+    if (function == GPIO_MODE_F5) {
+        function = gpio_get_dir(pin.pin_num) + GPIO_MODE_INPUT;
         return function;
     } else {
         return function;
