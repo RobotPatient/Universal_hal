@@ -21,51 +21,72 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-
 #include <gpio.h>
-#include <gpio_platform_specific.h>
-#include <hal_gpio.h>
+#include "bit_manipulation.h"
+#include "gpio_platform_specific.h"
+#include "hal_gpio.h"
+#include "hardware/sync.h"
 
-void set_gpio_pin_driver_strength(const GPIOPin pin, GPIODriveStrength driver_strength) {
-    gpio_set_drive_strength(pin.pin_num, driver_strength);
+#include "hardware/irq.h"
+#include "hardware/structs/iobank0.h"
+
+#if LIB_PICO_BINARY_INFO
+#include "pico/binary_info.h"
+#endif
+
+#define GPIO_OPT_PULL_UP_POS             0
+#define GPIO_OPT_PULL_DOWN_POS           1
+#define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 4
+
+#define REMOVE_IO_OFFSET(x) x - GPIO_MODE_INPUT
+
+void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
+    gpio_put(pin, level);
 }
 
-GPIODriveStrength get_gpio_driver_strength(const GPIOPin pin) {
-    return gpio_get_drive_strength(pin.pin_num);
-}
-
-void set_gpio_pin_function(const GPIOPin pin, GPIOPinFunction pin_function) {
-    gpio_set_function(pin.pin_num, pin_function);
-}
-
-void SetGPIOPull(const GPIOPin pin, GPIOPull PullMode) {
-    bool up = (PullMode == (kGPIOPullBusKeep || kGPIOPullUp));
-    bool down = (PullMode == (kGPIOPullBusKeep || kGPIOPullDown));
-    gpio_set_pulls(pin.pin_num, up, down);
-}
-
-GPIOPinFunction get_gpio_pin_function(const GPIOPin pin) {
-    return gpio_get_function(pin.pin_num);
-}
-
-void set_gpio_pin_mode(const gpio_pin_t pin, const unsigned char direction) {
-    gpio_set_function(pin.pin_num, GPIO_FUNC_SIO);
-    gpio_set_dir(pin.pin_num, direction);
-}
-
-void set_gpio_pin_lvl(const GPIOPin pin, const unsigned char level) {
-    gpio_put(pin.pin_num, level);
-}
-
-GPIOPinDirection get_gpio_pin_direction(const GPIOPin pin) {
-    return gpio_get_dir(pin.pin_num);
-}
-
-GPIOPinLevel get_gpio_pin_level(const GPIOPin pin) {
-    return gpio_get(pin.pin_num);
-}
-
-void toggle_gpio_pin_output(const GPIOPin pin) {
-    uint32_t mask = 1ul << pin.pin_num;
+void toggle_gpio_pin_output(const gpio_pin_t pin) {
+    const uint32_t mask = 1ul << pin.pin_num;
     gpio_xor_mask(mask);
+}
+
+gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
+return gpio_get(pin.pin_num);
+}
+
+
+void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
+    check_gpio_param(pin.pin_num);
+    //invalid_params_if(GPIO, ((uint32_t)fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB) & ~IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS);
+    // Set input enable on, output disable off
+    hw_write_masked(&padsbank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS, PADS_BANK0_GPIO0_IE_BITS | PADS_BANK0_GPIO0_OD_BITS);
+    // Zero all fields apart from fsel; we want this IO to do what the peripheral tells it.
+    // This doesn't affect e.g. pullup/pulldown, as these are in pad controls.
+    if (BITMASK_COMPARE(pin_mode, GPIO_MODE_INPUT) || BITMASK_COMPARE(pin_mode, GPIO_MODE_OUTPUT)) {
+        iobank0_hw->io[gpio].ctrl = 0 << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
+        gpio_set_dir(pin.pin_num, REMOVE_IO_OFFSET(pin_mode));
+    } else {
+        iobank0_hw->io[gpio].ctrl = fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
+    }
+}
+
+gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
+    uint8_t function;
+    
+    function = gpio_get_function(pin.pin_num);
+    if(function == 0) {
+        function = gpio_get_dir(pin.pin_num)+GPIO_MODE_INPUT;
+        return function;
+    } else {
+        return function;
+    }
+}
+
+void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+}
+
+gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
+    return GPIO_OPT_DRIVE_STRENGTH_HIGH;
+}
+
+void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
 }
