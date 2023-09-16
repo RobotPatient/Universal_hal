@@ -34,14 +34,15 @@
 #include "pico/binary_info.h"
 #endif
 
-#define GPIO_OPT_PULL_UP_POS             0
-#define GPIO_OPT_PULL_DOWN_POS           1
-#define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 4
+#define GPIO_OPT_SLEW_RATE_SLOW_POS 2
+#define GPIO_OPT_DRIVE_STRENGTH_POS 4
+#define GPIO_OPT_PULL_UP_POS 1
+#define ADD_GPIO_DRIVE_STENGTH_OPT_OFFSET(x) (x + GPIO_OPT_DRIVE_STRENGTH_POS)
 
-#define REMOVE_IO_OFFSET(x)              x - GPIO_MODE_INPUT
+#define REMOVE_IO_OFFSET(x)             (x - GPIO_MODE_INPUT)
 
 void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
-    gpio_put(pin, level);
+    gpio_put(pin.pin_num, level);
 }
 
 void toggle_gpio_pin_output(const gpio_pin_t pin) {
@@ -54,17 +55,16 @@ gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
 }
 
 void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
-    check_gpio_param(pin.pin_num);
     //invalid_params_if(GPIO, ((uint32_t)fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB) & ~IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS);
     // Set input enable on, output disable off
-    hw_write_masked(&padsbank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS, PADS_BANK0_GPIO0_IE_BITS | PADS_BANK0_GPIO0_OD_BITS);
+    hw_write_masked(&padsbank0_hw->io[pin.pin_num], PADS_BANK0_GPIO0_IE_BITS, PADS_BANK0_GPIO0_IE_BITS | PADS_BANK0_GPIO0_OD_BITS);
     // Zero all fields apart from fsel; we want this IO to do what the peripheral tells it.
     // This doesn't affect e.g. pullup/pulldown, as these are in pad controls.
     if (BITMASK_COMPARE(pin_mode, GPIO_MODE_INPUT) || BITMASK_COMPARE(pin_mode, GPIO_MODE_OUTPUT)) {
-        iobank0_hw->io[gpio].ctrl = GPIO_MODE_F5 << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
+        iobank0_hw->io[pin.pin_num].ctrl = GPIO_MODE_F5 << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
         gpio_set_dir(pin.pin_num, REMOVE_IO_OFFSET(pin_mode));
     } else {
-        iobank0_hw->io[gpio].ctrl = fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
+        iobank0_hw->io[pin.pin_num].ctrl = pin_mode << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
     }
 }
 
@@ -81,10 +81,51 @@ gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
 }
 
 void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+    const uint8_t driver_mask_cmp_val = GPIO_OPT_DRIVE_STRENGTH_HIGH | GPIO_OPT_DRIVE_STRENGTH_MEDIUM 
+                                        | GPIO_OPT_DRIVE_STRENGTH_LOW | GPIO_OPT_DRIVE_STRENGTH_VLOW;
+
+    switch(BITMASK_COMPARE(opt, driver_mask_cmp_val)) {
+        case GPIO_OPT_DRIVE_STRENGTH_HIGH:
+        {
+            gpio_set_drive_strength(pin.pin_num, GPIO_DRIVE_STRENGTH_12MA);
+            break;
+        }
+        case GPIO_OPT_DRIVE_STRENGTH_MEDIUM:
+        {
+            gpio_set_drive_strength(pin.pin_num, GPIO_DRIVE_STRENGTH_8MA);
+            break;
+        }
+        case GPIO_OPT_DRIVE_STRENGTH_LOW:
+        {
+            gpio_set_drive_strength(pin.pin_num, GPIO_DRIVE_STRENGTH_4MA);
+            break;
+        }
+        case GPIO_OPT_DRIVE_STRENGTH_VLOW:
+        {
+            gpio_set_drive_strength(pin.pin_num, GPIO_DRIVE_STRENGTH_2MA);
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    const uint8_t pullup_en = BITMASK_COMPARE(pin.pin_num, GPIO_OPT_PULL_UP);
+    const uint8_t pulldown_en = BITMASK_COMPARE(pin.pin_num, GPIO_OPT_PULL_DOWN); 
+    gpio_set_pulls(pin.pin_num, pullup_en, pulldown_en);
+
+    const uint8_t slew_rate_val = BITMASK_COMPARE(opt, GPIO_OPT_SLEW_RATE_HIGH) ? GPIO_SLEW_RATE_FAST : GPIO_SLEW_RATE_SLOW;
+    gpio_set_slew_rate(pin.pin_num, slew_rate_val);
 }
 
 gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
-    return GPIO_OPT_DRIVE_STRENGTH_HIGH;
+    const uint8_t driver_strength = ADD_GPIO_DRIVE_STENGTH_OPT_OFFSET(gpio_get_drive_strength(pin.pin_num));
+    const uint8_t slew_rate = (SHIFT_ONE_LEFT_BY_N( (GPIO_OPT_SLEW_RATE_SLOW_POS + gpio_get_slew_rate(pin.pin_num))));
+    const uint8_t pull_down_en = gpio_is_pulled_down(pin.pin_num);
+    const uint8_t pull_up_en = gpio_is_pulled_up(pin.pin_num);
+    const uint8_t options = (SHIFT_ONE_LEFT_BY_N(driver_strength)) | slew_rate | pull_down_en | (pull_up_en << GPIO_OPT_PULL_UP_POS) ;
+    return options;
 }
 
 void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
