@@ -19,7 +19,8 @@ if(PLATFORM_DEFINED MATCHES "^__SAMD21")
     add_library(Universal_hall "hal/platform/atmelsam/default_irq_handlers.c"
                                "hal/platform/atmelsam/gpio_samd.c"
                                "hal/platform/atmelsam/i2c.c"
-            hal/universal_hal.h)
+            hal/universal_hal.h
+            hal/platform/atmelsam/spi.c)
     target_include_directories(Universal_hall PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hall INTERFACE board_sdk)
 else()

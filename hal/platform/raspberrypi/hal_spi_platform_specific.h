@@ -29,20 +29,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <sam.h>
 #include <stddef.h>
-
-#include <i2c_platform_specific.h>
 #include <gpio_platform_specific.h>
 
 typedef enum { SPI_OPERATING_MODE_MASTER, SPI_OPERATING_MODE_SLAVE } spi_operating_mode_t;
 
 typedef struct {
-    sercom_num_t sercom_inst_num;
-    Sercom* sercom_inst;
-    clk_gen_num_t clk_gen_slow;
-    clk_gen_num_t clk_gen_fast;
-    uint32_t fast_clk_gen_frequency;
     spi_operating_mode_t operating_mode;
 } spi_periph_inst_t;
 
@@ -50,6 +42,15 @@ typedef struct {
     spi_periph_inst_t* spi_peripheral;
     gpio_pin_t cs_pin;
 } spi_dev_t;
+
+typedef struct {
+    uint8_t transaction_type;
+    uint8_t instance_num;
+    const uint8_t* write_buffer;
+    uint8_t* read_buffer;
+    uint8_t buf_size;
+    uint8_t buf_cnt;
+} bustransaction_t;
 
 #ifdef __cplusplus
 }

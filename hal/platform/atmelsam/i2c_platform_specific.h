@@ -28,11 +28,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+//
+// Created by victor on 9/18/23.
+//
 
 #include <sam.h>
 #include <stddef.h>
 
-typedef enum { I2COpModeMaster, I2COpModeSlave } i2c_operating_mode_t;
+typedef enum { I2C_OPERATING_MODE_MASTER, I2C_OPERATING_MODE_SLAVE } i2c_operating_mode_t;
 
 typedef enum { SERCOM_NUM_0, SERCOM_NUM_1, SERCOM_NUM_2, SERCOM_NUM_3, SERCOM_NUM_4, SERCOM_NUM_5 } sercom_num_t;
 

@@ -47,20 +47,13 @@ extern "C" {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-void spi_init(const spi_periph_inst_t *spi_instance, unsigned long baud_rate);
+void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-void spi_deinit(const spi_periph_inst_t *spi_instance);
-
-/**
- * @brief Function to enable slave mode after the peripheral has already been initialized in host-mode
- * @param i2c_instance I2C options used when configuring the HW peripheral.
- * @param addr The I2C slave address to used
- */
-void spi_set_slave_mode(const spi_periph_inst_t *spi_instance);
+void spi_deinit(const spi_dev_t *spi_instance);
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
@@ -72,7 +65,7 @@ void spi_set_slave_mode(const spi_periph_inst_t *spi_instance);
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void spi_write_blocking(const spi_periph_inst_t *spi_instance, const unsigned char *write_buff, size_t size);
+void spi_write_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -84,7 +77,7 @@ void spi_write_blocking(const spi_periph_inst_t *spi_instance, const unsigned ch
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void spi_write_non_blocking(const spi_periph_inst_t *spi_instance, const unsigned char *write_buff, size_t size);
+void spi_write_non_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -94,7 +87,7 @@ void spi_write_non_blocking(const spi_periph_inst_t *spi_instance, const unsigne
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void spi_read_blocking(const spi_periph_inst_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes);
+void spi_read_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
@@ -104,7 +97,7 @@ void spi_read_blocking(const spi_periph_inst_t *spi_instance, unsigned char *rea
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void spi_read_non_blocking(const spi_periph_inst_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes);
+void spi_read_non_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes);
 
 #ifdef __cplusplus
 }

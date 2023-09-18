@@ -154,7 +154,7 @@ while (GCLK->STATUS.bit.SYNCBUSY)
 #endif
 
 
-const bool SlaveConfiguration = (i2c_instance->operating_mode == I2COpModeSlave && i2c_instance->i2c_slave_addr != 0);
+const bool SlaveConfiguration = (i2c_instance->operating_mode == I2C_OPERATING_MODE_SLAVE && i2c_instance->i2c_slave_addr != 0);
 if(SlaveConfiguration) {
     i2c_set_slave_mode(i2c_instance, i2c_instance->i2c_slave_addr);
 } else {
