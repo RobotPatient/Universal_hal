@@ -68,8 +68,8 @@
  * 3. Set the gpio pin level: set_gpio_pin_lvl(blinky_led, GPIO_HIGH);
  *    or toggle the gpio: toggle_gpio_pin_output(blinky_led);
  */
-#ifndef GPIO_HPP
-#define GPIO_HPP
+#ifndef HAL_GPIO_H
+#define HAL_GPIO_H
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
@@ -139,9 +139,9 @@ void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt);
  * @param hw Pointer to the hw peripheral responsible for the IRQ (Depends on the platform used).
  * @note To use it define this function in one of your own source files (main.c for example), this will override the default handler.
  */
-void gpio_irq_handler(const void* const hw) __attribute__((weak));
+void gpio_irq_handler(const void *const hw) __attribute__((weak));
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif
+#endif  /* HAL_GPIO_H */

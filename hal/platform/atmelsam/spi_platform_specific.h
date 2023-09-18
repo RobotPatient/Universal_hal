@@ -1,6 +1,6 @@
 /**
-* \file            i2c_platform_specific.h
-* \brief           Include file with platform specific options for the I2C module
+* \file            spi_platform_specific.h
+* \brief           Include file with platform specific options for the SPI module
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -22,24 +22,20 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#ifndef I2C_MASTER_PLATFORM_SPECIFIC
-#define I2C_MASTER_PLATFORM_SPECIFIC
+#ifndef HAL_SPI_PLATFORM_SPECIFIC
+#define HAL_SPI_PLATFORM_SPECIFIC
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-//
-// Created by victor on 9/18/23.
-//
 
 #include <sam.h>
 #include <stddef.h>
 
-typedef enum { I2C_OPERATING_MODE_MASTER, I2C_OPERATING_MODE_SLAVE } i2c_operating_mode_t;
+#include <i2c_platform_specific.h>
+#include <gpio_platform_specific.h>
 
-typedef enum { SERCOM_NUM_0, SERCOM_NUM_1, SERCOM_NUM_2, SERCOM_NUM_3, SERCOM_NUM_4, SERCOM_NUM_5 } sercom_num_t;
-
-typedef enum { CLKGEN_0, CLKGEN_1, CLKGEN_2, CLKGEN_3, CLKGEN_4, CLKGEN_5, CLKGEN_6, CLKGEN_7, CLKGEN_8 } clk_gen_num_t;
+typedef enum { SPI_OPERATING_MODE_MASTER, SPI_OPERATING_MODE_SLAVE } spi_operating_mode_t;
 
 typedef struct {
     sercom_num_t sercom_inst_num;
@@ -47,27 +43,13 @@ typedef struct {
     clk_gen_num_t clk_gen_slow;
     clk_gen_num_t clk_gen_fast;
     uint32_t fast_clk_gen_frequency;
-    i2c_operating_mode_t operating_mode;
-    unsigned short i2c_slave_addr;
-} i2c_periph_inst_t;
+    spi_operating_mode_t operating_mode;
+} spi_periph_inst_t;
 
 typedef struct {
-    uint8_t transaction_type;
-    uint8_t instance_num;
-    const uint8_t* write_buffer;
-    uint8_t* read_buffer;
-    uint8_t buf_size;
-    uint8_t buf_cnt;
-} bustransaction_t;
-
-typedef enum {
-    SERCOMACT_NONE,
-    SERCOMACT_IDLE_I2CS,
-    SERCOMACT_IDLE_I2CM,
-    SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP,
-    SERCOMACT_I2C_DATA_TRANSMIT_STOP,
-    SERCOMACT_I2C_DATA_RECEIVE_STOP
-} busactions_t;
+    spi_periph_inst_t* spi_peripheral;
+    gpio_pin_t cs_pin;
+} spi_dev_t;
 
 #ifdef __cplusplus
 }

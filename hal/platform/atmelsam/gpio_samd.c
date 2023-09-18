@@ -158,7 +158,7 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
      */
     const uint8_t pull_up_en = BITMASK_COMPARE(opt, GPIO_OPT_PULL_UP);
     const uint8_t pull_en = ((BITMASK_COMPARE(opt, GPIO_OPT_PULL_DOWN) >> 1) | (pull_up_en));
-    const uint8_t reg_val = non_settable_pincfg_options | pull_en | BITMASK_COMPARE(opt, GPIO_OPT_DRIVE_STRENGTH_STRONG);
+    const uint8_t reg_val = non_settable_pincfg_options | pull_en | BITMASK_COMPARE(opt, GPIO_OPT_DRIVE_STRENGTH_HIGH);
     PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = reg_val;
 
     /*
@@ -192,7 +192,7 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
 
     const uint8_t sampling_opt_en = BIT_IS_SET(PORT->Group[pin.port_num].CTRL.reg, pin.pin_num);
 
-    uint8_t res = BITMASK_COMPARE(pincfg_register, GPIO_OPT_DRIVE_STRENGTH_STRONG) | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
+    uint8_t res = BITMASK_COMPARE(pincfg_register, GPIO_OPT_DRIVE_STRENGTH_HIGH) | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
 
     if (BITMASK_COMPARE(pincfg_register, PORT_PINCFG_PULLEN)) {
         /*

@@ -1,6 +1,6 @@
 /**
-* \file            bit_manipulation.h
-* \brief           Header file with useful macro's for bit manipulation
+* \file            spi.c
+* \brief           Source file which implements the standard SPI API functions
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -22,23 +22,29 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#ifndef ATMELSAMD21_BIT_MANIPULATION_H
-#define ATMELSAMD21_BIT_MANIPULATION_H
-/* Extern c for compiling with c++*/
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include <hal_spi.h>
+#include <stddef.h>
 
-#define BITMASK_COMPARE(NUM, MASK)       (NUM & MASK)
-#define BIT_IS_SET(VAL, BIT_NUM)         (VAL >> BIT_NUM) & 1
-#define SHIFT_ONE_LEFT_BY_N(N)           1 << N
+void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {
 
-#define GET_LOWER_4_BITS_OF_BYTE(x)      BITMASK_COMPARE(x, 0xF)
-#define GET_UPPER_4_BITS_OF_BYTE(x)      BITMASK_COMPARE((x >> 4), 0xF)
-
-#define PIN_IS_EVEN_NUMBER(x)            (x % 2) == 0
-
-#ifdef __cplusplus
 }
-#endif /* __cplusplus */
-#endif //ATMELSAMD21_BIT_MANIPULATION_H
+
+void spi_deinit(const spi_dev_t *spi_instance) {
+
+}
+
+void spi_write_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
+
+}
+
+void spi_write_non_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
+
+}
+
+void spi_read_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes) {
+
+}
+
+void spi_read_non_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes) {
+
+}
