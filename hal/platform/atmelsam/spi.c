@@ -27,7 +27,28 @@
 #include <default_irq_handlers.h>
 
 void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {
+    const spi_periph_inst_t *spi_peripheral_inst = spi_instance->spi_peripheral;
+    const uint8_t invalid_sercom_instance_num = (spi_peripheral_inst->sercom_inst_num > SERCOM_INST_NUM - 1);
+    const uint8_t hw_handle_is_null = (spi_peripheral_inst->sercom_inst == NULL);
+    const uint8_t invalid_clk_gen_num = (spi_peripheral_inst->clk_gen_slow > GCLK_GEN_NUM - 1 ||
+                                         spi_peripheral_inst->clk_gen_fast > GCLK_GEN_NUM - 1);
+    if (hw_handle_is_null || invalid_sercom_instance_num || invalid_clk_gen_num) {
+        return;
+    }
+        // Set the clock system
+#ifdef __SAMD51__
 
+#else
+    PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + spi_peripheral_inst->sercom_inst_num);
+    GCLK->CLKCTRL.reg =
+            GCLK_CLKCTRL_GEN(spi_peripheral_inst->clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
+    while (GCLK->STATUS.bit.SYNCBUSY);
+    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(spi_peripheral_inst->clk_gen_fast) |
+                        ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + spi_peripheral_inst->sercom_inst_num)
+                                << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+    GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(spi_peripheral_inst->clk_gen_fast);
+    while (GCLK->STATUS.bit.SYNCBUSY);
+#endif
 }
 
 void spi_deinit(const spi_dev_t *spi_instance) {
