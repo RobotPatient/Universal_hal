@@ -21,10 +21,27 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-
-#include <hal_spi.h>
 #include <stddef.h>
-#include <default_irq_handlers.h>
+#include "hal_spi.h"
+#include "spi_platform_specific.h"
+#include "hal_gpio.h"
+#include "default_irq_handlers.h"
+#include "bit_manipulation.h"
+
+
+/**
+ * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.
+ *        By continually reading its SPI syncbusy register.
+ * @param hw Pointer to the sercom peripheral to be manipulated or read
+ * @param bits_to_read The bits to read within the syncbusy register (bitmask)
+ * @note Possible bits that can be read are: SERCOM_SPI_SYNCBUSY_SWRST
+ *                                           SERCOM_SPI_SYNCBUSY_ENABLE
+ *                                           SERCOM_SPI_SYNCBUSY_CTRLB
+ */
+static inline void spi_wait_for_sync(const void *const hw, const uint32_t bits_to_read) {
+    while (((Sercom *) hw)->SPI.SYNCBUSY.reg & bits_to_read) {
+    };
+}
 
 void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {
     const spi_periph_inst_t *spi_peripheral_inst = spi_instance->spi_peripheral;
@@ -49,24 +66,64 @@ void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {
     GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(spi_peripheral_inst->clk_gen_fast);
     while (GCLK->STATUS.bit.SYNCBUSY);
 #endif
+    spi_peripheral_inst->sercom_inst->SPI.CTRLA.reg = SERCOM_SPI_CTRLA_SWRST;
+    spi_wait_for_sync(spi_peripheral_inst->sercom_inst, SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
+    spi_peripheral_inst->sercom_inst->SPI.CTRLA.reg = SERCOM_SPI_CTRLA_MODE(spi_peripheral_inst->operating_mode) |
+                                                      (spi_instance->clock_polarity << SERCOM_SPI_CTRLA_CPHA_Pos) |
+                                                      (spi_instance->data_order << SERCOM_SPI_CTRLA_CPOL_Pos) |
+                                                      (SERCOM_SPI_CTRLA_DIPO(spi_peripheral_inst->dipo_pad)) |
+                                                      (SERCOM_SPI_CTRLA_DOPO(spi_peripheral_inst->dopo_pad));
+    spi_peripheral_inst->sercom_inst->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_PLOADEN | SERCOM_SPI_CTRLB_CHSIZE(spi_instance->character_size);
+    spi_peripheral_inst->sercom_inst->SPI.BAUD.reg = spi_peripheral_inst->fast_clk_gen_frequency / baud_rate;
+    spi_peripheral_inst->sercom_inst->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_RXC | SERCOM_SPI_INTENSET_TXC |
+                                                         SERCOM_SPI_INTENSET_SSL | SERCOM_SPI_INTENSET_DRE;
+    const enum IRQn irq_type = (SERCOM0_IRQn + spi_peripheral_inst->sercom_inst_num);
+    NVIC_EnableIRQ(irq_type);
+    NVIC_SetPriority(irq_type, 2);
 }
 
 void spi_deinit(const spi_dev_t *spi_instance) {
 
 }
 
-void spi_write_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
+void spi_start_transaction(const spi_dev_t *spi_instance) {
+    set_gpio_pin_lvl(spi_instance->cs_pin, GPIO_LOW);
+}
 
+void spi_end_transaction(const spi_dev_t *spi_instance) {
+    set_gpio_pin_lvl(spi_instance->cs_pin, GPIO_HIGH);
+}
+
+void spi_write_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
+    const sercom_num_t sercom_inst_num = spi_instance->spi_peripheral->sercom_inst_num;
+    spi_write_non_blocking(spi_instance, write_buff, size);
+    while(SercomBusTrans[sercom_inst_num].transaction_type != SERCOMACT_IDLE_SPI);
 }
 
 void spi_write_non_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
-
+    const sercom_num_t sercom_inst_num = spi_instance->spi_peripheral->sercom_inst_num;
+    while(SercomBusTrans[sercom_inst_num].transaction_type != SERCOMACT_IDLE_SPI);
+    SercomBusTrans[sercom_inst_num].buf_cnt = 1;
+    SercomBusTrans[sercom_inst_num].buf_size = size;
+    SercomBusTrans[sercom_inst_num].write_buffer = write_buff;
+    SercomBusTrans[sercom_inst_num].transaction_type = SERCOMACT_SPI_DATA_TRANSMIT;
+    spi_instance->spi_peripheral->sercom_inst->SPI.DATA.reg = write_buff[0];
+    spi_write_blocking(spi_instance, write_buff, size);
 }
 
 void spi_read_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes) {
-
+    const sercom_num_t sercom_inst_num = spi_instance->spi_peripheral->sercom_inst_num;
+    spi_read_non_blocking(spi_instance, read_buff, amount_of_bytes);
+    while(SercomBusTrans[sercom_inst_num].transaction_type != SERCOMACT_IDLE_SPI);
 }
 
 void spi_read_non_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes) {
-
+    const sercom_num_t sercom_inst_num = spi_instance->spi_peripheral->sercom_inst_num;
+    while(SercomBusTrans[sercom_inst_num].transaction_type != SERCOMACT_IDLE_SPI);
+    SercomBusTrans[sercom_inst_num].buf_cnt = 1;
+    SercomBusTrans[sercom_inst_num].buf_size = amount_of_bytes;
+    SercomBusTrans[sercom_inst_num].read_buffer = read_buff;
+    SercomBusTrans[sercom_inst_num].transaction_type = SERCOMACT_SPI_DATA_RECEIVE;
+    spi_instance->spi_peripheral->sercom_inst->SPI.DATA.reg = read_buff[0];
 }
+
