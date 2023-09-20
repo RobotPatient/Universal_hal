@@ -20,7 +20,8 @@ if(PLATFORM_DEFINED MATCHES "^__SAMD21")
                                "hal/platform/atmelsam/gpio_samd.c"
                                "hal/platform/atmelsam/i2c.c"
             hal/universal_hal.h
-            hal/platform/atmelsam/spi.c)
+            hal/platform/atmelsam/spi.c
+            hal/hal_spi_slave.h)
     target_include_directories(Universal_hall PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hall INTERFACE board_sdk)
 else()

@@ -1,6 +1,6 @@
 /**
-* \file            hal_spi.h
-* \brief           SPI module include file
+* \file            hal_spi_host.h
+* \brief           SPI host driver module include file
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -23,8 +23,8 @@
 */
 /** SPI Module
  */
-#ifndef HAL_SPI_H
-#define HAL_SPI_H
+#ifndef HAL_SPI_HOST_H
+#define HAL_SPI_HOST_H
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +34,7 @@ extern "C" {
 
 
 /**
- * @brief Function to initialize the specified HW peripheral with I2C functionality.
+ * @brief Function to initialize the specified HW peripheral with SPI functionality.
  *        Uses the options set in the i2c_periph_inst_t struct defined platform_specific.h.
  *        To ensure platform compatibility place static i2c_periph_inst_t for each hw peripheral in an board_options.h file
  *        and include it in the build.
@@ -54,6 +54,18 @@ void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate);
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
 void spi_deinit(const spi_dev_t *spi_instance);
+
+/**
+ * @brief Start a spi transaction (sets the chip select line low)
+ * @param spi_instance The SPI device to start a transaction with.
+ */
+void spi_start_transaction(const spi_dev_t *spi_instance);
+
+/**
+ * @brief End a spi transaction (sets the chip select line high)
+ * @param spi_instance The SPI device to start a transaction with.
+ */
+void spi_end_transaction(const spi_dev_t *spi_instance);
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
@@ -125,58 +137,6 @@ void spi_host_data_recv_irq(const void* hw, volatile bustransaction_t* transacti
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
 void spi_host_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for SPI Client address match interrupt.
- *        Gets run when a start condition with valid slave address is detected.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void spi_slave_chip_select_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client stop interrupt.
- *        Gets run when a stop condition is detected.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void spi_slave_stop_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client receive interrupt.
- *        Gets run when a byte is received from the host.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void spi_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client send interrupt.
- *        Gets run when a byte is requested from the host.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void spi_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-void spi_start_transaction(const spi_dev_t *spi_instance);
-
-void spi_end_transaction(const spi_dev_t *spi_instance);
 
 #ifdef __cplusplus
 }

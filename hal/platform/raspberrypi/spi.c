@@ -22,7 +22,7 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#include <hal_spi.h>
+#include <hal_spi_host.h>
 #include <stddef.h>
 
 void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {

@@ -25,7 +25,7 @@
 #include "bit_manipulation.h"
 #include "default_irq_handlers.h"
 #include "hal_gpio.h"
-#include "hal_spi.h"
+#include "hal_spi_host.h"
 #include "spi_platform_specific.h"
 
 /**
