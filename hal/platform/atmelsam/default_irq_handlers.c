@@ -72,6 +72,38 @@ void i2c_master_data_send_irq(const void *const hw, volatile bustransaction_t *t
     }
 }
 
+
+void spi_master_handler(const void *const hw, volatile bustransaction_t *transaction) {
+    Sercom *sercom_instance = ((Sercom *) hw);
+    if(transaction->transaction_type == SERCOMACT_SPI_DATA_TRANSMIT) {
+        const bool write_buffer_exists = (transaction->write_buffer != NULL);
+        const bool has_bytes_left_to_write = (transaction->buf_cnt < transaction->buf_size);
+        if (write_buffer_exists && has_bytes_left_to_write) {
+            sercom_instance->SPI.DATA.reg = transaction->write_buffer[transaction->buf_cnt++];
+        } else {
+            sercom_instance->SPI.INTFLAG.reg = SERCOM_SPI_INTFLAG_TXC;
+            sercom_instance->SPI.INTENCLR.reg = SERCOM_SPI_INTFLAG_DRE;
+            transaction->transaction_type = SERCOMACT_IDLE_SPI;
+        }
+    } else if(transaction->transaction_type == SERCOMACT_SPI_DATA_RECEIVE) {
+        if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size) {
+            transaction->read_buffer[transaction->buf_cnt++] = sercom_instance->SPI.DATA.reg;
+            const bool last_byte_read = transaction->buf_cnt >= transaction->buf_size;
+            if(!last_byte_read) {
+                sercom_instance->SPI.DATA.reg = 0;
+            }
+        } else {
+            uint32_t reg = sercom_instance->SPI.CTRLB.reg;
+            reg &= ~(SERCOM_SPI_CTRLB_RXEN);
+            sercom_instance->SPI.CTRLB.reg = reg;
+            sercom_instance->SPI.INTENCLR.reg = SERCOM_SPI_INTFLAG_DRE;
+            transaction->transaction_type = SERCOMACT_IDLE_SPI;
+        }
+    } else {
+        sercom_instance->SPI.INTFLAG.reg = 0xFF;
+    }
+}
+
 void i2c_slave_data_recv_irq(const void *const hw, volatile bustransaction_t *Transaction) {
     ((Sercom *) hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_DRDY;
     Transaction->transaction_type = SERCOMACT_IDLE_I2CS;
@@ -165,14 +197,15 @@ __attribute__((used)) void SERCOM3_Handler(void) {
 }
 
 __attribute__((used)) void SERCOM2_Handler(void) {
-    if (SERCOM2->I2CM.INTFLAG.bit.SB) {
-        i2c_master_data_recv_irq(SERCOM2, &SercomBusTrans[2]);
-    } else if (SERCOM2->I2CM.INTFLAG.bit.MB) {
-        i2c_master_data_send_irq(SERCOM2, &SercomBusTrans[2]);
-    } else if (SERCOM2->I2CS.INTFLAG.bit.AMATCH || SERCOM2->I2CS.INTFLAG.bit.DRDY || SERCOM2->I2CS.INTFLAG.bit.PREC) {
-        i2c_slave_handler(SERCOM2, &SercomBusTrans[2]);
-    } else if (SERCOM2->SPI.INTFLAG.bit.TXC) {
-
+//    if (SERCOM2->I2CM.INTFLAG.bit.SB) {
+//        i2c_master_data_recv_irq(SERCOM2, &SercomBusTrans[2]);
+//    } else if (SERCOM2->I2CM.INTFLAG.bit.MB) {
+//        i2c_master_data_send_irq(SERCOM2, &SercomBusTrans[2]);
+//    } else if (SERCOM2->I2CS.INTFLAG.bit.AMATCH || SERCOM2->I2CS.INTFLAG.bit.DRDY || SERCOM2->I2CS.INTFLAG.bit.PREC) {
+//        i2c_slave_handler(SERCOM2, &SercomBusTrans[2]);
+//    } else
+    if (SERCOM2->SPI.INTFLAG.bit.TXC || SERCOM2->SPI.INTFLAG.bit.DRE || SERCOM2->SPI.INTFLAG.bit.RXC) {
+        spi_master_handler(SERCOM2, &SercomBusTrans[2]);
     }
 }
 
