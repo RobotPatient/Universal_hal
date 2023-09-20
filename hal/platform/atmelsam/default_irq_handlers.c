@@ -27,6 +27,7 @@
 #include "hal_gpio.h"
 #include "hal_i2c.h"
 #include "i2c_platform_specific.h"
+
 /**
  * @brief Each SERCOM peripheral gets its own SercomBusTransaction.
  *        This will eventually be replaced with a ringbuffer implementation
@@ -34,9 +35,9 @@
  *
  * @todo Replace this implementation with a ringbuffer
  */
-volatile bustransaction_t SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
+volatile bustransaction_t sercom_bustrans_buffer[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
 
 /**
  * @brief Macros used in ISR for acknowledging and finishing the transaction
@@ -79,7 +80,7 @@ void spi_host_data_send_irq(const void* hw, volatile bustransaction_t* transacti
         } else {
             sercom_instance->SPI.INTFLAG.reg = SERCOM_SPI_INTFLAG_TXC;
             sercom_instance->SPI.INTENCLR.reg = SERCOM_SPI_INTFLAG_DRE;
-            transaction->transaction_type = SERCOMACT_IDLE_SPI;
+            transaction->transaction_type = SERCOMACT_IDLE_SPI_HOST;
         }
     } else {
         sercom_instance->SPI.INTFLAG.reg = 0xFF;
@@ -100,11 +101,26 @@ void spi_host_data_recv_irq(const void* hw, volatile bustransaction_t* transacti
             reg &= ~(SERCOM_SPI_CTRLB_RXEN);
             sercom_instance->SPI.CTRLB.reg = reg;
             sercom_instance->SPI.INTENCLR.reg = SERCOM_SPI_INTFLAG_DRE;
-            transaction->transaction_type = SERCOMACT_IDLE_SPI;
+            transaction->transaction_type = SERCOMACT_IDLE_SPI_HOST;
         }
     } else {
         sercom_instance->SPI.INTFLAG.reg = 0xFF;
     }
+}
+
+void spi_slave_chip_select_irq(const void* hw, volatile bustransaction_t* transaction) {
+    ((Sercom*)hw)->SPI.INTFLAG.reg = SERCOM_SPI_INTFLAG_SSL;
+    transaction->transaction_type = SERCOMACT_IDLE_SPI_SLAVE;
+}
+
+void spi_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) {
+    ((Sercom*)hw)->SPI.INTFLAG.reg = SERCOM_SPI_INTFLAG_RXC;
+    transaction->transaction_type = SERCOMACT_IDLE_SPI_SLAVE;
+}
+
+void spi_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) {
+    ((Sercom*)hw)->SPI.INTFLAG.reg = SERCOM_SPI_INTFLAG_TXC;
+    transaction->transaction_type = SERCOMACT_IDLE_SPI_SLAVE;
 }
 
 void i2c_slave_data_recv_irq(const void* const hw, volatile bustransaction_t* Transaction) {
@@ -192,10 +208,20 @@ static inline void default_isr_handler(const void* const hw, volatile bustransac
             spi_host_data_send_irq(sercom_instance, transaction);
             break;
         }
-        case SERCOMACT_IDLE_SPI: {
-            uint8_t SPI_INTFLAG = sercom_instance->SPI.INTFLAG.reg;
-            sercom_instance->SPI.INTFLAG.reg = SPI_INTFLAG;
+        case SERCOMACT_IDLE_SPI_HOST: {
+            uint8_t spi_intflag = sercom_instance->SPI.INTFLAG.reg;
+            sercom_instance->SPI.INTFLAG.reg = spi_intflag;
             break;
+        }
+        case SERCOMACT_IDLE_SPI_SLAVE: {
+            const uint8_t spi_intflag = sercom_instance->SPI.INTFLAG.reg;
+            if (BITMASK_COMPARE(spi_intflag, SERCOM_SPI_INTFLAG_TXC)) {
+                spi_slave_data_send_irq(sercom_instance, transaction);
+            } else if (BITMASK_COMPARE(spi_intflag, SERCOM_SPI_INTFLAG_RXC)) {
+                spi_slave_data_recv_irq(sercom_instance, transaction);
+            } else if (BITMASK_COMPARE(spi_intflag, SERCOM_SPI_INTFLAG_SSL)) {
+                spi_slave_chip_select_irq(sercom_instance, transaction);
+            }
         }
         default: {
             uint8_t SPI_INTFLAG = sercom_instance->SPI.INTFLAG.reg;
@@ -206,37 +232,37 @@ static inline void default_isr_handler(const void* const hw, volatile bustransac
 }
 
 __attribute__((used)) void SERCOM5_Handler(void) {
-    volatile bustransaction_t* bustransaction = &SercomBusTrans[5];
+    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[5];
     Sercom*                    sercom_instance = SERCOM5;
     default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM4_Handler(void) {
-    volatile bustransaction_t* bustransaction = &SercomBusTrans[4];
+    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[4];
     Sercom*                    sercom_instance = SERCOM4;
     default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM3_Handler(void) {
-    volatile bustransaction_t* bustransaction = &SercomBusTrans[3];
+    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[3];
     Sercom*                    sercom_instance = SERCOM3;
     default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM2_Handler(void) {
-    volatile bustransaction_t* bustransaction = &SercomBusTrans[2];
+    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[2];
     Sercom*                    sercom_instance = SERCOM2;
     default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM1_Handler(void) {
-    volatile bustransaction_t* bustransaction = &SercomBusTrans[1];
+    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[1];
     Sercom*                    sercom_instance = SERCOM1;
     default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM0_Handler(void) {
-    volatile bustransaction_t* bustransaction = &SercomBusTrans[0];
+    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[0];
     Sercom*                    sercom_instance = SERCOM0;
     default_isr_handler(sercom_instance, bustransaction);
 }

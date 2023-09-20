@@ -1,6 +1,6 @@
 /**
-* \file            spi.c
-* \brief           Source file which implements the standard SPI API functions
+* \file            peripheral_clocking.h
+* \brief           Include file with platform specific options for peripheral clocking
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -21,30 +21,9 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+#ifndef ATMELSAMD21_PERIPHERAL_CLOCKING_H
+#define ATMELSAMD21_PERIPHERAL_CLOCKING_H
 
-#include <hal_spi_host.h>
-#include <stddef.h>
+typedef enum { CLKGEN_0, CLKGEN_1, CLKGEN_2, CLKGEN_3, CLKGEN_4, CLKGEN_5, CLKGEN_6, CLKGEN_7, CLKGEN_8 } clk_gen_num_t;
 
-void spi_host_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {
-
-}
-
-void spi_host_deinit(const spi_dev_t *spi_instance) {
-
-}
-
-void spi_write_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
-
-}
-
-void spi_write_non_blocking(const spi_dev_t *spi_instance, const unsigned char *write_buff, size_t size) {
-
-}
-
-void spi_read_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes) {
-
-}
-
-void spi_read_non_blocking(const spi_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes) {
-
-}
+#endif //ATMELSAMD21_PERIPHERAL_CLOCKING_H

@@ -1,5 +1,5 @@
 /**
-* \file            spi_platform_specific.h
+* \file            spi_common_platform_specific.h
 * \brief           Include file with platform specific options for the SPI module
 */
 /*
@@ -21,24 +21,19 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+#ifndef ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
+#define ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
 
-#ifndef HAL_SPI_PLATFORM_SPECIFIC
-#define HAL_SPI_PLATFORM_SPECIFIC
-/* Extern c for compiling with c++*/
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
+#include <stdint.h>
+#include <stdio.h>
 #include <sam.h>
-#include <stddef.h>
-
-#include <i2c_platform_specific.h>
-#include <gpio_platform_specific.h>
+#include "sercom_stuff.h"
+#include "peripheral_clocking.h"
 
 typedef enum {
     SPI_OPERATING_MODE_SLAVE = 0x2, SPI_OPERATING_MODE_MASTER
 } spi_operating_mode_t;
-    
+
 typedef enum {
     SPI_CLOCK_POLARITY_SCK_LOW_IDLE, SPI_CLOCK_POLARITY_SCK_HIGH_IDLE
 } spi_clock_polarity_t;
@@ -56,12 +51,12 @@ typedef enum {
 } sercom_dopo_pad_t;
 
 typedef enum {
-    SPI_ADDRESS_MODE_MASK, SPI_ADDRESS_MODE_2_ADDRS, SPI_ADDRESS_MODE_RANGE
-} spi_slave_addr_mode_t;
-
-typedef enum {
     SPI_8_BIT_CHARACTER_SIZE, SPI_9_BIT_CHARACTER_SIZE
 } spi_character_size_t;
+
+typedef enum {
+    SPI_ADDRESS_MODE_MASK, SPI_ADDRESS_MODE_2_ADDRS, SPI_ADDRESS_MODE_RANGE
+} spi_slave_addr_mode_t;
 
 typedef struct {
     sercom_num_t sercom_inst_num;
@@ -74,16 +69,4 @@ typedef struct {
     sercom_dopo_pad_t dopo_pad;
 } spi_periph_inst_t;
 
-typedef struct {
-    const spi_periph_inst_t *spi_peripheral;
-    const gpio_pin_t cs_pin;
-    const spi_clock_polarity_t clock_polarity;
-    const spi_data_order_t data_order;
-    const spi_slave_addr_mode_t slave_addr_mode;
-    const spi_character_size_t character_size;
-} spi_dev_t;
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-#endif
+#endif //ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H

@@ -30,7 +30,7 @@
 #define GPIO_OPT_PULL_DOWN_POS           3
 #define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 5
 
-void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
+void gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
     if (level) {
         /*
          * GPIO LEVEL HIGH: Set the OUTSET register to (1 << pin_num).
@@ -46,7 +46,7 @@ void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
     }
 }
 
-void toggle_gpio_pin_output(const gpio_pin_t pin) {
+void gpio_toggle_pin_output(const gpio_pin_t pin) {
     /*
      * The OUTTGL register gets set with a value of (1 << pin_num).
      * This will toggle the output status of the given pin.
@@ -55,7 +55,7 @@ void toggle_gpio_pin_output(const gpio_pin_t pin) {
     PORT->Group[pin.port_num].OUTTGL.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
 }
 
-gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
+gpio_level_t gpio_get_pin_level(const gpio_pin_t pin) {
     /*
      * The IN register will be read, and the bit corresponding to the pin gets returned.
      * This gives the current input status of the pin.
@@ -94,7 +94,7 @@ static inline void prv_set_dir(const gpio_pin_t pin, const uint8_t direction) {
     }
 }
 
-void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
+void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     /*
      * Detect using the offset of GPIO_MODE_INPUT in the enum whether the mode is an input or output
      */
@@ -127,7 +127,7 @@ static inline gpio_mode_t prv_get_dir(const gpio_pin_t pin) {
     }
 }
 
-gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
+gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin) {
     const uint8_t pincfg_reg = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
     if (pincfg_reg & PORT_PINCFG_PMUXEN) {
         return prv_get_function(pin);
@@ -142,7 +142,7 @@ static inline uint8_t get_non_settable_pincfg_options(const gpio_pin_t pin) {
     return non_settable_opt;
 }
 
-void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+void gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     /*
      * Some bits in the pincfg register are not set by this function and should not be changed.
      * These bits are retrieved with this function to be included in the final reg_val later.
@@ -184,7 +184,7 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     }
 }
 
-gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
+gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin) {
     /*
      * Get the pincfg register to extract the PULL_EN and DRIVE_STR bits from.
      */
@@ -207,7 +207,7 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
     return res;
 }
 
-void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
+void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
     /*
      * Check whether pin given is set as output or input. If set as output, make it an input.
      */

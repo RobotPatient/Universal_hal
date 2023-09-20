@@ -32,7 +32,7 @@ extern "C" {
 /**
  * @brief The SAMD series support two GPIO levels,
  *        LOW AND HIGH... Use this when using the
- *        set_gpio_pin_level() or get_gpio_pin_level() functions.
+ *        set_gpio_pin_level() or gpio_get_pin_level() functions.
  */
 typedef enum {
     GPIO_LOW,

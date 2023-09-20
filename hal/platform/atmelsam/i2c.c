@@ -241,8 +241,8 @@ void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigne
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
     const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
-    volatile bustransaction_t* TransactionData = &SercomBusTrans[Sercom_inst_num];
-    while((SercomInst->I2CM.STATUS.bit.BUSSTATE != 0x1) && SercomBusTrans[Sercom_inst_num].transaction_type != SERCOMACT_NONE && SercomInst->I2CM.INTFLAG.reg == 0);
+    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[Sercom_inst_num];
+    while((SercomInst->I2CM.STATUS.bit.BUSSTATE != 0x1) && sercom_bustrans_buffer[Sercom_inst_num].transaction_type != SERCOMACT_NONE && SercomInst->I2CM.INTFLAG.reg == 0);
     i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 	TransactionData->write_buffer = write_buff;
 	TransactionData->buf_size = size;
@@ -270,7 +270,7 @@ void i2c_read_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
     const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
-    volatile bustransaction_t* TransactionData = &SercomBusTrans[Sercom_inst_num];
+    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[Sercom_inst_num];
     i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     TransactionData->read_buffer = read_buff;
     TransactionData->buf_size = amount_of_bytes;

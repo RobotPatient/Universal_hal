@@ -34,12 +34,10 @@ extern "C" {
 
 #include <sam.h>
 #include <stddef.h>
+#include "sercom_stuff.h"
+#include "peripheral_clocking.h"
 
 typedef enum { I2C_OPERATING_MODE_MASTER, I2C_OPERATING_MODE_SLAVE } i2c_operating_mode_t;
-
-typedef enum { SERCOM_NUM_0, SERCOM_NUM_1, SERCOM_NUM_2, SERCOM_NUM_3, SERCOM_NUM_4, SERCOM_NUM_5 } sercom_num_t;
-
-typedef enum { CLKGEN_0, CLKGEN_1, CLKGEN_2, CLKGEN_3, CLKGEN_4, CLKGEN_5, CLKGEN_6, CLKGEN_7, CLKGEN_8 } clk_gen_num_t;
 
 typedef struct {
     sercom_num_t sercom_inst_num;
@@ -50,27 +48,6 @@ typedef struct {
     i2c_operating_mode_t operating_mode;
     unsigned short i2c_slave_addr;
 } i2c_periph_inst_t;
-
-typedef struct {
-    uint8_t transaction_type;
-    uint8_t instance_num;
-    const uint8_t* write_buffer;
-    uint8_t* read_buffer;
-    uint8_t buf_size;
-    uint8_t buf_cnt;
-} bustransaction_t;
-
-typedef enum {
-    SERCOMACT_NONE,
-    SERCOMACT_IDLE_I2CS,
-    SERCOMACT_IDLE_I2CM,
-    SERCOMACT_IDLE_SPI,
-    SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP,
-    SERCOMACT_I2C_DATA_TRANSMIT_STOP,
-    SERCOMACT_I2C_DATA_RECEIVE_STOP,
-    SERCOMACT_SPI_DATA_TRANSMIT,
-    SERCOMACT_SPI_DATA_RECEIVE
-} busactions_t;
 
 #ifdef __cplusplus
 }

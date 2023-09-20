@@ -41,20 +41,20 @@
 
 #define REMOVE_IO_OFFSET(x)             (x - GPIO_MODE_INPUT)
 
-void set_gpio_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
+void gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
     gpio_put(pin.pin_num, level);
 }
 
-void toggle_gpio_pin_output(const gpio_pin_t pin) {
+void gpio_toggle_pin_output(const gpio_pin_t pin) {
     const uint32_t mask = 1ul << pin.pin_num;
     gpio_xor_mask(mask);
 }
 
-gpio_level_t get_gpio_pin_level(const gpio_pin_t pin) {
+gpio_level_t gpio_get_pin_level(const gpio_pin_t pin) {
     return gpio_get(pin.pin_num);
 }
 
-void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
+void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     //invalid_params_if(GPIO, ((uint32_t)fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB) & ~IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS);
     // Set input enable on, output disable off
     hw_write_masked(&padsbank0_hw->io[pin.pin_num], PADS_BANK0_GPIO0_IE_BITS, PADS_BANK0_GPIO0_IE_BITS | PADS_BANK0_GPIO0_OD_BITS);
@@ -68,7 +68,7 @@ void set_gpio_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     }
 }
 
-gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
+gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin) {
     uint8_t function;
 
     function = gpio_get_function(pin.pin_num);
@@ -80,7 +80,7 @@ gpio_mode_t get_gpio_pin_mode(const gpio_pin_t pin) {
     }
 }
 
-void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+void gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     const uint8_t driver_mask_cmp_val = GPIO_OPT_DRIVE_STRENGTH_HIGH | GPIO_OPT_DRIVE_STRENGTH_MEDIUM 
                                         | GPIO_OPT_DRIVE_STRENGTH_LOW | GPIO_OPT_DRIVE_STRENGTH_VLOW;
 
@@ -119,7 +119,7 @@ void set_gpio_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     gpio_set_slew_rate(pin.pin_num, slew_rate_val);
 }
 
-gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
+gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin) {
     const uint8_t driver_strength = ADD_GPIO_DRIVE_STENGTH_OPT_OFFSET(gpio_get_drive_strength(pin.pin_num));
     const uint8_t slew_rate = (SHIFT_ONE_LEFT_BY_N( (GPIO_OPT_SLEW_RATE_SLOW_POS + gpio_get_slew_rate(pin.pin_num))));
     const uint8_t pull_down_en = gpio_is_pulled_down(pin.pin_num);
@@ -128,5 +128,5 @@ gpio_opt_t get_gpio_pin_options(const gpio_pin_t pin) {
     return options;
 }
 
-void set_gpio_interrupt(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
+void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
 }
