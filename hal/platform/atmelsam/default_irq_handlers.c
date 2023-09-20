@@ -22,11 +22,11 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 #include "default_irq_handlers.h"
-#include "hal_i2c.h"
-#include "hal_gpio.h"
-#include "i2c_platform_specific.h"
 #include <stdbool.h>
-
+#include "bit_manipulation.h"
+#include "hal_gpio.h"
+#include "hal_i2c.h"
+#include "i2c_platform_specific.h"
 /**
  * @brief Each SERCOM peripheral gets its own SercomBusTransaction.
  *        This will eventually be replaced with a ringbuffer implementation
@@ -34,12 +34,9 @@
  *
  * @todo Replace this implementation with a ringbuffer
  */
-volatile bustransaction_t SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
+volatile bustransaction_t SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                               {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
 
 /**
  * @brief Macros used in ISR for acknowledging and finishing the transaction
@@ -54,8 +51,8 @@ volatile bustransaction_t SercomBusTrans[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0
  * @param hw Pointer to the HW peripheral to be manipulated
  * @param transaction The current transaction information
  */
-void i2c_master_data_send_irq(const void *const hw, volatile bustransaction_t *transaction) {
-    Sercom *sercom_instance = ((Sercom *) hw);
+void i2c_master_data_send_irq(const void* const hw, volatile bustransaction_t* transaction) {
+    Sercom*    sercom_instance = ((Sercom*)hw);
     const bool write_buffer_exists = (transaction->write_buffer != NULL);
     const bool has_bytes_left_to_write = (transaction->buf_cnt < transaction->buf_size);
     if (write_buffer_exists && has_bytes_left_to_write) {
@@ -72,10 +69,9 @@ void i2c_master_data_send_irq(const void *const hw, volatile bustransaction_t *t
     }
 }
 
-
-void spi_master_handler(const void *const hw, volatile bustransaction_t *transaction) {
-    Sercom *sercom_instance = ((Sercom *) hw);
-    if(transaction->transaction_type == SERCOMACT_SPI_DATA_TRANSMIT) {
+void spi_host_data_send_irq(const void* hw, volatile bustransaction_t* transaction) {
+    Sercom* sercom_instance = ((Sercom*)hw);
+    if (transaction->transaction_type == SERCOMACT_SPI_DATA_TRANSMIT) {
         const bool write_buffer_exists = (transaction->write_buffer != NULL);
         const bool has_bytes_left_to_write = (transaction->buf_cnt < transaction->buf_size);
         if (write_buffer_exists && has_bytes_left_to_write) {
@@ -85,11 +81,18 @@ void spi_master_handler(const void *const hw, volatile bustransaction_t *transac
             sercom_instance->SPI.INTENCLR.reg = SERCOM_SPI_INTFLAG_DRE;
             transaction->transaction_type = SERCOMACT_IDLE_SPI;
         }
-    } else if(transaction->transaction_type == SERCOMACT_SPI_DATA_RECEIVE) {
+    } else {
+        sercom_instance->SPI.INTFLAG.reg = 0xFF;
+    }
+}
+
+void spi_host_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) {
+    Sercom* sercom_instance = ((Sercom*)hw);
+    if (transaction->transaction_type == SERCOMACT_SPI_DATA_RECEIVE) {
         if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size) {
             transaction->read_buffer[transaction->buf_cnt++] = sercom_instance->SPI.DATA.reg;
             const bool last_byte_read = transaction->buf_cnt >= transaction->buf_size;
-            if(!last_byte_read) {
+            if (!last_byte_read) {
                 sercom_instance->SPI.DATA.reg = 0;
             }
         } else {
@@ -104,33 +107,32 @@ void spi_master_handler(const void *const hw, volatile bustransaction_t *transac
     }
 }
 
-void i2c_slave_data_recv_irq(const void *const hw, volatile bustransaction_t *Transaction) {
-    ((Sercom *) hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_DRDY;
+void i2c_slave_data_recv_irq(const void* const hw, volatile bustransaction_t* Transaction) {
+    ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_DRDY;
     Transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_slave_data_send_irq(const void *const hw, volatile bustransaction_t *Transaction) {
-    ((Sercom *) hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_DRDY;
+void i2c_slave_data_send_irq(const void* const hw, volatile bustransaction_t* Transaction) {
+    ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_DRDY;
     Transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_slave_stop_irq(const void *const hw, volatile bustransaction_t *Transaction) {
-    ((Sercom *) hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_PREC;
+void i2c_slave_stop_irq(const void* const hw, volatile bustransaction_t* Transaction) {
+    ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_PREC;
     Transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_slave_address_match_irq(const void *const hw, volatile bustransaction_t *transaction) {
-    ((Sercom *) hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_AMATCH;
+void i2c_slave_address_match_irq(const void* const hw, volatile bustransaction_t* transaction) {
+    ((Sercom*)hw)->I2CS.INTFLAG.reg = SERCOM_I2CS_INTFLAG_AMATCH;
     transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_master_data_recv_irq(const void *const hw, volatile bustransaction_t *transaction) {
-    Sercom *sercom_instance = ((Sercom *) hw);
+void i2c_master_data_recv_irq(const void* const hw, volatile bustransaction_t* transaction) {
+    Sercom* sercom_instance = ((Sercom*)hw);
     if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size) {
         transaction->read_buffer[transaction->buf_cnt++] = sercom_instance->I2CM.DATA.reg;
         const bool last_byte_read = transaction->buf_cnt >= transaction->buf_size;
-        sercom_instance->I2CM.CTRLB.reg = last_byte_read ? SERCOM_I2C_MASTER_NACK_AND_STOP :
-                                          SERCOM_I2C_MASTER_RECV_ACK_AND_REQ_NEW_BYTE;
+        sercom_instance->I2CM.CTRLB.reg = last_byte_read ? SERCOM_I2C_MASTER_NACK_AND_STOP : SERCOM_I2C_MASTER_RECV_ACK_AND_REQ_NEW_BYTE;
     } else {
         sercom_instance->I2CM.CTRLB.reg = SERCOM_I2C_MASTER_NACK_AND_STOP;
         transaction->transaction_type = SERCOMACT_IDLE_I2CM;
@@ -138,8 +140,8 @@ void i2c_master_data_recv_irq(const void *const hw, volatile bustransaction_t *t
     }
 }
 
-void i2c_slave_handler(const void *const hw, volatile bustransaction_t *Transaction) {
-    Sercom *sercom_instance = ((Sercom *) hw);
+void i2c_slave_handler(const void* const hw, volatile bustransaction_t* Transaction) {
+    Sercom*    sercom_instance = ((Sercom*)hw);
     const bool addressMatchInt = sercom_instance->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_AMATCH;
     const bool stopInt = sercom_instance->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_PREC;
     const bool dataReadyInt = sercom_instance->I2CS.INTFLAG.reg & SERCOM_I2CS_INTFLAG_DRDY;
@@ -158,75 +160,85 @@ void i2c_slave_handler(const void *const hw, volatile bustransaction_t *Transact
     }
 }
 
-void gpio_irq_handler(const void *const hw) {
-    Eic *eic_inst = (Eic *) hw;
+void gpio_irq_handler(const void* const hw) {
+    Eic*           eic_inst = (Eic*)hw;
     const uint32_t intflag_val = eic_inst->INTFLAG.reg;
     eic_inst->INTFLAG.reg = intflag_val;
     const uint32_t nmi_intflag_val = eic_inst->NMIFLAG.reg;
     eic_inst->NMIFLAG.reg = nmi_intflag_val;
 }
 
-__attribute__((used)) void SERCOM5_Handler(void) {
-    if (SERCOM5->I2CM.INTFLAG.bit.SB) {
-        i2c_master_data_recv_irq(SERCOM5, &SercomBusTrans[5]);
-    } else if (SERCOM5->I2CM.INTFLAG.bit.MB) {
-        i2c_master_data_send_irq(SERCOM5, &SercomBusTrans[5]);
-    } else if (SERCOM5->I2CS.INTFLAG.bit.AMATCH || SERCOM5->I2CS.INTFLAG.bit.DRDY || SERCOM5->I2CS.INTFLAG.bit.PREC) {
-        i2c_slave_handler(SERCOM5, &SercomBusTrans[5]);
+static inline void default_isr_handler(const void* const hw, volatile bustransaction_t* transaction) {
+    Sercom* sercom_instance = ((Sercom*)hw);
+    switch (transaction->transaction_type) {
+        case SERCOMACT_IDLE_I2CS: {
+            i2c_slave_handler(sercom_instance, transaction);
+            break;
+        }
+        case SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP:
+        case SERCOMACT_I2C_DATA_TRANSMIT_STOP: {
+            i2c_master_data_send_irq(sercom_instance, transaction);
+            break;
+        }
+        case SERCOMACT_I2C_DATA_RECEIVE_STOP: {
+            i2c_master_data_recv_irq(sercom_instance, transaction);
+            break;
+        }
+        case SERCOMACT_SPI_DATA_RECEIVE: {
+            spi_host_data_recv_irq(sercom_instance, transaction);
+            break;
+        }
+        case SERCOMACT_SPI_DATA_TRANSMIT: {
+            spi_host_data_send_irq(sercom_instance, transaction);
+            break;
+        }
+        case SERCOMACT_IDLE_SPI: {
+            uint8_t SPI_INTFLAG = sercom_instance->SPI.INTFLAG.reg;
+            sercom_instance->SPI.INTFLAG.reg = SPI_INTFLAG;
+            break;
+        }
+        default: {
+            uint8_t SPI_INTFLAG = sercom_instance->SPI.INTFLAG.reg;
+            sercom_instance->SPI.INTFLAG.reg = SPI_INTFLAG;
+            break;
+        }
     }
+}
+
+__attribute__((used)) void SERCOM5_Handler(void) {
+    volatile bustransaction_t* bustransaction = &SercomBusTrans[5];
+    Sercom*                    sercom_instance = SERCOM5;
+    default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM4_Handler(void) {
-    if (SERCOM4->I2CM.INTFLAG.bit.SB) {
-        i2c_master_data_recv_irq(SERCOM4, &SercomBusTrans[4]);
-    } else if (SERCOM4->I2CM.INTFLAG.bit.MB) {
-        i2c_master_data_send_irq(SERCOM4, &SercomBusTrans[4]);
-    } else if (SERCOM4->I2CS.INTFLAG.bit.AMATCH || SERCOM4->I2CS.INTFLAG.bit.DRDY || SERCOM4->I2CS.INTFLAG.bit.PREC) {
-        i2c_slave_handler(SERCOM4, &SercomBusTrans[4]);
-    }
+    volatile bustransaction_t* bustransaction = &SercomBusTrans[4];
+    Sercom*                    sercom_instance = SERCOM4;
+    default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM3_Handler(void) {
-    if (SERCOM3->I2CM.INTFLAG.bit.SB) {
-        i2c_master_data_recv_irq(SERCOM3, &SercomBusTrans[3]);
-    } else if (SERCOM3->I2CM.INTFLAG.bit.MB) {
-        i2c_master_data_send_irq(SERCOM3, &SercomBusTrans[3]);
-    } else if (SERCOM3->I2CS.INTFLAG.bit.AMATCH || SERCOM3->I2CS.INTFLAG.bit.DRDY || SERCOM3->I2CS.INTFLAG.bit.PREC) {
-        i2c_slave_handler(SERCOM3, &SercomBusTrans[3]);
-    }
+    volatile bustransaction_t* bustransaction = &SercomBusTrans[3];
+    Sercom*                    sercom_instance = SERCOM3;
+    default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM2_Handler(void) {
-//    if (SERCOM2->I2CM.INTFLAG.bit.SB) {
-//        i2c_master_data_recv_irq(SERCOM2, &SercomBusTrans[2]);
-//    } else if (SERCOM2->I2CM.INTFLAG.bit.MB) {
-//        i2c_master_data_send_irq(SERCOM2, &SercomBusTrans[2]);
-//    } else if (SERCOM2->I2CS.INTFLAG.bit.AMATCH || SERCOM2->I2CS.INTFLAG.bit.DRDY || SERCOM2->I2CS.INTFLAG.bit.PREC) {
-//        i2c_slave_handler(SERCOM2, &SercomBusTrans[2]);
-//    } else
-    if (SERCOM2->SPI.INTFLAG.bit.TXC || SERCOM2->SPI.INTFLAG.bit.DRE || SERCOM2->SPI.INTFLAG.bit.RXC) {
-        spi_master_handler(SERCOM2, &SercomBusTrans[2]);
-    }
+    volatile bustransaction_t* bustransaction = &SercomBusTrans[2];
+    Sercom*                    sercom_instance = SERCOM2;
+    default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM1_Handler(void) {
-    if (SERCOM1->I2CM.INTFLAG.bit.SB) {
-        i2c_master_data_recv_irq(SERCOM1, &SercomBusTrans[1]);
-    } else if (SERCOM1->I2CM.INTFLAG.bit.MB) {
-        i2c_master_data_send_irq(SERCOM1, &SercomBusTrans[1]);
-    } else if (SERCOM1->I2CS.INTFLAG.bit.AMATCH || SERCOM1->I2CS.INTFLAG.bit.DRDY || SERCOM1->I2CS.INTFLAG.bit.PREC) {
-        i2c_slave_handler(SERCOM1, &SercomBusTrans[1]);
-    }
+    volatile bustransaction_t* bustransaction = &SercomBusTrans[1];
+    Sercom*                    sercom_instance = SERCOM1;
+    default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM0_Handler(void) {
-    if (SERCOM0->I2CM.INTFLAG.bit.SB) {
-        i2c_master_data_recv_irq(SERCOM0, &SercomBusTrans[0]);
-    } else if (SERCOM0->I2CM.INTFLAG.bit.MB) {
-        i2c_master_data_send_irq(SERCOM0, &SercomBusTrans[0]);
-    } else if (SERCOM0->I2CS.INTFLAG.bit.AMATCH || SERCOM0->I2CS.INTFLAG.bit.DRDY || SERCOM0->I2CS.INTFLAG.bit.PREC) {
-        i2c_slave_handler(SERCOM0, &SercomBusTrans[0]);
-    }
+    volatile bustransaction_t* bustransaction = &SercomBusTrans[0];
+    Sercom*                    sercom_instance = SERCOM0;
+    default_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void EIC_Handler(void) {

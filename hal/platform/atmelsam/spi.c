@@ -74,7 +74,7 @@ void spi_init(const spi_dev_t *spi_instance, unsigned long baud_rate) {
                                                       (SERCOM_SPI_CTRLA_DIPO(spi_peripheral_inst->dipo_pad)) |
                                                       (SERCOM_SPI_CTRLA_DOPO(spi_peripheral_inst->dopo_pad));
     spi_peripheral_inst->sercom_inst->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_PLOADEN | SERCOM_SPI_CTRLB_CHSIZE(spi_instance->character_size);
-    spi_peripheral_inst->sercom_inst->SPI.BAUD.reg = spi_peripheral_inst->fast_clk_gen_frequency / baud_rate;
+    spi_peripheral_inst->sercom_inst->SPI.BAUD.reg = spi_peripheral_inst->fast_clk_gen_frequency / baud_rate / 2;
     spi_peripheral_inst->sercom_inst->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_RXC | SERCOM_SPI_INTENSET_TXC |
                                                          SERCOM_SPI_INTENSET_SSL;
     spi_peripheral_inst->sercom_inst->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_ENABLE;
