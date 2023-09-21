@@ -31,7 +31,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "hal_gpio.h"
-#include "hal_i2c.h"
+#include "hal_i2c_host.h"
 
 #ifdef __cplusplus
 }

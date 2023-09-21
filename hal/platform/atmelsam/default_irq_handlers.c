@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include "bit_manipulation.h"
 #include "hal_gpio.h"
-#include "hal_i2c.h"
+#include "hal_i2c_host.h"
 #include "i2c_platform_specific.h"
 
 /**

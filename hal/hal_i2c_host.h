@@ -202,7 +202,7 @@ void i2c_master_data_recv_irq(const void* hw, volatile bustransaction_t* transac
 /**
  * @brief IRQ handler for I2C host data send interrupt.
  *        Gets run when a host write action is executed.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
+ *        By defining this function inside a -Obinarsource file outside the Universal HALL, the default IRQ handler will be overridden
  *        and the compiler will automatically link your own custom implementation.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
  * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
@@ -211,54 +211,6 @@ void i2c_master_data_recv_irq(const void* hw, volatile bustransaction_t* transac
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
 void i2c_master_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client address match interrupt.
- *        Gets run when a start condition with valid slave address is detected.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client stop interrupt.
- *        Gets run when a stop condition is detected.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client receive interrupt.
- *        Gets run when a byte is received from the host.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
-
-/**
- * @brief IRQ handler for I2C Client send interrupt.
- *        Gets run when a byte is requested from the host.
- *        By defining this function inside a source file outside the Universal HALL, the default IRQ handler will be overridden
- *        and the compiler will automatically link your own custom implementation.
- * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
- *
- *  @note I2C Slave functionality doesn't use the read/write functions below
- */
-void i2c_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }

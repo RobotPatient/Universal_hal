@@ -23,7 +23,7 @@
 */
 
 #include <stdbool.h>
-#include <hal_i2c.h>
+#include <hal_i2c_host.h>
 #include <stddef.h>
 #include <default_irq_handlers.h>
 
@@ -105,21 +105,7 @@ void wait_for_idle_busstate(Sercom *SercomInst){
     } while(timeout >= 1);
 }
 
-/**
- * @brief Helper function which waits for the SERCOM peripheral to get in sync and finish requested operations.
- *        By continually reading its I2CS syncbusy register.
- * @param hw Pointer to the SERCOM peripheral to be manipulated or read
- * @param bits_to_read The bits to read within the syncbusy register (bitmask)
- * @note Possible bits that can be read are: SERCOM_I2CS_SYNCBUSY_SWRST
- *                                           SERCOM_I2CS_SYNCBUSY_ENABLE
- *                                           SERCOM_I2CS_SYNCBUSY_SYSOP
- * @note This function can only be used for use with I2C client/slave configuration
- */
-static inline void i2c_slave_wait_for_sync(const void *const hw, const uint32_t bits_to_read)
-{
-	while (((Sercom *)hw)->I2CS.SYNCBUSY.reg & bits_to_read) {
-	};
-}
+
 
 /**
  * @brief Internal function used for disabling the SERCOM i2c Host driver
@@ -155,9 +141,7 @@ while (GCLK->STATUS.bit.SYNCBUSY)
 
 
 const bool SlaveConfiguration = (i2c_instance->operating_mode == I2C_OPERATING_MODE_SLAVE && i2c_instance->i2c_slave_addr != 0);
-if(SlaveConfiguration) {
-    i2c_set_slave_mode(i2c_instance, i2c_instance->i2c_slave_addr);
-} else {
+if(!SlaveConfiguration) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
     const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
     if(SercomEnabled) disable_host_i2c_driver(SercomInst);
@@ -213,29 +197,7 @@ void i2c_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud
     i2c_init(i2c_instance, baud_rate);
 }
 
-void i2c_set_slave_mode(const i2c_periph_inst_t* i2c_instance, const unsigned short addr) {
-Sercom* SercomInst = i2c_instance->sercom_inst;
-const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
-if(SercomEnabled) disable_host_i2c_driver(SercomInst);
-SercomInst->I2CS.CTRLA.reg = (SERCOM_I2CS_CTRLA_SWRST | SERCOM_I2CS_CTRLA_MODE(4));
-    i2c_slave_wait_for_sync(SercomInst, SERCOM_I2CS_SYNCBUSY_SWRST);
-SercomInst->I2CS.CTRLA.reg = (1 << SERCOM_I2CS_CTRLA_LOWTOUTEN_Pos      /* SCL Low Time-Out: disabled */
-	        | 0 << SERCOM_I2CS_CTRLA_SCLSM_Pos    /* SCL Clock Stretch Mode: disabled */
-	        | 0 << SERCOM_I2CS_CTRLA_SPEED_Pos    /* Transfer Speed: 0 */
-	        | 1 << SERCOM_I2CS_CTRLA_SEXTTOEN_Pos /* Slave SCL Low Extend Time-Out: disabled */
-	        | 0b10 << SERCOM_I2CS_CTRLA_SDAHOLD_Pos  /* SDA Hold Time: 0 */
-	        | 0 << SERCOM_I2CS_CTRLA_PINOUT_Pos   /* Pin Usage: disabled */
-	        | 0 << SERCOM_I2CS_CTRLA_RUNSTDBY_Pos /* Run In Standby: disabled */
-	        | 4 << SERCOM_I2CS_CTRLA_MODE_Pos);
-SercomInst->I2CS.CTRLB.reg |= SERCOM_I2CS_CTRLB_SMEN;
-    i2c_slave_wait_for_sync(SercomInst, SERCOM_I2CS_SYNCBUSY_MASK);
-SercomInst->I2CS.ADDR.reg = (0 << SERCOM_I2CS_ADDR_ADDRMASK_Pos       /* Address Mask: 0 */
-	                      | 0 << SERCOM_I2CS_ADDR_TENBITEN_Pos /* Ten Bit Addressing Enable: disabled */
-	                      | 0 << SERCOM_I2CS_ADDR_GENCEN_Pos   /* General Call Address Enable: disabled */
-                          | (addr) << SERCOM_I2CS_ADDR_ADDR_Pos);
-SercomInst->I2CS.CTRLA.reg |= SERCOM_I2CS_CTRLA_ENABLE;
-SercomInst->I2CS.INTENSET.reg = SERCOM_I2CS_INTENSET_AMATCH | SERCOM_I2CS_INTENSET_PREC | SERCOM_I2CS_INTENSET_DRDY;
-}
+
 
 void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
     Sercom* SercomInst = i2c_instance->sercom_inst;

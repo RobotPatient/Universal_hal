@@ -20,7 +20,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
+#include "hal_i2c_slave.h"
+#include "hal_i2c_host.h"
 #include "sercom_stuff.h"
 
 void SERCOM0_Handler(void) __attribute__((used));
