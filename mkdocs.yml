@@ -2,18 +2,28 @@ site_name: Universal_hal
 plugins:
   - mkdoxy:
       projects:
-        atmelsam/: # name of project must be alphanumeric + numbers (without spaces)
+        atmelsam_i2c_host/: # name of project must be alphanumeric + numbers (without spaces)
           src-dirs: "hal/ hal/platform/atmelsam/"
           full-doc: True
           doxy-cfg:
-            FILE_PATTERNS: "*.c *.h*"
+            FILE_PATTERNS: "i2c.c 
+            				i2c_host.h 
+            				i2c_platform_specific.h 
+            				peripheral_clocking.h 
+            				sercom_stuff.h 
+            				default_isr_handlers.h 
+            				default_irq_handlers.c"
             RECURSIVE: False
             EXTRACT_ALL: True
 markdown_extensions:
   - toc
   - tables
   - admonition
-  - pymdownx.superfences
+  - pymdownx.superfences:
+     custom_fences:
+         - name: mermaid
+           class: mermaid
+           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true 
   - pymdownx.details
@@ -56,16 +66,17 @@ features:
 nav:
   - Home: "index.md"
   - API:
-      - 'I2C':
-        - 'General API': "API/i2c_api.md"
+      - 'I2C Host':
+        - 'Compatibility': "API/i2c_compatibility.md"
+        - 'General API': "API/i2c_host_api.md"
         - 'API platform':
            - SAMD:
-             - "Struct List": "atmelsam/annotated.md"
-             - "Struct Member Variables": "atmelsam/class_member_variables.md"
-             - "Functions": "atmelsam/functions.md"
-             - "Variables": "atmelsam/variables.md"
-             - "Macros": "atmelsam/macros.md"
-             - "Files": "atmelsam/files.md"
+             - "Struct List": "atmelsam_i2c_host/annotated.md"
+             - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"
+             - "Functions": "atmelsam_i2c_host/functions.md"
+             - "Variables": "atmelsam_i2c_host/variables.md"
+             - "Macros": "atmelsam_i2c_host/macros.md"
+             - "Files": "atmelsam_i2c_host/files.md"
   - Contributing:
     - 'General': 'contributing.md'
     - 'Code style': 'code_style.md'
