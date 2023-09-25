@@ -71,12 +71,16 @@ nav:
         - 'General API': "API/i2c_host_api.md"
         - 'API platform':
            - SAMD:
-             - "Struct List": "atmelsam_i2c_host/annotated.md"
-             - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"
-             - "Functions": "atmelsam_i2c_host/functions.md"
-             - "Variables": "atmelsam_i2c_host/variables.md"
-             - "Macros": "atmelsam_i2c_host/macros.md"
-             - "Files": "atmelsam_i2c_host/files.md"
+             - "About": API/platform/about.md
+             - "Usage": API/platform/Usage.md
+             - "Critical Notes": API/platform/Critical_notes.md
+             - Doxygen:
+               - "Struct List": "atmelsam_i2c_host/annotated.md"
+               - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"
+               - "Functions": "atmelsam_i2c_host/functions.md"
+               - "Variables": "atmelsam_i2c_host/variables.md"
+               - "Macros": "atmelsam_i2c_host/macros.md"
+               - "Files": "atmelsam_i2c_host/files.md"
   - Contributing:
     - 'General': 'contributing.md'
     - 'Code style': 'code_style.md'
