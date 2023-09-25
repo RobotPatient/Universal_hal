@@ -18,6 +18,7 @@ The Inter-Integrated Circuit (I2C) protocol is a popular communication protocol 
 1. **Master and Slave Devices:**
    
    - **Master Device:** Initiates and controls the data transfer.
+   
    - **Slave Device:** Responds to the master device.
 
 2. **Two-Wire Communication:**
@@ -35,6 +36,4 @@ The Inter-Integrated Circuit (I2C) protocol is a popular communication protocol 
 
 4. The slave sends an acknowledgment bit for each byte received.
 
-5. The master ends the communication.
-   
-    
+5. The master ends the communication. 
