@@ -14,6 +14,17 @@ To be able to use the peripheral correctly, some pins, clocks and a struct have 
 !!! note
 	You can click on the checkmarks above to check them off your list ;)
 
+### Clocks
+Clockgenerators are not set by this implementation. It only hooks the peripheral up to existing clockgenerators. These generators have to be set-up by your own integrating code or software framework. 
+
+Some frameworks like Arduino and ASF using the Atmel Start tool will configure most of the stuff under the hood. It is almost pure coincidence that both frameworks use the same default clockgenerators for the main clock and peripheral clocking.
+
+Both frameworks have clockgenerator 0 set-up with a frequency of 48 (Arduino) or 8 MHz (ASF). And clockgenerator 3 set-up with a frequency of 32.768KHz. 
+
+!!! Warning
+	The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation.	
+
+
 ### GPIO pinmux settings
 
 Besides setting the i2c_inst_t struct the pins have to be linked to the hardware peripheral using the SAMD's built-in pinmux. This can be done with the gpio_set_pin_mode function:
@@ -61,58 +72,58 @@ typedef struct {
 ```
 
 
-Within this struct you will find these settings:
-
-??? info  "sercom_inst_num -> the sercom number to couple the module to" 
-  
-		Example: 
-  
-		| Sercom     | sercom_inst_num value |
-		| ---------- | --------------------- |
-		| Sercom 0   | SERCOM_NUM_0          |
-		| Sercom 1   | SERCOM_NUM_1          |
-		| Sercom ... | SERCOM_NUM_...        |
-
-??? info "sercom_inst -> pointer to the sercom instance."
-		
-		Example:
-  
-		| Sercom     | sercom_inst value |
-		| ---------- | ----------------- |
-		| Sercom 0   | SERCOM0           |
-		| Sercom 1   | SERCOM1           |
-		| Sercom ... | SERCOM...         |
-
-		The pointer type uses the type and macro's used in the SAM CMSIS headers (typically included with ASF, Harmony and Arduino).
+Within this struct you will find these settings:	
+??? info  "sercom_inst_num"
+	The sercom number to couple the module to 
 	
-??? info "clk_gen_slow -> The clock generator to use for the slow clock of the Sercom."
-	!!! note
-		The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation.
+	Example: 
+    
+    | Sercom     | sercom_inst_num value |
+	| ---------- | --------------------- |
+	| Sercom 0   | SERCOM_NUM_0          |
+	| Sercom ... | SERCOM_NUM_...        |
+
+??? info "sercom_inst"
+	Pointer to the sercom instance.
 	
-		| Clock generator     | clk_gen_slow or clk_gen_fast |
-		| ------------------- | ---------------------------- |
-		| Clock generator 0   | CLKGEN_0                     |
-		| Clock generator 1   | CLKGEN_1                     |
-		| Clock generator ... | CLKGEN_...                   |
+	Example:
+  
+  	| Sercom     | sercom_inst value |
+	| ---------- | ----------------- |
+	| Sercom 0   | SERCOM0           |
+	| Sercom 1   | SERCOM1           |
+	| Sercom ... | SERCOM...         |
+
+	The pointer type uses the type and macro's used in the SAM CMSIS headers (typically included with ASF, Harmony and Arduino).
+??? info "clk_gen_slow"
+	The clock generator to use for the slow clock of the Sercom.
+
+	
+	| Clock generator     | clk_gen_slow or clk_gen_fast |
+	| ------------------- | ---------------------------- |
+	| Clock generator 0   | CLKGEN_0                     |
+	| Clock generator 1   | CLKGEN_1                     |
+	| Clock generator ... | CLKGEN_...                   |
 		
-		Default value: 3 -> Arduino typically has set-up a 32 KHz clock on this pin. 
+	Default value: 3 -> Arduino typically has set-up a 32 KHz clock on this pin. 
 		
-		Other values may apply, it depends on how the clock system is laid out.
+	Other values may apply, it depends on how the clock system is laid out.
 
 ??? info "clk_gen_fast -> The clock generator to use for the fast clock of the Sercom."
- 	 See the story above....
+ 	 See the details of clk_gen_slow...
 
-     	Default value: 0 -> Arduino has 48/120MHz main clock on this pin.
+     Default value: 0 -> Arduino has 48/120MHz main clock on this pin.
 
-??? info "fast_clk_gen_frequency -> The output frequency of the selected clockgenerator on clk_gen_fast."
+??? info "fast_clk_gen_frequency"
+	The output frequency of the selected clockgenerator on clk_gen_fast.
   	A typical value would be: 
   	
-  		| Clock generator   | Platform | Framework | Frequency                             |
-  		| ----------------- | -------- | --------- | ------------------------------------- |
-  		| Clock generator 0 | SAMD51   | Arduino   | 120 MHz                               |
-  		| Clock generator 0 | SAMD51   | ASF       | 8 MHz (default option in Atmel start) |
-  		| Clock generator 0 | SAMD21   | Arduino   | 48 MHz                                |
-  		| Clock generator 0 | SAMD21   | ASF       | 8 MHz (default option in Atmel start) |
+  	| Clock generator   | Platform | Framework | Frequency                             |
+  	| ----------------- | -------- | --------- | ------------------------------------- |
+  	| Clock generator 0 | SAMD51   | Arduino   | 120 MHz                               |
+  	| Clock generator 0 | SAMD51   | ASF       | 8 MHz (default option in Atmel start) |
+  	| Clock generator 0 | SAMD21   | Arduino   | 48 MHz                                |
+  	| Clock generator 0 | SAMD21   | ASF       | 8 MHz (default option in Atmel start) |
 
 !!! info "operating_mode -> Specifies whether the i2c host or slave driver is used."
 	Use the value: `I2C_OPERATING_MODE_MASTER`
