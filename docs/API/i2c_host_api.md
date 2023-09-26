@@ -27,12 +27,12 @@ The i2c_init function is employed to initialize the I2C peripheral within a micr
 #### Parameters:
 
 1. i2c_instance (const i2c_periph_inst_t*):
-   
-   - A pointer to an instance of the I2C peripheral structure, which contains the information related to the I2C peripheral's configuration and state.
-
+	
+	 A pointer to an instance of the I2C peripheral structure, which contains the information related to the I2C peripheral's configuration and state.
+	 
 2. baud_rate (unsigned long):
-   
-   - The desired baud rate for I2C communication, representing the frequency of the SCL line. Common values are 100 KHz or 400 KHz, but the function allows for other baud rates, including up to 1 MHz, depending on the hardware peripheral capabilities and the connected slave device requirements.
+	
+	 The desired baud rate for I2C communication, representing the frequency of the SCL line. Common values are 100 KHz or 400 KHz, but the function allows for other baud rates, including up to 1 MHz, depending on the hardware peripheral capabilities and the connected slave device requirements.
 
 #### Return Type:
 
@@ -86,12 +86,12 @@ The i2c_set_baud_rate function is used to reconfigure the baud rate of an alread
 #### Parameters:
 
 1. i2c_instance (const i2c_periph_inst_t*):
-   
-   - A pointer to an instance of the I2C peripheral structure, holding the configuration and state information for the I2C peripheral.
+
+	A pointer to an instance of the I2C peripheral structure, holding the configuration and state information for the I2C peripheral.
 
 2. baud_rate (unsigned long):
    
-   - The desired new baud rate for I2C communication. It represents the frequency of the SCL line. This value is typically 100 KHz or 400 KHz, but other values can be selected based on the hardware's capability and the slave devices' requirements.
+	The desired new baud rate for I2C communication. It represents the frequency of the SCL line. This value is typically 100 KHz or 400 KHz, but other values can be selected based on the hardware's capability and the slave devices' requirements.
 
 #### Return:
 
@@ -118,23 +118,23 @@ The i2c_write_blocking function is used to execute a blocking write operation on
 
 1. i2c_instance (const i2c_periph_inst_t*):
    
-   - A pointer to an instance of the I2C peripheral structure. This parameter contains the information related to the I2C peripheral's configuration and state.
+	A pointer to an instance of the I2C peripheral structure. This parameter contains the information related to the I2C peripheral's configuration and state.
 
 2. addr (unsigned char):
    
-   - The I2C address of the slave device to which the data will be sent.
+	The I2C address of the slave device to which the data will be sent.
 
 3. write_buff (const unsigned char*):
    
-   - A pointer to the buffer containing the data to be written to the slave device.
+	A pointer to the buffer containing the data to be written to the slave device.
 
 4. size (size_t):
    
-   - The number of bytes to write from the write_buff to the slave device.
+	The number of bytes to write from the write_buff to the slave device.
 
 5. stop_bit (i2c_stop_bit_t):
    
-   - An enumeration type to specify whether a STOP bit should be sent after the write operation is complete.
+	An enumeration type to specify whether a STOP bit should be sent after the write operation is complete.
 
 #### Return Type:
 
@@ -163,23 +163,23 @@ The i2c_write_non_blocking function executes a non-blocking write operation on a
 
 1. i2c_instance (const i2c_periph_inst_t*):
    
-   - A pointer to an instance of the I2C peripheral structure, which houses the configuration and state information for the I2C peripheral.
+	A pointer to an instance of the I2C peripheral structure, which houses the configuration and state information for the I2C peripheral.
 
 2. addr (unsigned short):
    
-   - The I2C address of the slave device to which the data will be sent.
+	The I2C address of the slave device to which the data will be sent.
 
 3. write_buff (const unsigned char*):
    
-   - A pointer to the buffer containing the data to be written to the slave device.
+	A pointer to the buffer containing the data to be written to the slave device.
 
 4. size (size_t):
    
-   - The number of bytes to be written from write_buff to the slave device.
+	The number of bytes to be written from write_buff to the slave device.
 
 5. stop_bit (i2c_stop_bit_t):
    
-   - An enumeration indicating whether a STOP bit should be sent after the write operation.
+	An enumeration indicating whether a STOP bit should be sent after the write operation.
 
 #### Return:
 
@@ -208,19 +208,19 @@ The i2c_read_blocking function performs a blocking read operation on an I2C bus.
 
 1. i2c_instance (const i2c_periph_inst_t*):
    
-   - A pointer to an instance of the I2C peripheral structure. This parameter holds information about the I2C peripheral's configuration and state.
+	 A pointer to an instance of the I2C peripheral structure. This parameter holds information about the I2C peripheral's configuration and state.
 
 2. addr (unsigned short):
    
-   - The I2C address of the slave device from which the data will be read.
+	 The I2C address of the slave device from which the data will be read.
 
 3. read_buff (unsigned char*):
    
-   - A pointer to the buffer where the read data will be stored.
+	 A pointer to the buffer where the read data will be stored.
 
 4. amount_of_bytes (size_t):
    
-   - The number of bytes to be read from the slave device and stored into read_buff.
+	The number of bytes to be read from the slave device and stored into read_buff.
 
 #### Return:
 
@@ -248,19 +248,19 @@ The i2c_read_non_blocking function performs a non-blocking read operation on an 
 
 1. i2c_instance (const i2c_periph_inst_t*):
    
-   - A pointer to an instance of the I2C peripheral structure. This parameter holds information about the I2C peripheral's configuration and state.
+	A pointer to an instance of the I2C peripheral structure. This parameter holds information about the I2C peripheral's configuration and state.
 
 2. addr (unsigned short):
    
-   - The I2C address of the slave device from which the data will be read.
+	The I2C address of the slave device from which the data will be read.
 
 3. read_buff (unsigned char*):
    
-   - A pointer to the buffer where the read data will be stored.
+	A pointer to the buffer where the read data will be stored.
 
 4. amount_of_bytes (size_t):
    
-   - The number of bytes to be read from the slave device and stored into read_buff.
+	The number of bytes to be read from the slave device and stored into read_buff.
 
 #### Return:
 
@@ -270,6 +270,8 @@ void:
 
 #### Working:
 
-    The function initiates the read operation by addressing the slave device with address addr on the I2C bus specified by i2c_instance.
-    It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
-    Unlike the blocking read function, i2c_read_non_blocking will not halt the program execution until the read operation is complete.
+1. The function initiates the read operation by addressing the slave device with address addr on the I2C bus specified by i2c_instance.
+
+2. It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
+
+3. Unlike the blocking read function, i2c_read_non_blocking will not halt the program execution until the read operation is complete.

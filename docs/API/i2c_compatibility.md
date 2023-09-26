@@ -22,7 +22,6 @@ The Inter-Integrated Circuit (I2C) protocol is a popular communication protocol 
    - **Slave Device:** Responds to the master device.
 
 2. **Two-Wire Communication:**
-
 - **SDA (Serial Data Line):** Carries data.
 
 - **SCL (Serial Clock Line):** Synchronizes data transfer.
@@ -38,4 +37,3 @@ The Inter-Integrated Circuit (I2C) protocol is a popular communication protocol 
 4. The slave sends an acknowledgment bit for each byte received.
 
 5. The master ends the communication. 
-   
