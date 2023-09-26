@@ -59,7 +59,8 @@ The i2c_deinit function is used to de-initialize or reset the I2C peripheral to 
 #### Parameters:
 
 1. i2c_instance (const i2c_periph_inst_t*):
-   - A pointer to an instance of the I2C peripheral structure. This parameter holds information regarding the I2C peripheral's configuration and state.
+	
+	A pointer to an instance of the I2C peripheral structure. This parameter holds information regarding the I2C peripheral's configuration and state.
 
 #### Return Type:
 
