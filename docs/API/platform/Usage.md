@@ -67,6 +67,7 @@ typedef struct {
     clk_gen_num_t clk_gen_slow;
     clk_gen_num_t clk_gen_fast;
     uint32_t fast_clk_gen_frequency;
+    uint8_t irq_priority;
     i2c_operating_mode_t operating_mode;
     unsigned short i2c_slave_addr;
 } i2c_periph_inst_t;
@@ -128,6 +129,19 @@ Within this struct you will find these settings:
       | Clock generator 0 | SAMD21   | Arduino   | 48000000 (48 MHz)                     |
       | Clock generator 0 | SAMD21   | ASF       | 8000000 (8 MHz)			 |
 
+!!! info "irq_priority"
+    Specifies the priority of the SERCOM interrupts. 
+    
+    This i2c host driver is interrupts driven. 
+    
+    A low irq priority is very important.
+    
+    Possible values range from 0 (highest priority) to 4 (lowest priority) on the SAMD21
+    
+    Or from 0 (highest priority) to 255 (lowest priority) on the SAMD51.
+    
+    Default value = 2
+    
 !!! info "operating_mode"
     Specifies whether the i2c host or slave driver is used.
     
@@ -162,6 +176,7 @@ Within this struct you will find these settings:
      .clk_gen_slow = CLKGEN_3,
      .clk_gen_fast = CLKGEN_0,
      .fast_clk_gen_frequency = F_CPU,
+     .irq_priority = 2,
      .operating_mode = I2C_OPERATING_MODE_MASTER
     };
     
