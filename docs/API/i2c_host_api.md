@@ -7,11 +7,11 @@ The API for I2C host functionality has the following functions available:
 ```c
 void i2c_init(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
 void i2c_deinit(const i2c_periph_inst_t* i2c_instance);
-void i2c_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
-void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
-void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
-void i2c_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
-void i2c_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
+void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
+void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
+void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 ```
 
 ### i2c_init function
@@ -76,12 +76,12 @@ This process is crucial for power management and ensuring the secure termination
 ### i2c_set_baudrate function
 
 ```c
-void i2c_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
+void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
 ```
 
 #### Description:
 
-The i2c_set_baud_rate function is used to reconfigure the baud rate of an already initialized I2C peripheral for communication. Adjusting the baud rate is essential for ensuring reliable communication with devices on the I2C bus, especially when changing the communication requirements or working with various devices with different baud rate specifications.
+The i2c_host_set_baud_rate function is used to reconfigure the baud rate of an already initialized I2C peripheral for communication. Adjusting the baud rate is essential for ensuring reliable communication with devices on the I2C bus, especially when changing the communication requirements or working with various devices with different baud rate specifications.
 
 #### Parameters:
 
@@ -101,18 +101,18 @@ void:
 
 #### Working:
 
-    The i2c_set_baud_rate function takes a pointer to an already initialized I2C peripheral instance and a desired new baud rate as inputs.
+    The i2c_host_set_baud_rate function takes a pointer to an already initialized I2C peripheral instance and a desired new baud rate as inputs.
     It reconfigures the I2C peripheral pointed to by i2c_instance to operate at the specified baud_rate, allowing for adaptation to new communication speeds as required.
 
-### i2c_write_blocking function
+### i2c_host_write_blocking function
 
 ```c
-void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
+void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
 ```
 
 #### Description:
 
-The i2c_write_blocking function is used to execute a blocking write operation on an I2C bus. It sends a sequence of bytes to a specific I2C address. The function will block the execution until the write operation is complete.
+The i2c_host_write_blocking function is used to execute a blocking write operation on an I2C bus. It sends a sequence of bytes to a specific I2C address. The function will block the execution until the write operation is complete.
 
 #### Parameters:
 
@@ -149,15 +149,15 @@ void:
 3. The function will wait (block) until the complete data is written.
 4. If stop_bit is set, it will send a STOP bit after completing the write operation to release the I2C bus.
 
-### i2c_write_non_blocking function
+### i2c_host_write_non_blocking function
 
 ```c
-void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
+void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
 ```
 
 #### Description:
 
-The i2c_write_non_blocking function executes a non-blocking write operation on an I2C bus. It sends a sequence of bytes to a specific I2C address and allows the program to continue executing while the write operation is underway.
+The i2c_host_write_non_blocking function executes a non-blocking write operation on an I2C bus. It sends a sequence of bytes to a specific I2C address and allows the program to continue executing while the write operation is underway.
 
 #### Parameters:
 
@@ -191,18 +191,18 @@ void:
 
 1. The function starts the write operation by sending the data from write_buff to the slave device with address addr on the I2C bus specified by i2c_instance.
 2. It will write size number of bytes from write_buff to the slave device.
-   **Unlike the blocking write function, i2c_write_non_blocking will not halt the program execution until the write operation is complete.**
+   **Unlike the blocking write function, i2c_host_write_non_blocking will not halt the program execution until the write operation is complete.**
 3. If stop_bit is set, a STOP bit will be sent after the write operation to release the I2C bus.
 
-### i2c_read_blocking function
+### i2c_host_read_blocking function
 
 ```c
-void i2c_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 ```
 
 #### Description:
 
-The i2c_read_blocking function performs a blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, halting the execution until the entire read operation is completed.
+The i2c_host_read_blocking function performs a blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, halting the execution until the entire read operation is completed.
 
 #### Parameters:
 
@@ -232,17 +232,17 @@ void:
 
 1. The function begins the read operation by addressing the slave device with address addr on the I2C bus specified by i2c_instance.
 2. It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
-3. The i2c_read_blocking function will block or halt the program execution until the entire read operation is finished.
+3. The i2c_host_read_blocking function will block or halt the program execution until the entire read operation is finished.
 
-### i2c_read_non_blocking function
+### i2c_host_read_non_blocking function
 
 ```c
-void i2c_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 ```
 
 #### Description:
 
-The i2c_read_non_blocking function performs a non-blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, allowing the program to continue executing while the read operation is underway.
+The i2c_host_read_non_blocking function performs a non-blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, allowing the program to continue executing while the read operation is underway.
 
 #### Parameters:
 
@@ -272,4 +272,4 @@ void:
 
     The function initiates the read operation by addressing the slave device with address addr on the I2C bus specified by i2c_instance.
     It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
-    Unlike the blocking read function, i2c_read_non_blocking will not halt the program execution until the read operation is complete.
+    Unlike the blocking read function, i2c_host_read_non_blocking will not halt the program execution until the read operation is complete.
