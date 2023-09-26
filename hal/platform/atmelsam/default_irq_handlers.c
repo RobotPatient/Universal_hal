@@ -52,7 +52,7 @@ volatile bustransaction_t sercom_bustrans_buffer[6] = {{SERCOMACT_NONE, 0, NULL,
  * @param hw Pointer to the HW peripheral to be manipulated
  * @param transaction The current transaction information
  */
-void i2c_master_data_send_irq(const void* const hw, volatile bustransaction_t* transaction) {
+void i2c_host_data_send_irq(const void* hw, volatile bustransaction_t* transaction) {
     Sercom*    sercom_instance = ((Sercom*)hw);
     const bool write_buffer_exists = (transaction->write_buffer != NULL);
     const bool has_bytes_left_to_write = (transaction->buf_cnt < transaction->buf_size);
@@ -143,7 +143,7 @@ void i2c_slave_address_match_irq(const void* const hw, volatile bustransaction_t
     transaction->transaction_type = SERCOMACT_IDLE_I2CS;
 }
 
-void i2c_master_data_recv_irq(const void* const hw, volatile bustransaction_t* transaction) {
+void i2c_host_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) {
     Sercom* sercom_instance = ((Sercom*)hw);
     if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size) {
         transaction->read_buffer[transaction->buf_cnt++] = sercom_instance->I2CM.DATA.reg;
@@ -193,11 +193,11 @@ static inline void default_isr_handler(const void* const hw, volatile bustransac
         }
         case SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP:
         case SERCOMACT_I2C_DATA_TRANSMIT_STOP: {
-            i2c_master_data_send_irq(sercom_instance, transaction);
+            i2c_host_data_send_irq(sercom_instance, transaction);
             break;
         }
         case SERCOMACT_I2C_DATA_RECEIVE_STOP: {
-            i2c_master_data_recv_irq(sercom_instance, transaction);
+            i2c_host_data_recv_irq(sercom_instance, transaction);
             break;
         }
         case SERCOMACT_SPI_DATA_RECEIVE: {

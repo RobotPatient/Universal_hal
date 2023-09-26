@@ -118,7 +118,7 @@ static inline void disable_host_i2c_driver(const void *const hw) {
 }
 
 
-void i2c_init(const i2c_periph_inst_t* i2c_instance, const unsigned long baud_rate) {
+void i2c_host_init(const i2c_periph_inst_t* i2c_instance, const unsigned long baud_rate) {
     const bool InvalidSercomInstNum = (i2c_instance->sercom_inst_num < 0 || i2c_instance->sercom_inst_num > 5);
     const bool InvalidSercomInst = (i2c_instance->sercom_inst == NULL);
     const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
@@ -185,21 +185,21 @@ if(!SlaveConfiguration) {
 	NVIC_SetPriority(irq_type, 2);
 }
 
-void i2c_deinit(const i2c_periph_inst_t* i2c_instance) {
+void i2c_host_deinit(const i2c_periph_inst_t* i2c_instance) {
     disable_host_i2c_driver(i2c_instance->sercom_inst);
 }
 
-void i2c_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate) {
+void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
     i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
     disable_host_i2c_driver(SercomInst);
-    i2c_init(i2c_instance, baud_rate);
+    i2c_host_init(i2c_instance, baud_rate);
 }
 
 
 
-void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
+void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
     const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
@@ -214,21 +214,21 @@ void i2c_write_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigne
     i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
 
-void i2c_write_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
+void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
-	i2c_write_non_blocking(i2c_instance, addr, write_buff, size, stop_bit);
+    i2c_host_write_non_blocking(i2c_instance, addr, write_buff, size, stop_bit);
     wait_for_idle_busstate(SercomInst);
 }
 
 
 
-void i2c_read_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
-    i2c_read_non_blocking(i2c_instance, addr, read_buff, amount_of_bytes);
+void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
+    i2c_host_read_non_blocking(i2c_instance, addr, read_buff, amount_of_bytes);
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
 }
 
-void i2c_read_non_blocking(const i2c_periph_inst_t* i2c_instance, const unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
+void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
     Sercom* SercomInst = i2c_instance->sercom_inst;
     wait_for_idle_busstate(SercomInst);
     const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
