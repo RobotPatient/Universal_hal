@@ -15,30 +15,57 @@ The atmel SAMD series has full support for I2C Host and I2C slave functionality.
 
 #### Internal implementation details
 
+
+#### SERCOMX_Handler ISR
 ```mermaid
 flowchart TD
-    START(Start ISR) --> TRANSACTIONTYPEW{Transaction is I2C host write transaction?}
-   
-    TRANSACTIONTYPEW--> |No| TRANSACTIONTYPER{Transaction is I2C host read transaction?}
-    TRANSACTIONTYPEW--> |Yes| BYTETOWRITE{Is there a byte left to write?}
+    subgraph SERCOMX_Handler
+    EXIT[Exit ISR]
+    START(Start ISR)
+    TRANSACTION_TYPE_I2C_HOST_R{Transaction is I2C host read transaction?}
+    TRANSACTION_TYPE_I2C_HOST_W{Transaction is I2C host write transaction?}
+    
+    START --> TRANSACTION_TYPE_I2C_HOST_W{Transaction is I2C host write transaction?}
+
+    TRANSACTIONTYPEW--> |No| TRANSACTIONTYPER
+    TRANSACTIONTYPEW--> |Yes| i2c_host_x_data_send_irq(Run the i2c_host_x_data_send_irq routine)
+    TRANSACTIONTYPER --> |No| EXIT
+    TRANSACTIONTYPER --> |Yes| i2c_host_x_data_recv_irq(Run the i2c_host_x_data_recv_irq_routine)
+    i2c_host_x_data_send_irq --> EXIT
+    i2c_host_x_data_recv_irq --> EXIT
+    end
+```
+#### i2c_host_x_data_send_irq standard implementation
+```mermaid
+flowchart TD
+    subgraph i2c_master_x_data_send_irq
+    START[Start Routine] --> BYTETOWRITE
+    EXIT[Exit Routine]
+    BYTETOWRITE{Is there a byte left to write?}
     BYTETOWRITE --> |Yes| WRITEBYTE(Write byte from transaction buffer to the bus)
     WRITEBYTE --> LASTBYTEW{Was this the last byte?}
-    LASTBYTEW --> |Yes| GENERATEI2CSTOP
-    LASTBYTEW --> |No| RESET_INTFLAG(Reset interrupt flags)
-    BYTETOWRITE --> |No| GENERATEI2CSTOP(Generate stop condition)
-    TRANSACTIONTYPER--> |No| RESET_INTFLAG
-    TRANSACTIONTYPER --> |Yes| BYTETOREAD{Is there a byte left to read?}
+    LASTBYTEW --> |Yes| GENERATEI2CSTOPW
+    LASTBYTEW --> |No| RESET_INTFLAGW(Request next i2c host write interrupt)
+    BYTETOWRITE --> |No| GENERATEI2CSTOPW(Generate stop condition)
+    RESET_INTFLAGW --> EXIT
+    GENERATEI2CSTOPW --> EXIT
+    end
+```
+#### i2c_host_x_data_send_irq standard implementation
+ 
+```mermaid
+ flowchart TD
+    subgraph  i2c_master_x_data_recv_irq
+    START[Start Routine] --> BYTETOREAD
+    EXIT[Exit Routine]
+    BYTETOREAD{Is there a byte left to read?}
     BYTETOREAD --> |Yes| READBYTE(Read byte from bus and write it to the transaction buffer)
-
     READBYTE --> LASTBYTER{Was this the last byte?}
     LASTBYTER --> |No| GENERATEACK(Generate ACK action on bus and request more bytes)
-    GENERATEACK --> RESET_INTFLAG
+    GENERATEACK --> EXIT
     LASTBYTER --> |Yes| GENERATENAK
-    GENERATENAK --> GENERATEI2CSTOP
+    GENERATENAK --> GENERATEI2CSTOP(Generate stop condition on bus)
+    GENERATEI2CSTOP--> EXIT
     BYTETOREAD --> |No| GENERATENAK(Generate NAK action on bus)    
-    GENERATEI2CSTOP --> RESET_INTFLAG
-    OTHERISR --> RESET_INTFLAG
-    RESET_INTFLAG --> OTHERISR(Run other communication interface ISR)  
-    OTHERISR --> EXIT[Exit ISR]
-
+    end
 ```
