@@ -182,7 +182,7 @@ if(!SlaveConfiguration) {
 }	
 	const enum IRQn irq_type = (SERCOM0_IRQn + i2c_instance->sercom_inst_num);
 	NVIC_EnableIRQ(irq_type);
-	NVIC_SetPriority(irq_type, 2);
+	NVIC_SetPriority(irq_type, i2c_instance->irq_priority);
 }
 
 void i2c_host_deinit(const i2c_periph_inst_t* i2c_instance) {

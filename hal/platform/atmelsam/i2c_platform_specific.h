@@ -45,6 +45,7 @@ typedef struct {
     clk_gen_num_t clk_gen_slow;
     clk_gen_num_t clk_gen_fast;
     uint32_t fast_clk_gen_frequency;
+    uint8_t irq_priority;
     i2c_operating_mode_t operating_mode;
     unsigned short i2c_slave_addr;
 } i2c_periph_inst_t;

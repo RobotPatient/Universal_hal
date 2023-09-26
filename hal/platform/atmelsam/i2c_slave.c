@@ -94,7 +94,7 @@ void i2c_slave_init(i2c_periph_inst_t *i2c_instance){
     SercomInst->I2CS.INTENSET.reg = SERCOM_I2CS_INTENSET_AMATCH | SERCOM_I2CS_INTENSET_PREC | SERCOM_I2CS_INTENSET_DRDY;
     const enum IRQn irq_type = (SERCOM0_IRQn + i2c_instance->sercom_inst_num);
     NVIC_EnableIRQ(irq_type);
-    NVIC_SetPriority(irq_type, 2);
+    NVIC_SetPriority(irq_type, i2c_instance->irq_priority);
 }
 
 void i2c_slave_deinit(i2c_periph_inst_t *i2c_instance){
