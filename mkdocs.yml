@@ -2,7 +2,7 @@ site_name: Universal_hal
 plugins:
   - mkdoxy:
       projects:
-        atmelsam_i2c_host/: # name of project must be alphanumeric + numbers (without spaces)
+        atmelsam_i2c_host/:
           src-dirs: "hal/ hal/platform/atmelsam/"
           full-doc: True
           doxy-cfg:
@@ -16,6 +16,9 @@ plugins:
             RECURSIVE: False
             EXTRACT_ALL: True
 markdown_extensions:
+  - pymdownx.tasklist:
+      custom_checkbox: true
+      clickable_checkbox: true
   - toc
   - tables
   - admonition
@@ -27,6 +30,12 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true 
   - pymdownx.details
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.tabbed:
+      alternate_style: true 
+  - def_list
+  - tables
   - pymdownx.blocks.admonition:
       types:
       - new
@@ -63,6 +72,10 @@ theme:
         name: Switch to light mode
 features:
   - content.tabs.link
+extra_javascript:
+  - javascript/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 nav:
   - Home: "index.md"
   - API:
@@ -71,12 +84,16 @@ nav:
         - 'General API': "API/i2c_host_api.md"
         - 'API platform':
            - SAMD:
-             - "Struct List": "atmelsam_i2c_host/annotated.md"
-             - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"
-             - "Functions": "atmelsam_i2c_host/functions.md"
-             - "Variables": "atmelsam_i2c_host/variables.md"
-             - "Macros": "atmelsam_i2c_host/macros.md"
-             - "Files": "atmelsam_i2c_host/files.md"
+             - "About": API/platform/about.md
+             - "Usage": API/platform/Usage.md
+             - "Critical Notes": API/platform/Critical_notes.md
+             - Doxygen:
+               - "Struct List": "atmelsam_i2c_host/annotated.md"
+               - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"
+               - "Functions": "atmelsam_i2c_host/functions.md"
+               - "Variables": "atmelsam_i2c_host/variables.md"
+               - "Macros": "atmelsam_i2c_host/macros.md"
+               - "Files": "atmelsam_i2c_host/files.md"
   - Contributing:
     - 'General': 'contributing.md'
     - 'Code style': 'code_style.md'

@@ -4,6 +4,4 @@
 
 ## I2C Master functionality
 
-
-
 ## I2C Slave functionality
