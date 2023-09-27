@@ -101,6 +101,13 @@ extern "C" {
 #include "error_handling.h"
 #include "i2c_platform_specific.h"
 
+typedef struct {
+    i2c_clock_sources_t clock_sources;
+    const uint32_t periph_clk_freq;
+    const uint32_t baud_rate_freq;
+    const i2c_extra_opt_t extra_configuration_options;
+} i2c_host_conf_opt_t;
+
 typedef enum {
     I2C_NO_STOP_BIT,
     I2C_STOP_BIT
@@ -120,48 +127,13 @@ typedef enum {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, uint32_t periph_clk_freq,
-                             const unsigned long baud_rate, const i2c_extra_opt_t extra_configuration_options);
-
-/**
- * @brief Macro for i2c_host_init that does static assert checking on the parameters, so that errors can be resolved at compile time.
- *
- * I2C options to be used when configuring the HW peripheral.
- *                      It might include options like: Slave mode enabled
- *                                                     Peripheral clock options
- *                                                     HW peripheral instance number
- *                                                     HW peripheral handle
- *
- * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
- */
-#define i2c_host_init(i2c_instance, clock_sources, peripheral_clk_freq, baud_rate, extra_configuration_options )                                     \
-    do {                                                                                                                                             \
-                                                                 \
-        _i2c_host_init(i2c_instance, clock_sources, peripheral_clk_freq, baud_rate, extra_configuration_options);                                    \
-    } while (0);
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, i2c_host_conf_opt_t configuration_options);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_instance);
-
-/**
- * @brief Macro that does static assert checking on the parameters, so that errors can be resolved at compile time.
- *
- * I2C options to be used when configuring the HW peripheral.
- *                      It might include options like: Slave mode enabled
- *                                                     Peripheral clock options
- *                                                     HW peripheral instance number
- *                                                     HW peripheral handle
- *
- * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
- */
-#define i2c_host_deinit(i2c_instance, baud_rate)                                                                                                     \
-    do {                                                                                                                                             \
-        _Static_assert(i2c_instance != NULL, "The given i2c instance equals NULL");                                                                  \
-        _i2c_host_deinit(i2c_instance, baud_rate);                                                                                                   \
-    } while (0);
+uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_instance);
 
 /**
  * @brief Function to enable slave mode after the peripheral has already been initialized in host-mode

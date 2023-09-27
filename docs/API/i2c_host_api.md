@@ -5,8 +5,8 @@
 The API for I2C host functionality has the following functions available:
 
 ```c
-void _i2c_host_init(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
-void _i2c_host_deinit(const i2c_periph_inst_t* i2c_instance);
+void i2c_host_init(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
+void i2c_host_deinit(const i2c_periph_inst_t* i2c_instance);
 void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
 void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
 void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
@@ -14,15 +14,15 @@ void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned shor
 void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 ```
 
-### _i2c_host_init function
+### i2c_host_init function
 
 ```c
-void _i2c_host_init(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
+void i2c_host_init(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
 ```
 
 #### Description:
 
-The _i2c_host_init function is employed to initialize the I2C peripheral within a microcontroller for I2C communication. It does not involve any pin assignments or clock generator setups but ensures the hardware peripheral is ready for I2C operations.
+The i2c_host_init function is employed to initialize the I2C peripheral within a microcontroller for I2C communication. It does not involve any pin assignments or clock generator setups but ensures the hardware peripheral is ready for I2C operations.
 
 #### Parameters:
 
@@ -46,15 +46,15 @@ void:
 2. It initializes the I2C hardware peripheral pointed to by i2c_instance with the specified baud_rate.
 3. The initialization process ensures the I2C peripheral is properly configured and ready for further I2C operations.
 
-### _i2c_host_deinit function
+### i2c_host_deinit function
 
 ```c
-void _i2c_host_deinit(const i2c_periph_inst_t* i2c_instance);
+void i2c_host_deinit(const i2c_periph_inst_t* i2c_instance);
 ```
 
 #### Description:
 
-The _i2c_host_deinit function is used to de-initialize or reset the I2C peripheral to a non-operational state. This helps in conserving power and preventing further I2C operations, ensuring that the I2C peripheral is safely turned off.
+The i2c_host_deinit function is used to de-initialize or reset the I2C peripheral to a non-operational state. This helps in conserving power and preventing further I2C operations, ensuring that the I2C peripheral is safely turned off.
 
 #### Parameters:
 
@@ -70,7 +70,7 @@ void:
 
 #### Working:
 
-The _i2c_host_deinit function takes a pointer to an I2C peripheral instance as an input.
+The i2c_host_deinit function takes a pointer to an I2C peripheral instance as an input.
 It resets the I2C peripheral pointed to by i2c_instance, rendering it inactive and unavailable for further I2C communication.
 This process is crucial for power management and ensuring the secure termination of I2C operations.
 

@@ -61,6 +61,7 @@ typedef enum {
 } i2c_periph_inst_t;
 
 
+
 typedef enum {
   I2C_CLK_SOURCE_USE_DEFAULT = 0x00,
   I2C_CLK_SOURCE_FAST_CLKGEN0 = 0x01,
@@ -89,6 +90,9 @@ typedef enum {
   I2C_EXTRA_OPT_IRQ_PRIO_2 = 0x300,
   I2C_EXTRA_OPT_IRQ_PRIO_3 = 0x400
 } i2c_extra_opt_t;
+
+
+
 
 #define I2C_HOST_FUNC_PARAMETER_CHECK(i2c_instance, baud_rate) do { \
                                                                   } while(0);
