@@ -49,12 +49,12 @@ void disable_i2c_interface(const void *const hw) {
 }
 
 void i2c_slave_init(i2c_periph_inst_t *i2c_instance){
-    const bool InvalidSercomInstNum = (i2c_instance->sercom_inst_num < 0 || i2c_instance->sercom_inst_num > 5);
-    const bool InvalidSercomInst = (i2c_instance->sercom_inst == NULL);
-    const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
-    if (InvalidSercomInst || InvalidSercomInstNum || InvalidClockGen){
-        return;
-    }
+//    const bool InvalidSercomInstNum = (i2c_instance->sercom_inst_num < 0 || i2c_instance->sercom_inst_num > 5);
+//    const bool InvalidSercomInst = (i2c_instance->sercom_inst == NULL);
+//    const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
+//    if (InvalidSercomInst || InvalidSercomInstNum || InvalidClockGen){
+//        return;
+//    }
 // Set the clock system
 #ifdef __SAMD51__
 

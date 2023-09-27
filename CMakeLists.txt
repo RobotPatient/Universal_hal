@@ -26,8 +26,7 @@ if(PLATFORM_DEFINED MATCHES "^__SAMD21")
             hal/platform/atmelsam/spi_slave.c
             hal/platform/atmelsam/spi_platform_specific.h
             hal/platform/atmelsam/peripheral_clocking.h
-            hal/platform/atmelsam/sercom_stuff.h
-            hal/platform/atmelsam/i2c_slave.c)
+            hal/platform/atmelsam/sercom_stuff.h)
     target_include_directories(Universal_hall PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hall INTERFACE board_sdk)
 else()

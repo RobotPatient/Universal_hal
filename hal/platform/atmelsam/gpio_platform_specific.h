@@ -24,11 +24,11 @@
 
 #ifndef GPIO_PLATFORM_SPECIFIC
 #define GPIO_PLATFORM_SPECIFIC
+#include "peripheral_clocking.h"
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 /**
  * @brief The SAMD series support two GPIO levels,
  *        LOW AND HIGH... Use this when using the
@@ -155,6 +155,7 @@ typedef enum {
  * @note For minimal functionality at least set the irq_channel and irq_condition options.
  */
 typedef struct {
+    clk_gen_num_t irq_clk_generator;
     gpio_irq_channel_t   irq_channel;
     gpio_irq_condition_t irq_condition;
     gpio_irq_extra_opt_t irq_extra_opt;

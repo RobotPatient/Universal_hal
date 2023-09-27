@@ -29,9 +29,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef const char GPIO_ERR;
-
-enum GPIO_ERR_CODES { ERROR = -1, OK = 0 };
+typedef enum {
+    UHAL_STATUS_INVALID_PARAMETERS = -3,
+    UHAL_STATUS_PERIPHERAL_CLOCK_ERROR = -2,
+    UHAL_STATUS_ERROR = -1,
+    UHAL_STATUS_OK = 0,
+    UHAL_STATUS_PERIPHERAL_IN_USE_WARNING = 1,
+} uhal_status_t;
 
 #ifdef __cplusplus
 }

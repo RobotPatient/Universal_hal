@@ -30,7 +30,24 @@
 #define GPIO_OPT_PULL_DOWN_POS           3
 #define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 5
 
-void gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
+static inline uhal_status_t check_gpio_pin_parameter(const gpio_pin_t pin) {
+    /* Most of the SAMD series mcu have no more than two I/O banks */
+    const uint8_t invalid_port_num = (pin.port_num != GPIO_PORT_A || pin.port_num != GPIO_PORT_B);
+    /* Pin properties are stored in 32 bit registers. Thus, the pin-number can never be bigger than 31.*/
+    const uint8_t invalid_pin_num = (pin.pin_num < 0 || pin.pin_num > 31);
+    if (invalid_pin_num || invalid_port_num) {
+        return UHAL_STATUS_INVALID_PARAMETERS;
+    } else {
+        return UHAL_STATUS_OK;
+    }
+}
+
+uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
+    const int8_t status = check_gpio_pin_parameter(pin);
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
+
     if (level) {
         /*
          * GPIO LEVEL HIGH: Set the OUTSET register to (1 << pin_num).
@@ -44,18 +61,28 @@ void gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
          */
         PORT->Group[pin.port_num].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
     }
+    return UHAL_STATUS_OK;
 }
 
-void gpio_toggle_pin_output(const gpio_pin_t pin) {
+uhal_status_t gpio_toggle_pin_output(const gpio_pin_t pin) {
+    const int8_t status = check_gpio_pin_parameter(pin);
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
     /*
      * The OUTTGL register gets set with a value of (1 << pin_num).
      * This will toggle the output status of the given pin.
-     * @note This will cause unwanted behavior if a pin is set as input instead of output.
+     * @note This might cause unwanted behavior if a pin is set as input instead of output.
      */
     PORT->Group[pin.port_num].OUTTGL.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+    return UHAL_STATUS_OK;
 }
 
 gpio_level_t gpio_get_pin_level(const gpio_pin_t pin) {
+    const int8_t status = check_gpio_pin_parameter(pin);
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
     /*
      * The IN register will be read, and the bit corresponding to the pin gets returned.
      * This gives the current input status of the pin.
@@ -94,7 +121,11 @@ static inline void prv_set_dir(const gpio_pin_t pin, const uint8_t direction) {
     }
 }
 
-void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
+uhal_status_t gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
+    const int8_t status = check_gpio_pin_parameter(pin);
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
     /*
      * Detect using the offset of GPIO_MODE_INPUT in the enum whether the mode is an input or output
      */
@@ -104,11 +135,12 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
     } else {
         prv_set_function(pin, pin_mode);
     }
+    return UHAL_STATUS_OK;
 }
 
 static inline gpio_mode_t prv_get_function(const gpio_pin_t pin) {
     const uint8_t pmux_reg = PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].reg;
-    uint8_t res;
+    uint8_t       res;
     if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
         res = GET_LOWER_4_BITS_OF_BYTE(pmux_reg);
         return res;
@@ -142,7 +174,11 @@ static inline uint8_t get_non_settable_pincfg_options(const gpio_pin_t pin) {
     return non_settable_opt;
 }
 
-void gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
+    const int8_t status = check_gpio_pin_parameter(pin);
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
     /*
      * Some bits in the pincfg register are not set by this function and should not be changed.
      * These bits are retrieved with this function to be included in the final reg_val later.
@@ -174,7 +210,7 @@ void gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
      * the CTRL register. That is what this section does.
      */
     const uint8_t sampling_opt_set = BITMASK_COMPARE(opt, GPIO_OPT_SAMPLE_CONTINUOUSLY);
-    uint32_t res = PORT->Group[pin.port_num].CTRL.reg;
+    uint32_t      res = PORT->Group[pin.port_num].CTRL.reg;
     if (sampling_opt_set) {
         res |= SHIFT_ONE_LEFT_BY_N(pin.pin_num);
         PORT->Group[pin.port_num].CTRL.reg = res;
@@ -182,6 +218,7 @@ void gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
         res &= ~(SHIFT_ONE_LEFT_BY_N(pin.pin_num));
         PORT->Group[pin.port_num].CTRL.reg = res;
     }
+    return UHAL_STATUS_OK;
 }
 
 gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin) {
@@ -207,7 +244,27 @@ gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin) {
     return res;
 }
 
-void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
+static inline uhal_status_t wait_for_eic_gclk_sync() {
+    int timeout = 65535;
+    int timeout_attempt = 4;
+    while (EIC->STATUS.bit.SYNCBUSY) {
+        timeout--;
+        if (timeout <= 0) {
+            if (--timeout_attempt) {
+                timeout = 65535;
+            } else {
+                return UHAL_STATUS_PERIPHERAL_CLOCK_ERROR;
+            }
+        }
+    }
+    return UHAL_STATUS_OK;
+}
+
+uhal_status_t gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
+    int8_t status = check_gpio_pin_parameter(pin);
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
     /*
      * Check whether pin given is set as output or input. If set as output, make it an input.
      */
@@ -222,16 +279,17 @@ void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
     prv_set_function(pin, GPIO_MODE_A);
 
     /*
-     * Set the clock of EIC to the system_clk on CLK_GEN_0,
-     * which is the most used clock generator for system clocks among frameworks.
+     * Set the clock of EIC to the system_clk on the given CLK_GEN
      */
-    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_ID_EIC | GCLK_CLKCTRL_GEN_GCLK0;
+    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_ID_EIC | GCLK_CLKCTRL_GEN(irq_opt.irq_clk_generator);
 
     /*
      * Wait for the peripheral to apply changes..
-     * @todo add a timeout function with error return status if fails
      */
-    while (GCLK->STATUS.bit.SYNCBUSY) {}
+    status = wait_for_eic_gclk_sync();
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
 
     /*
      * EIC is divided within two sections: GPIO_CONFIG0 AND GPIO_CONFIG1 because the system is limited to 32-bit register sizes.
@@ -243,13 +301,12 @@ void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
          * Calculate the bit_positions of the filter_mask and trigger_mask bits for the specific pin-channel
          * and convert it in to a mask.
          */
-        filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING)
-                                     << ((irq_opt.irq_channel * 4) + (EIC_CONFIG_FILTEN0_Pos));
+        filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING) << ((irq_opt.irq_channel * 4) + (EIC_CONFIG_FILTEN0_Pos));
         trigger_mask = irq_opt.irq_condition << (4 * irq_opt.irq_channel);
         EIC->CONFIG[0].reg |= filter_mask | trigger_mask;
     } else if (irq_opt.irq_channel <= GPIO_IRQ_CHANNEL_15) {
         filter_mask = BITMASK_COMPARE(irq_opt.irq_extra_opt, GPIO_IRQ_EXTRA_FILTERING)
-                                     << (((irq_opt.irq_channel - GPIO_IRQ_CHANNEL_8) * 4) + (EIC_CONFIG_FILTEN0_Pos));
+                      << (((irq_opt.irq_channel - GPIO_IRQ_CHANNEL_8) * 4) + (EIC_CONFIG_FILTEN0_Pos));
         trigger_mask = irq_opt.irq_condition << (4 * (irq_opt.irq_channel - GPIO_IRQ_CHANNEL_8));
         EIC->CONFIG[1].reg |= filter_mask | trigger_mask;
     } else {
@@ -289,7 +346,11 @@ void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt) {
 
     /*
      * Wait for the peripheral to apply changes..
-     * @todo add a timeout function with error return status if fails
      */
-    while (EIC->STATUS.bit.SYNCBUSY) {}
+    status = wait_for_eic_gclk_sync();
+    if (status != UHAL_STATUS_OK) {
+        return status;
+    }
+
+    return UHAL_STATUS_OK;
 }

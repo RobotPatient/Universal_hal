@@ -22,11 +22,13 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#include <stdbool.h>
-#include <hal_i2c_host.h>
-#include <stddef.h>
+#include <assert.h>
 #include <default_irq_handlers.h>
-
+#include <hal_i2c_host.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include "bit_manipulation.h"
+#include "error_handling.h"
 /**
  * @brief This formula is used to calculate the baud rate steps.
  * The formula is a rewritten form of the formula found on page 483 (section 28.10.3) of the SAMD21 Family datasheet.
@@ -36,9 +38,11 @@
  * fscl will be the output clock frequency (100/400/1000 KHz)
  * Baud_steps are the amount of steps needed to generate the right output frequency
  */
-#define calculate_baudrate(clock_freq, baud_freq) (clock_freq/(2*baud_freq)) - (10*clock_freq/(2*clock_freq)) - 5
+#define calculate_baudrate(clock_freq, baud_freq) (clock_freq / (2 * baud_freq)) - (10 * clock_freq / (2 * clock_freq)) - 5
 
+#define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
 
+Sercom* i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 /**
  * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.
  *        By continually reading its I2CM syncbusy register.
@@ -49,10 +53,8 @@
  *                                           SERCOM_I2CM_SYNCBUSY_SYSOP
  * @note This function can only be used for use with I2C host/master configuration
  */
-static inline void i2c_master_wait_for_sync(const void *const hw, const uint32_t bits_to_read)
-{
-    while (((Sercom *)hw)->I2CM.SYNCBUSY.reg & bits_to_read) {
-    };
+static inline void i2c_master_wait_for_sync(const void* const hw, const uint32_t bits_to_read) {
+    while (((Sercom*)hw)->I2CM.SYNCBUSY.reg & bits_to_read) {};
 }
 
 /**
@@ -66,9 +68,9 @@ static inline void i2c_master_wait_for_sync(const void *const hw, const uint32_t
  *                              Other: N/A
  * @note This function can only be used for use with I2C host/master configuration
  */
-uint8_t get_i2c_master_busstate(const void *const hw) {
+uint8_t get_i2c_master_busstate(const void* const hw) {
     i2c_master_wait_for_sync(hw, SERCOM_I2CM_SYNCBUSY_SYSOP);
-    return (((Sercom *)hw)->I2CM.STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE_Msk) >> SERCOM_I2CM_STATUS_BUSSTATE_Pos;
+    return (((Sercom*)hw)->I2CM.STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE_Msk) >> SERCOM_I2CM_STATUS_BUSSTATE_Pos;
 }
 
 /**
@@ -79,17 +81,18 @@ uint8_t get_i2c_master_busstate(const void *const hw) {
  *
  * @note This function can only be used for use with I2C host/master configuration
  */
-void wait_for_idle_busstate(Sercom *SercomInst){
-    int timeout         = 65535;
+void wait_for_idle_busstate(Sercom* SercomInst) {
+    int timeout = 65535;
     int timeout_attempt = 4;
     while (get_i2c_master_busstate(SercomInst) != 0x1) {
         timeout--;
 
         if (timeout <= 0) {
-            if (--timeout_attempt)
+            if (--timeout_attempt) {
                 timeout = 65535;
-            else
+            } else {
                 return;
+            }
         }
     }
     /**
@@ -100,144 +103,168 @@ void wait_for_idle_busstate(Sercom *SercomInst){
      * @todo Change this delay to flag/checking other means of overcoming this problem
     */
     timeout = 20;
-    do{
+    do {
         timeout--;
-    } while(timeout >= 1);
+    } while (timeout >= 1);
 }
 
+static inline uint8_t get_fast_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+    const uint16_t fast_clk_val = (clock_sources & 0xFF) - 1;
+    return fast_clk_val;
+}
 
+static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+    const uint16_t slow_clk_val = SERCOM_SLOW_CLOCK_SOURCE(clock_sources) - 1;
+    return slow_clk_val;
+}
+
+static inline Sercom* get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
+    return i2c_peripheral_mapping_table[peripheral_inst_num];
+}
 
 /**
  * @brief Internal function used for disabling the SERCOM i2c Host driver
  * @param hw Pointer to the SERCOM peripheral to be manipulated or read
  */
-static inline void disable_host_i2c_driver(const void *const hw) {
+static inline void disable_host_i2c_driver(const void* const hw) {
     ((Sercom*)hw)->I2CM.CTRLA.reg &= ~SERCOM_I2CM_CTRLA_ENABLE;
     const uint32_t waitflags = (SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
     i2c_master_wait_for_sync(hw, waitflags);
 }
 
-
-void i2c_host_init(const i2c_periph_inst_t* i2c_instance, const unsigned long baud_rate) {
-    const bool InvalidSercomInstNum = (i2c_instance->sercom_inst_num < 0 || i2c_instance->sercom_inst_num > 5);
-    const bool InvalidSercomInst = (i2c_instance->sercom_inst == NULL);
-    const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
-if (InvalidSercomInst || InvalidSercomInstNum || InvalidClockGen){ 
-    return;
-}
-// Set the clock system
+uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, const unsigned long periph_clk_freq,
+                             const unsigned long baud_rate, const i2c_extra_opt_t extra_configuration_options) {
 #ifdef __SAMD51__
 
 #else
-PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + i2c_instance->sercom_inst_num);
-GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(i2c_instance->clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
-while (GCLK->STATUS.bit.SYNCBUSY)
-		;
-GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(i2c_instance->clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_instance->sercom_inst_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
-GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(i2c_instance->clk_gen_fast);
-while (GCLK->STATUS.bit.SYNCBUSY)
-		;
+    PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + i2c_peripheral_num);
+    if (clock_sources != I2C_CLK_SOURCE_USE_DEFAULT) {
+        const uint8_t clk_gen_slow = get_slow_clk_gen_val(clock_sources);
+        GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
+        while (GCLK->STATUS.bit.SYNCBUSY)
+            ;
+        const uint8_t clk_gen_fast = get_fast_clk_gen_val(clock_sources);
+        GCLK->CLKCTRL.reg =
+            GCLK_CLKCTRL_GEN(clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+        GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
+        while (GCLK->STATUS.bit.SYNCBUSY)
+            ;
+    } else {
+        uint8_t clk_gen_slow = 3;
+        GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
+        while (GCLK->STATUS.bit.SYNCBUSY)
+            ;
+        const uint8_t clk_gen_fast = 0;
+        GCLK->CLKCTRL.reg =
+            GCLK_CLKCTRL_GEN(clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+        GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
+        while (GCLK->STATUS.bit.SYNCBUSY)
+            ;
+    }
 #endif
 
-
-const bool SlaveConfiguration = (i2c_instance->operating_mode == I2C_OPERATING_MODE_SLAVE && i2c_instance->i2c_slave_addr != 0);
-if(!SlaveConfiguration) {
-    Sercom* SercomInst = i2c_instance->sercom_inst;
+    Sercom*    SercomInst = get_sercom_inst(i2c_peripheral_num);
     const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
-    if(SercomEnabled) disable_host_i2c_driver(SercomInst);
-    SercomInst->I2CM.CTRLA.reg =  (SERCOM_I2CM_CTRLA_SWRST |SERCOM_I2CM_CTRLA_MODE(5));
+    if (SercomEnabled) {
+        disable_host_i2c_driver(SercomInst);
+    }
+    SercomInst->I2CM.CTRLA.reg = (SERCOM_I2CM_CTRLA_SWRST | SERCOM_I2CM_CTRLA_MODE(5));
     const uint32_t waitflags = (SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
     i2c_master_wait_for_sync(SercomInst, waitflags);
-    SercomInst->I2CM.CTRLA.reg = ( 0 << SERCOM_I2CM_CTRLA_LOWTOUTEN_Pos      /* SCL Low Time-Out: disabled */
-	        | 0 << SERCOM_I2CM_CTRLA_INACTOUT_Pos /* Inactive Time-Out: 0 */
-	        | 0 << SERCOM_I2CM_CTRLA_SCLSM_Pos    /* SCL Clock Stretch Mode: disabled */
-	        | 0 << SERCOM_I2CM_CTRLA_SPEED_Pos    /* Transfer Speed: 0 */
-	        | 0 << SERCOM_I2CM_CTRLA_SEXTTOEN_Pos /* Slave SCL Low Extend Time-Out: disabled */
-	        | 0 << SERCOM_I2CM_CTRLA_MEXTTOEN_Pos /* Master SCL Low Extend Time-Out: 0 */
-	        | 0b10 << SERCOM_I2CM_CTRLA_SDAHOLD_Pos  /* SDA Hold Time: 0 */
-	        | 0 << SERCOM_I2CM_CTRLA_PINOUT_Pos   /* Pin Usage: disabled */
-	        | 0 << SERCOM_I2CM_CTRLA_RUNSTDBY_Pos /* Run In Standby: disabled */
-	        | 5 << SERCOM_I2CM_CTRLA_MODE_Pos);
+    SercomInst->I2CM.CTRLA.reg = (0 << SERCOM_I2CM_CTRLA_LOWTOUTEN_Pos    /* SCL Low Time-Out: disabled */
+                                  | 0 << SERCOM_I2CM_CTRLA_INACTOUT_Pos   /* Inactive Time-Out: 0 */
+                                  | 0 << SERCOM_I2CM_CTRLA_SCLSM_Pos      /* SCL Clock Stretch Mode: disabled */
+                                  | 0 << SERCOM_I2CM_CTRLA_SPEED_Pos      /* Transfer Speed: 0 */
+                                  | 0 << SERCOM_I2CM_CTRLA_SEXTTOEN_Pos   /* Slave SCL Low Extend Time-Out: disabled */
+                                  | 0 << SERCOM_I2CM_CTRLA_MEXTTOEN_Pos   /* Master SCL Low Extend Time-Out: 0 */
+                                  | 0b10 << SERCOM_I2CM_CTRLA_SDAHOLD_Pos /* SDA Hold Time: 0 */
+                                  | 0 << SERCOM_I2CM_CTRLA_PINOUT_Pos     /* Pin Usage: disabled */
+                                  | 0 << SERCOM_I2CM_CTRLA_RUNSTDBY_Pos   /* Run In Standby: disabled */
+                                  | 5 << SERCOM_I2CM_CTRLA_MODE_Pos);
 
     i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
-    SercomInst->I2CM.BAUD.reg = calculate_baudrate(i2c_instance->fast_clk_gen_frequency, baud_rate);
-	int timeout         = 65535;
-	int timeout_attempt = 4;
-	SercomInst->I2CM.CTRLA.reg |= SERCOM_I2CM_CTRLA_ENABLE;
+    SercomInst->I2CM.BAUD.reg = calculate_baudrate(periph_clk_freq, baud_rate);
+    int timeout = 65535;
+    int timeout_attempt = 4;
+    SercomInst->I2CM.CTRLA.reg |= SERCOM_I2CM_CTRLA_ENABLE;
     SercomInst->I2CM.CTRLB.reg |= SERCOM_I2CM_CTRLB_SMEN;
     i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
-	while (get_i2c_master_busstate(SercomInst) != 0x1) {
-		timeout--;
+    while (get_i2c_master_busstate(SercomInst) != 0x1) {
+        timeout--;
 
-		if (timeout <= 0) {
-			if (--timeout_attempt)
-				timeout = 65535;
-			else
-				return;
+        if (timeout <= 0) {
+            if (--timeout_attempt) {
+                timeout = 65535;
+            } else {
+                return UHAL_STATUS_PERIPHERAL_CLOCK_ERROR;
+            }
             SercomInst->I2CM.STATUS.reg = SERCOM_I2CM_STATUS_BUSSTATE(0x1);
             i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_SYSOP);
-		}
-	}
-	SercomInst->I2CM.INTENSET.reg = SERCOM_I2CM_INTENSET_MB | SERCOM_I2CM_INTENSET_SB;
-}	
-	const enum IRQn irq_type = (SERCOM0_IRQn + i2c_instance->sercom_inst_num);
-	NVIC_EnableIRQ(irq_type);
-	NVIC_SetPriority(irq_type, i2c_instance->irq_priority);
+        }
+    }
+    SercomInst->I2CM.INTENSET.reg = SERCOM_I2CM_INTENSET_MB | SERCOM_I2CM_INTENSET_SB;
+
+    const enum IRQn irq_type = (SERCOM0_IRQn + i2c_peripheral_num);
+    NVIC_EnableIRQ(irq_type);
+    const uint16_t irq_options = extra_configuration_options >> 8;
+    if (irq_options) {
+        NVIC_SetPriority(irq_type, irq_options - 1);
+    } else {
+        NVIC_SetPriority(irq_type, 2);
+    }
+    return UHAL_STATUS_OK;
 }
 
-void i2c_host_deinit(const i2c_periph_inst_t* i2c_instance) {
-    disable_host_i2c_driver(i2c_instance->sercom_inst);
+uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_instance) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    disable_host_i2c_driver(sercom_inst);
+    return UHAL_STATUS_OK;
 }
 
-void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate) {
-    Sercom* SercomInst = i2c_instance->sercom_inst;
-    wait_for_idle_busstate(SercomInst);
-    i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
-    disable_host_i2c_driver(SercomInst);
-    i2c_host_init(i2c_instance, baud_rate);
-}
-
-
-
-void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
-    Sercom* SercomInst = i2c_instance->sercom_inst;
-    wait_for_idle_busstate(SercomInst);
-    const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
-    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[Sercom_inst_num];
-    while((SercomInst->I2CM.STATUS.bit.BUSSTATE != 0x1) && sercom_bustrans_buffer[Sercom_inst_num].transaction_type != SERCOMACT_NONE && SercomInst->I2CM.INTFLAG.reg == 0);
-    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
-	TransactionData->write_buffer = write_buff;
-	TransactionData->buf_size = size;
-	TransactionData->transaction_type = stop_bit ? SERCOMACT_I2C_DATA_TRANSMIT_STOP : SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP;
+uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size,
+                                          i2c_stop_bit_t stop_bit) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    wait_for_idle_busstate(sercom_inst);
+    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[i2c_instance];
+    while ((sercom_inst->I2CM.STATUS.bit.BUSSTATE != 0x1) && sercom_bustrans_buffer[i2c_instance].transaction_type != SERCOMACT_NONE
+           && sercom_inst->I2CM.INTFLAG.reg == 0)
+        ;
+    i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    TransactionData->write_buffer = write_buff;
+    TransactionData->buf_size = size;
+    TransactionData->transaction_type = stop_bit ? SERCOMACT_I2C_DATA_TRANSMIT_STOP : SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP;
     TransactionData->buf_cnt = 0;
-    SercomInst->I2CM.ADDR.reg = (addr << 1);
-    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    sercom_inst->I2CM.ADDR.reg = (addr << 1);
+    i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    return UHAL_STATUS_OK;
 }
 
-void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit) {
-    Sercom* SercomInst = i2c_instance->sercom_inst;
+uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size,
+                                      i2c_stop_bit_t stop_bit) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
     i2c_host_write_non_blocking(i2c_instance, addr, write_buff, size, stop_bit);
-    wait_for_idle_busstate(SercomInst);
+    wait_for_idle_busstate(sercom_inst);
+    return UHAL_STATUS_OK;
 }
 
-
-
-void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
+uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
     i2c_host_read_non_blocking(i2c_instance, addr, read_buff, amount_of_bytes);
-    Sercom* SercomInst = i2c_instance->sercom_inst;
-    wait_for_idle_busstate(SercomInst);
+    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    wait_for_idle_busstate(sercom_inst);
+    return UHAL_STATUS_OK;
 }
 
-void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
-    Sercom* SercomInst = i2c_instance->sercom_inst;
-    wait_for_idle_busstate(SercomInst);
-    const sercom_num_t Sercom_inst_num = i2c_instance->sercom_inst_num;
-    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[Sercom_inst_num];
-    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff,
+                                         size_t amount_of_bytes) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    wait_for_idle_busstate(sercom_inst);
+    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[i2c_instance];
+    i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     TransactionData->read_buffer = read_buff;
     TransactionData->buf_size = amount_of_bytes;
     TransactionData->transaction_type = SERCOMACT_I2C_DATA_RECEIVE_STOP;
     TransactionData->buf_cnt = 0;
-    SercomInst->I2CM.ADDR.reg = (addr << 1) | 1;
-    i2c_master_wait_for_sync((SercomInst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    sercom_inst->I2CM.ADDR.reg = (addr << 1) | 1;
+    i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    return UHAL_STATUS_OK;
 }

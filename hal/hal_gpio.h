@@ -75,7 +75,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <gpio_error_handling.h>
+#include <error_handling.h>
 #include <gpio_platform_specific.h>
 
 /**
@@ -83,21 +83,21 @@ extern "C" {
  * @param pin The pin to toggle
  * @note Requires the pin to be set as output first.
  */
-void gpio_toggle_pin_output(const gpio_pin_t pin);
+uhal_status_t gpio_toggle_pin_output(const gpio_pin_t pin);
 
 /**
  * @brief Sets the gpio pin to INPUT,OUTPUT or special pin-mux functions (platform dependent).
  * @param pin The pin to set to specific mode.
  * @param pin_mode The pin mode to set the pin to.
  */
-void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
+uhal_status_t gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
 
 /**
  * @brief Sets the gpio pin output level (HIGH, LOW, HIGH_IMPEDANCE (if supported) ).
  * @param pin The pin to set the output level of.
  * @param level The level: HIGH, LOW, etc...
  */
-void gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
+uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
 
 /**
  * @brief Gets the current input level or set output level (depending on if pin is set to input or output direction).
@@ -118,7 +118,7 @@ gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin);
  * @param pin The pin to apply the new options to.
  * @param opt The options to set.
  */
-void gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
+uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
 
 /**
  * @brief Gets the currently set options for the specified pin.
@@ -132,7 +132,7 @@ gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin);
  * @param pin The pin on which the interrupt has to be triggered.
  * @param irq_opt The options needed to setup the pin with interrupts (channels, trigger options (rising, falling, etc...), e.g. )
  */
-void gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt);
+uhal_status_t gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt);
 
 /**
  * @brief Default GPIO irq handler function.

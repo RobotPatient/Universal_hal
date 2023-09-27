@@ -97,12 +97,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "assert.h"
+#include "error_handling.h"
 #include "i2c_platform_specific.h"
 
 typedef enum {
     I2C_NO_STOP_BIT,
     I2C_STOP_BIT
-}i2c_stop_bit_t;
+} i2c_stop_bit_t;
 
 /**
  * @brief Function to initialize the specified HW peripheral with I2C functionality.
@@ -118,27 +120,55 @@ typedef enum {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-void i2c_host_init(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
+uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, const unsigned long periph_clk_freq,
+                             const unsigned long baud_rate, const i2c_extra_opt_t extra_configuration_options);
+
+/**
+ * @brief Macro for i2c_host_init that does static assert checking on the parameters, so that errors can be resolved at compile time.
+ *
+ * I2C options to be used when configuring the HW peripheral.
+ *                      It might include options like: Slave mode enabled
+ *                                                     Peripheral clock options
+ *                                                     HW peripheral instance number
+ *                                                     HW peripheral handle
+ *
+ * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
+ */
+#define i2c_host_init(i2c_instance, clock_sources, peripheral_clk_freq, baud_rate, extra_configuration_options )                                     \
+    do {                                                                                                                                             \
+                                                                 \
+        _i2c_host_init(i2c_instance, clock_sources, peripheral_clk_freq, baud_rate, extra_configuration_options);                                    \
+    } while (0);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-void i2c_host_deinit(const i2c_periph_inst_t* i2c_instance);
+uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_instance);
 
 /**
- * @brief Function to set the baud-rate after the peripheral has been initialized with I2C.
- * @param i2c_instance I2C options used when configuring the HW peripheral.
- * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode)
+ * @brief Macro that does static assert checking on the parameters, so that errors can be resolved at compile time.
+ *
+ * I2C options to be used when configuring the HW peripheral.
+ *                      It might include options like: Slave mode enabled
+ *                                                     Peripheral clock options
+ *                                                     HW peripheral instance number
+ *                                                     HW peripheral handle
+ *
+ * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_instance, unsigned long baud_rate);
+#define i2c_host_deinit(i2c_instance, baud_rate)                                                                                                     \
+    do {                                                                                                                                             \
+        _Static_assert(i2c_instance != NULL, "The given i2c instance equals NULL");                                                                  \
+        _i2c_host_deinit(i2c_instance, baud_rate);                                                                                                   \
+    } while (0);
 
 /**
  * @brief Function to enable slave mode after the peripheral has already been initialized in host-mode
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  * @param addr The I2C slave address to used
  */
-void i2c_host_set_slave_mode(const i2c_periph_inst_t* i2c_instance, unsigned short addr);
+uhal_status_t i2c_host_set_slave_mode(const i2c_periph_inst_t i2c_instance, unsigned short addr);
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
@@ -150,8 +180,8 @@ void i2c_host_set_slave_mode(const i2c_periph_inst_t* i2c_instance, unsigned sho
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size,
-                        i2c_stop_bit_t stop_bit);
+uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size,
+                                      i2c_stop_bit_t stop_bit);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -163,8 +193,8 @@ void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_instance, unsigned cha
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size,
-                            i2c_stop_bit_t stop_bit);
+uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size,
+                                          i2c_stop_bit_t stop_bit);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -174,7 +204,7 @@ void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
@@ -184,7 +214,8 @@ void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_instance, unsigned shor
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff,
+                                         size_t amount_of_bytes);
 
 /**
  * @brief IRQ handler for I2C host data receive interrupt.
