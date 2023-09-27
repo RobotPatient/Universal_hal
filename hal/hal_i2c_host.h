@@ -120,7 +120,7 @@ typedef enum {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, const unsigned long periph_clk_freq,
+uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, uint32_t periph_clk_freq,
                              const unsigned long baud_rate, const i2c_extra_opt_t extra_configuration_options);
 
 /**

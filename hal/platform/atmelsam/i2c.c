@@ -42,7 +42,7 @@
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
 
-Sercom* i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
+static Sercom* i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 /**
  * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.
  *        By continually reading its I2CM syncbusy register.
@@ -132,7 +132,7 @@ static inline void disable_host_i2c_driver(const void* const hw) {
     i2c_master_wait_for_sync(hw, waitflags);
 }
 
-uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, const unsigned long periph_clk_freq,
+uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources, uint32_t periph_clk_freq,
                              const unsigned long baud_rate, const i2c_extra_opt_t extra_configuration_options) {
 #ifdef __SAMD51__
 
@@ -150,7 +150,7 @@ uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i
         while (GCLK->STATUS.bit.SYNCBUSY)
             ;
     } else {
-        uint8_t clk_gen_slow = 3;
+        const uint8_t clk_gen_slow = 3;
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
         while (GCLK->STATUS.bit.SYNCBUSY)
             ;
@@ -207,11 +207,11 @@ uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i
     const enum IRQn irq_type = (SERCOM0_IRQn + i2c_peripheral_num);
     NVIC_EnableIRQ(irq_type);
     const uint16_t irq_options = extra_configuration_options >> 8;
-    if (irq_options) {
-        NVIC_SetPriority(irq_type, irq_options - 1);
-    } else {
+//    if (irq_options) {
+//        NVIC_SetPriority(irq_type, irq_options - 1);
+//    } else {
         NVIC_SetPriority(irq_type, 2);
-    }
+    //}
     return UHAL_STATUS_OK;
 }
 
