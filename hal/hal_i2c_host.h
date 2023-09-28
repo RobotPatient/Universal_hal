@@ -94,7 +94,7 @@ typedef enum {
  *                                                                          - 4-Wire mode
  *                                                                          - IRQ priority
  */
-uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
+void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
                              const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
                              const i2c_extra_opt_t extra_configuration_options);
 
@@ -108,7 +108,7 @@ do {                                                                            
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
  */
-uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
+void _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
 
 
 #define I2C_HOST_DEINIT(i2c_peripheral_num) \
@@ -127,7 +127,7 @@ _i2c_host_deinit(i2c_peripheral_num);\
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t
+void
 _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr,
                          const unsigned char *write_buff,
                          size_t size,
@@ -149,7 +149,7 @@ _i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit); 
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t
+void
 _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr,
                              const unsigned char *write_buff,
                              size_t size,
@@ -169,7 +169,7 @@ _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bi
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t
+void
 _i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
                         size_t amount_of_bytes);
 
@@ -187,7 +187,7 @@ _i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size);             
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t
+void
 _i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
                             size_t amount_of_bytes);
 
