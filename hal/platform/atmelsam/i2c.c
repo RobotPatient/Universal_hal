@@ -132,8 +132,8 @@ static inline void disable_host_i2c_driver(const void* const hw) {
     i2c_master_wait_for_sync(hw, waitflags);
 }
 
-uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
-                            const uint32_t periph_clk_freq, const uint32_t baud_rate_freq, const i2c_extra_opt_t extra_configuration_options) {
+uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
+                             const uint32_t periph_clk_freq, const uint32_t baud_rate_freq, const i2c_extra_opt_t extra_configuration_options) {
 #ifdef __SAMD51__
 
 #else
@@ -215,18 +215,18 @@ uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_instance) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
     disable_host_i2c_driver(sercom_inst);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size,
-                                          i2c_stop_bit_t stop_bit) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+uhal_status_t _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, const unsigned char* write_buff, size_t size,
+                                           i2c_stop_bit_t stop_bit) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
-    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[i2c_instance];
-    while ((sercom_inst->I2CM.STATUS.bit.BUSSTATE != 0x1) && sercom_bustrans_buffer[i2c_instance].transaction_type != SERCOMACT_NONE
+    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
+    while ((sercom_inst->I2CM.STATUS.bit.BUSSTATE != 0x1) && sercom_bustrans_buffer[i2c_peripheral_num].transaction_type != SERCOMACT_NONE
            && sercom_inst->I2CM.INTFLAG.reg == 0)
         ;
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
@@ -239,17 +239,17 @@ uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, 
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size,
-                                      i2c_stop_bit_t stop_bit) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
-    i2c_host_write_non_blocking(i2c_instance, addr, write_buff, size, stop_bit);
+uhal_status_t _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr, const unsigned char* write_buff, size_t size,
+                                       i2c_stop_bit_t stop_bit) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
+    _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);
     wait_for_idle_busstate(sercom_inst);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
-    i2c_host_read_non_blocking(i2c_instance, addr, read_buff, amount_of_bytes);
-    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+uhal_status_t _i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
+    i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, amount_of_bytes);
+    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
     return UHAL_STATUS_OK;
 }

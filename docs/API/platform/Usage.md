@@ -11,7 +11,7 @@ To be able to use the peripheral correctly, some pins, clocks and a struct have 
 - [ ] Setup the clocks for the peripheral (skip this step when using ASF or arduino).
 - [ ] Setup the pins for the peripheral (see the gpio section on this page).
 - [ ] Fill-in the i2c_periph_inst_t struct with the right settings.
-- [ ] Initialize the i2c hardware peripheral using the i2c_host_init() function.
+- [ ] Initialize the i2c hardware peripheral using the I2C_HOST_INIT() function.
 !!! note
     You can click on the checkmarks above to check them off your list ;)
 

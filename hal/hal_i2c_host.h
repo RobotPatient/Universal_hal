@@ -79,9 +79,9 @@
  * const uint8_t reg_addr[2] = {0x02, 0x07};
  *
  * i2c_init(&i2c_periph, F_I2C_CLOCK);
- * i2c_host_write_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, reg_addr, sizeof(reg_addr), I2C_STOP_BIT);
+ * _i2c_host_write_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, reg_addr, sizeof(reg_addr), I2C_STOP_BIT);
  * uint8_t result;
- * i2c_host_read_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, &result, sizeof(result));
+ * _i2c_host_read_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, &result, sizeof(result));
  *@endcode
  *
  * Using this module (Slave mode):
@@ -120,33 +120,33 @@ typedef enum {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
-                            const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
-                            const i2c_extra_opt_t extra_configuration_options);
+uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
+                             const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
+                             const i2c_extra_opt_t extra_configuration_options);
 
-#define _i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options) \
+#define I2C_HOST_INIT(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options) \
 do {                                                                                                                    \
-    I2C_HOST_FUNC_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options); \
-    i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options);               \
+    I2C_HOST_INIT_FUNC_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options); \
+    _i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options);               \
 }while(0);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
- * @param i2c_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
  */
-uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_instance);
+uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
 
-/**
- * @brief Function to enable slave mode after the peripheral has already been initialized in host-mode
- * @param i2c_instance I2C options used when configuring the HW peripheral.
- * @param addr The I2C slave address to used
- */
-uhal_status_t i2c_host_set_slave_mode(const i2c_periph_inst_t i2c_instance, unsigned short addr);
+
+#define I2C_HOST_DEINIT(i2c_peripheral_num) \
+do {                                        \
+I2C_HOST_DEINIT_FUNC_PARAMETER_CHECK(i2c_peripheral_num);    \
+_i2c_host_deinit(i2c_peripheral_num);\
+}while(0);
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
  *        This function does only work in host-mode.
- * @param i2c_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param write_buff Pointer to the write buffer with all the bytes that have to be written
  * @param size The amount of bytes which have to be written
@@ -154,14 +154,21 @@ uhal_status_t i2c_host_set_slave_mode(const i2c_periph_inst_t i2c_instance, unsi
  *                                                                       Value 0 is without stop-bit
  */
 uhal_status_t
-i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr, const unsigned char *write_buff,
-                        size_t size,
-                        i2c_stop_bit_t stop_bit);
+_i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr,
+                         const unsigned char *write_buff,
+                         size_t size,
+                         i2c_stop_bit_t stop_bit);
+
+#define I2C_HOST_WRITE_BLOCKING(i2c_peripheral_num, addr, write_buff, size, stop_bit) \
+do {                                                                            \
+I2C_HOST_WRITE_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, write_buff, size, stop_bit); \
+_i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);             \
+}while(0);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
  *        This function does only work in host-mode.
- * @param i2c_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param write_buff Pointer to the write buffer with all the bytes that have to be written
  * @param size The amount of bytes which have to be written
@@ -169,21 +176,33 @@ i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr
  *                                                                       Value 0 is without stop-bit
  */
 uhal_status_t
-i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, const unsigned char *write_buff,
-                            size_t size,
-                            i2c_stop_bit_t stop_bit);
+_i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, const unsigned char *write_buff,
+                             size_t size,
+                             i2c_stop_bit_t stop_bit);
+
+#define I2C_HOST_WRITE_NON_BLOCKING(i2c_peripheral_num, addr, write_buff, size, stop_bit) \
+do {                                                                            \
+I2C_HOST_WRITE_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, write_buff, size, stop_bit); \
+_i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);             \
+}while(0);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
  *        This function does only work in host-mode.
- * @param i2c_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
  * @param addr The I2C address of the client device to write to
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
 uhal_status_t
-i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char *read_buff,
-                       size_t amount_of_bytes);
+_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
+                        size_t amount_of_bytes);
+
+#define I2C_HOST_READ_BLOCKING(i2c_peripheral_num, addr, read_buff, size, stop_bit) \
+do {                                                                            \
+I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size, stop_bit); \
+_i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size, stop_bit);             \
+}while(0);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
