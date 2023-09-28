@@ -132,17 +132,18 @@ static inline void disable_host_i2c_driver(const void* const hw) {
     i2c_master_wait_for_sync(hw, waitflags);
 }
 
-uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, i2c_host_conf_opt_t configuration_options) {
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
+                            const uint32_t periph_clk_freq, const uint32_t baud_rate_freq, const i2c_extra_opt_t extra_configuration_options) {
 #ifdef __SAMD51__
 
 #else
     PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + i2c_peripheral_num);
-    if (configuration_options.clock_sources != I2C_CLK_SOURCE_USE_DEFAULT) {
-        const uint8_t clk_gen_slow = get_slow_clk_gen_val(configuration_options.clock_sources);
+    if (clock_sources != I2C_CLK_SOURCE_USE_DEFAULT) {
+        const uint8_t clk_gen_slow = get_slow_clk_gen_val(clock_sources);
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
         while (GCLK->STATUS.bit.SYNCBUSY)
             ;
-        const uint8_t clk_gen_fast = get_fast_clk_gen_val(configuration_options.clock_sources);
+        const uint8_t clk_gen_fast = get_fast_clk_gen_val(clock_sources);
         GCLK->CLKCTRL.reg =
             GCLK_CLKCTRL_GEN(clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
@@ -182,7 +183,7 @@ uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, i2c_host
                                   | 5 << SERCOM_I2CM_CTRLA_MODE_Pos);
 
     i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_MASK);
-    SercomInst->I2CM.BAUD.reg = calculate_baudrate(configuration_options.periph_clk_freq, configuration_options.baud_rate_freq);
+    SercomInst->I2CM.BAUD.reg = calculate_baudrate(periph_clk_freq, baud_rate_freq);
     int timeout = 65535;
     int timeout_attempt = 4;
     SercomInst->I2CM.CTRLA.reg |= SERCOM_I2CM_CTRLA_ENABLE;
@@ -205,7 +206,7 @@ uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, i2c_host
 
     const enum IRQn irq_type = (SERCOM0_IRQn + i2c_peripheral_num);
     NVIC_EnableIRQ(irq_type);
-    const uint16_t irq_options = configuration_options.extra_configuration_options >> 8;
+    const uint16_t irq_options = extra_configuration_options >> 8;
     if (irq_options) {
         NVIC_SetPriority(irq_type, irq_options - 1);
     } else {

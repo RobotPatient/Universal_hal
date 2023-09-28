@@ -40,17 +40,7 @@ typedef enum {
     I2C_OPERATING_MODE_SLAVE
 } i2c_operating_mode_t;
 
-//typedef struct {
-//    sercom_num_t         sercom_inst_num;
-//    Sercom*              sercom_inst;
-//    clk_gen_num_t        clk_gen_slow;
-//    clk_gen_num_t        clk_gen_fast;
-//    uint32_t             fast_clk_gen_frequency;
-//    uint8_t              irq_priority;
-//    i2c_operating_mode_t operating_mode;
-//    unsigned short       i2c_slave_addr;
-//}
-//
+
 typedef enum {
   I2C_SERCOM0,
   I2C_SERCOM1,
@@ -59,7 +49,6 @@ typedef enum {
   I2C_SERCOM4,
   I2C_SERCOM5
 } i2c_periph_inst_t;
-
 
 
 typedef enum {
@@ -93,9 +82,17 @@ typedef enum {
 
 
 
-
-#define I2C_HOST_FUNC_PARAMETER_CHECK(i2c_instance, baud_rate) do { \
-                                                                  } while(0);
+#define I2C_HOST_FUNC_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options) \
+do {                                                                                                                                   \
+const uint32_t max_freq =  48000000;                                                                                                   \
+const uint32_t min_freq =  200000;                                                                                                     \
+static_assert(i2c_peripheral_num <= I2C_SERCOM5 && i2c_peripheral_num >= I2C_SERCOM0, "Invalid i2c peripheral instance number given to host driver!");\
+static_assert(clock_sources <= I2C_CLK_SOURCE_SLOW_CLKGEN7 && clock_sources >= I2C_CLK_SOURCE_USE_DEFAULT, "Invalid clock-source used for the i2c host driver!"); \
+static_assert(periph_clk_freq <= max_freq, "I2C peripheral clock frequency higher than maximum allowed frequency");       \
+static_assert(periph_clk_freq >= min_freq, "I2C peripheral clock frequency has to be atleast higher than 2x the standard slow i2c baud_rate of 100KHz");  \
+static_assert((extra_configuration_options <= I2C_EXTRA_OPT_IRQ_PRIO_3 && extra_configuration_options >= I2C_EXTRA_OPT_IRQ_PRIO_0) || extra_configuration_options == I2C_EXTRA_OPT_NONE, "Invalid IRQ priority set on I2C host driver!"); \
+static_assert((extra_configuration_options & 0xFF) <= I2C_EXTRA_OPT_4_WIRE_MODE, "Unsupported extra configurations options set on I2C host driver!"); \
+} while(0);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -101,13 +101,6 @@ extern "C" {
 #include "error_handling.h"
 #include "i2c_platform_specific.h"
 
-typedef struct {
-    i2c_clock_sources_t clock_sources;
-    const uint32_t periph_clk_freq;
-    const uint32_t baud_rate_freq;
-    const i2c_extra_opt_t extra_configuration_options;
-} i2c_host_conf_opt_t;
-
 typedef enum {
     I2C_NO_STOP_BIT,
     I2C_STOP_BIT
@@ -127,7 +120,15 @@ typedef enum {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, i2c_host_conf_opt_t configuration_options);
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
+                            const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
+                            const i2c_extra_opt_t extra_configuration_options);
+
+#define _i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options) \
+do {                                                                                                                    \
+    I2C_HOST_FUNC_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options); \
+    i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options);               \
+}while(0);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
@@ -152,8 +153,10 @@ uhal_status_t i2c_host_set_slave_mode(const i2c_periph_inst_t i2c_instance, unsi
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr, const unsigned char* write_buff, size_t size,
-                                      i2c_stop_bit_t stop_bit);
+uhal_status_t
+i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsigned char addr, const unsigned char *write_buff,
+                        size_t size,
+                        i2c_stop_bit_t stop_bit);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -165,8 +168,10 @@ uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_instance, unsi
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, const unsigned char* write_buff, size_t size,
-                                          i2c_stop_bit_t stop_bit);
+uhal_status_t
+i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, const unsigned char *write_buff,
+                            size_t size,
+                            i2c_stop_bit_t stop_bit);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -176,7 +181,9 @@ uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_instance, 
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+uhal_status_t
+i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char *read_buff,
+                       size_t amount_of_bytes);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
@@ -186,8 +193,9 @@ uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_instance, unsig
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char* read_buff,
-                                         size_t amount_of_bytes);
+uhal_status_t
+i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char *read_buff,
+                           size_t amount_of_bytes);
 
 /**
  * @brief IRQ handler for I2C host data receive interrupt.
@@ -200,7 +208,7 @@ uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_instance, u
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void i2c_host_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void i2c_host_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C host data send interrupt.
@@ -213,7 +221,7 @@ void i2c_host_data_recv_irq(const void* hw, volatile bustransaction_t* transacti
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void i2c_host_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void i2c_host_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }
