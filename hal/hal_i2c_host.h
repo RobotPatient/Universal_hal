@@ -40,7 +40,7 @@
  *       stacking transactions. Other microcontrollers don't have it and have to be implemented manually in software.
  * - Setting different clock-frequencies for the I2C connection.
  * @note The supported clock-frequencies are dependent on which frequencies are supported by the hardware peripheral of the microcontroller variant.
- *       The I2C module doesn't check for this, you have to... Keep a eye on the datasheet of the MCU and the wiki (https://hoog-v.github.io/Universal_hal/).
+ *       The I2C module checks for this, you have to... Keep a eye on the datasheet of the MCU and the wiki (https://hoog-v.github.io/Universal_hal/).
  *       Software bit-banged implementations of the I2C driver only support standard mode speeds (100KHz)
  * - Linking your own custom interrupt handlers to this module for master as well as slave functionality.
  * @note Linking custom implementations of i2c master irq functions will certainly break the write and read functions...
@@ -61,34 +61,10 @@
  * - When using a microcontroller with extensive clock systems: Cortex-M based microcontrollers for example. The i2c module will not configure clock generators or other clock system options.
  *   It might depending on the implementation of the init function link to an already configured clock generator listed in the i2c_periph_inst_t struct.
  * - Due to the minimalistic interface there has not been a lot of error checking incorporated in the library... This is still an in progress.
- * @todo add more error checking to the I2C module
+ *
  * - The ISR handlers are shared among all hardware peripherals. It is very difficult to provide a separate handler for every hardware instance since this differs for every mcu variant.
  *   The bustransaction_t struct helps to identify which peripheral it runs on. But keep this in mind.
- * @todo add abstraction/default handler struct for ISR
  *
- * Using this module (Host mode):
- * 1. Create a i2c_periph_inst_t <name> in your source file or board header file (recommended), with the settings needed for your microcontroller.
- *    See the wiki(https://hoog-v.github.io/Universal_hal/) for which settings to configure and where to find them.
- * 2. Run i2c_init(<name>, <i2c_clock_freq>), this will configure the peripheral with the needed settings to run in host mode.
- * 3. Run any write or read request using the blocking (will wait till transaction is finished before running next line of code) or non-blocking (stack transactions and run them sequentially).
- *
- * Read a byte from reg 0x0207 from a connected sensor:
- *@code
- * #define F_I2C_CLOCK 100000
- * #define CLIENT_DEVICE_I2C_ADDR 0x29
- * const uint8_t reg_addr[2] = {0x02, 0x07};
- *
- * i2c_init(&i2c_periph, F_I2C_CLOCK);
- * _i2c_host_write_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, reg_addr, sizeof(reg_addr), I2C_STOP_BIT);
- * uint8_t result;
- * _i2c_host_read_blocking(&i2c_periph, CLIENT_DEVICE_I2C_ADDR, &result, sizeof(result));
- *@endcode
- *
- * Using this module (Slave mode):
- * 1. Create a i2c_periph_inst_t <name> in your source file or board header file (recommended), with the settings needed for your microcontroller.
- *    See the wiki(https://hoog-v.github.io/Universal_hal/) for which settings to configure and where to find them.
- * 2. Run i2c_init(<name>, 0), this will configure the peripheral with the needed settings to run in slave mode.
- * 3. Implement some of the slave IRQ functions, to match your use case.
  */
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
@@ -107,18 +83,16 @@ typedef enum {
 } i2c_stop_bit_t;
 
 /**
- * @brief Function to initialize the specified HW peripheral with I2C functionality.
- *        Uses the options set in the i2c_periph_inst_t struct defined platform_specific.h.
- *        To ensure platform compatibility place static i2c_periph_inst_t for each hw peripheral in an board_options.h file
- *        and include it in the build.
- *        Depending on the platform used it can configure for either host/client functionality.
- * @param i2c_instance I2C options to be used when configuring the HW peripheral.
- *                      It might include options like: Slave mode enabled
- *                                                     Peripheral clock options
- *                                                     HW peripheral instance number
- *                                                     HW peripheral handle
+ * @brief Function to initialize the specified HW peripheral with I2C host functionality.
+ *        To ensure platform compatibility use the default option as much as possible for each hw peripheral.
  *
- * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
+ * @param i2c_peripheral_num The i2c peripheral to configure
+ * @param clock_sources The clock source(s) to use..
+ * @param periph_clk_freq The clock frequency of the peripheral (if multiple clocks are used this will be the fastest frequency).
+ * @param baud_rate_freq The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded).
+ * @param extra_configuration_options The extra configuration options like: - DMA use
+ *                                                                          - 4-Wire mode
+ *                                                                          - IRQ priority
  */
 uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
                              const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
@@ -146,7 +120,7 @@ _i2c_host_deinit(i2c_peripheral_num);\
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
  *        This function does only work in host-mode.
- * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num The i2c peripheral to use
  * @param addr The I2C address of the client device to write to
  * @param write_buff Pointer to the write buffer with all the bytes that have to be written
  * @param size The amount of bytes which have to be written
@@ -168,7 +142,7 @@ _i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit); 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
  *        This function does only work in host-mode.
- * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num The i2c peripheral to use
  * @param addr The I2C address of the client device to write to
  * @param write_buff Pointer to the write buffer with all the bytes that have to be written
  * @param size The amount of bytes which have to be written
@@ -189,7 +163,7 @@ _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bi
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
  *        This function does only work in host-mode.
- * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num The i2c peripheral to use
  * @param addr The I2C address of the client device to write to
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
@@ -198,24 +172,29 @@ uhal_status_t
 _i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
                         size_t amount_of_bytes);
 
-#define I2C_HOST_READ_BLOCKING(i2c_peripheral_num, addr, read_buff, size, stop_bit) \
+#define I2C_HOST_READ_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
 do {                                                                            \
-I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size, stop_bit); \
-_i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size, stop_bit);             \
+I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size); \
+_i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size);             \
 }while(0);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
  *        This function does only work in host-mode.
- * @param i2c_instance I2C options used when configuring the HW peripheral.
+ * @param i2c_peripheral_num The i2c peripheral to use
  * @param addr The I2C address of the client device to write to
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
 uhal_status_t
-i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_instance, unsigned short addr, unsigned char *read_buff,
-                           size_t amount_of_bytes);
+_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
+                            size_t amount_of_bytes);
 
+#define I2C_HOST_READ_NON_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
+do {                                                                            \
+I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size); \
+_i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, size);             \
+}while(0);
 /**
  * @brief IRQ handler for I2C host data receive interrupt.
  *        Gets run when a host read action is executed.

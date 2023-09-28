@@ -11,7 +11,7 @@ void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_peripheral_num, unsigne
 void _i2c_host_write_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
 void _i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
 void _i2c_host_read_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
-void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void _i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 ```
 
 ### I2C_HOST_INIT function
@@ -236,15 +236,15 @@ void:
 2. It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
 3. The _i2c_host_read_blocking function will block or halt the program execution until the entire read operation is finished.
 
-### i2c_host_read_non_blocking function
+### _i2c_host_read_non_blocking function
 
 ```c
-void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void _i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
 ```
 
 #### Description:
 
-The i2c_host_read_non_blocking function performs a non-blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, allowing the program to continue executing while the read operation is underway.
+The _i2c_host_read_non_blocking function performs a non-blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, allowing the program to continue executing while the read operation is underway.
 
 #### Parameters:
 
