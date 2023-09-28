@@ -5,13 +5,36 @@
 The API for I2C host functionality has the following functions available:
 
 ```c
-void I2C_HOST_INIT(const i2c_periph_inst_t* i2c_peripheral_num, unsigned long baud_rate);
-void _i2c_host_deinit(const i2c_periph_inst_t* i2c_peripheral_num);
-void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_peripheral_num, unsigned long baud_rate);
-void _i2c_host_write_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
-void _i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
-void _i2c_host_read_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
-void _i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
+					const i2c_clock_sources_t clock_sources,
+                    const uint32_t periph_clk_freq, 
+                    const uint32_t baud_rate_freq,
+                    const i2c_extra_opt_t extra_configuration_options);
+                    
+
+void _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, 
+							  const unsigned char addr,
+                         	  const unsigned char *write_buff,
+                         	  const size_t size,
+                         	  const i2c_stop_bit_t stop_bit);
+                         	  
+void _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, 
+								  const unsigned short addr,
+                             	  const unsigned char *write_buff,
+                             	  const size_t size,
+                             	  const i2c_stop_bit_t stop_bit);
+                             	  
+void _i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, 
+							 const unsigned short addr, 
+							 unsigned char *read_buff,
+                        	 const size_t amount_of_bytes);
+                        	 
+void _i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, 
+								 const unsigned short addr, 
+								 unsigned char* read_buff, 
+								 const size_t amount_of_bytes);
+								 
+void _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
 ```
 
 ### I2C_HOST_INIT function
@@ -45,66 +68,6 @@ void:
 1. The function takes a pointer to an I2C instance and a baud rate as inputs.
 2. It initializes the I2C hardware peripheral pointed to by i2c_peripheral_num with the specified baud_rate.
 3. The initialization process ensures the I2C peripheral is properly configured and ready for further I2C operations.
-
-### _i2c_host_deinit function
-
-```c
-void _i2c_host_deinit(const i2c_periph_inst_t* i2c_peripheral_num);
-```
-
-#### Description:
-
-The _i2c_host_deinit function is used to de-initialize or reset the I2C peripheral to a non-operational state. This helps in conserving power and preventing further I2C operations, ensuring that the I2C peripheral is safely turned off.
-
-#### Parameters:
-
-1. i2c_peripheral_num (const i2c_periph_inst_t*):
-	
-	A pointer to an instance of the I2C peripheral structure. This parameter holds information regarding the I2C peripheral's configuration and state.
-
-#### Return Type:
-
-void:
-
-- This function does not return any value.
-
-#### Working:
-
-The _i2c_host_deinit function takes a pointer to an I2C peripheral instance as an input.
-It resets the I2C peripheral pointed to by i2c_peripheral_num, rendering it inactive and unavailable for further I2C communication.
-This process is crucial for power management and ensuring the secure termination of I2C operations.
-
-### i2c_host_set_baudrate function
-
-```c
-void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_peripheral_num, unsigned long baud_rate);
-```
-
-#### Description:
-
-The i2c_host_set_baud_rate function is used to reconfigure the baud rate of an already initialized I2C peripheral for communication. Adjusting the baud rate is essential for ensuring reliable communication with devices on the I2C bus, especially when changing the communication requirements or working with various devices with different baud rate specifications.
-
-#### Parameters:
-
-1. i2c_peripheral_num (const i2c_periph_inst_t*):
-
-	A pointer to an instance of the I2C peripheral structure, holding the configuration and state information for the I2C peripheral.
-
-2. baud_rate (unsigned long):
-   
-	The desired new baud rate for I2C communication. It represents the frequency of the SCL line. This value is typically 100 KHz or 400 KHz, but other values can be selected based on the hardware's capability and the slave devices' requirements.
-
-#### Return:
-
-void: 
-
-- The function does not return any value. It’s used only for adjusting the baud rate of the I2C peripheral and doesn’t compute or check for a successful setup.
-
-#### Working:
-
-1. The i2c_host_set_baud_rate function takes a pointer to an already initialized I2C peripheral instance and a desired new baud rate as inputs.
-
-2. It reconfigures the I2C peripheral pointed to by i2c_peripheral_num to operate at the specified baud_rate, allowing for adaptation to new communication speeds as required.
 
 ### _i2c_host_write_blocking function
 
@@ -277,4 +240,34 @@ void:
 2. It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
 
 3. Unlike the blocking read function, i2c_read_non_blocking will not halt the program execution until the read operation is complete.
+
+### _i2c_host_deinit function
+
+```c
+void _i2c_host_deinit(const i2c_periph_inst_t* i2c_peripheral_num);
+```
+
+#### Description:
+
+The _i2c_host_deinit function is used to de-initialize or reset the I2C peripheral to a non-operational state. This helps in conserving power and preventing further I2C operations, ensuring that the I2C peripheral is safely turned off.
+
+#### Parameters:
+
+1. i2c_peripheral_num (const i2c_periph_inst_t*):
+	
+	A pointer to an instance of the I2C peripheral structure. This parameter holds information regarding the I2C peripheral's configuration and state.
+
+#### Return Type:
+
+void:
+
+- This function does not return any value.
+
+#### Working:
+
+The _i2c_host_deinit function takes a pointer to an I2C peripheral instance as an input.
+It resets the I2C peripheral pointed to by i2c_peripheral_num, rendering it inactive and unavailable for further I2C communication.
+This process is crucial for power management and ensuring the secure termination of I2C operations.
+
+
 
