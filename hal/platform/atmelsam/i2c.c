@@ -219,9 +219,9 @@ void _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num) {
     disable_host_i2c_driver(sercom_inst);
 }
 
-void _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr,
-                                           const unsigned char *write_buff, size_t size,
-                                           i2c_stop_bit_t stop_bit) {
+void _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr,
+                                  const unsigned char *write_buff, const size_t size,
+                                  const i2c_stop_bit_t stop_bit) {
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
     volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
@@ -238,25 +238,25 @@ void _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, un
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
 }
 
-void _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr,
-                                       const unsigned char *write_buff, size_t size,
-                                       i2c_stop_bit_t stop_bit) {
+void _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned char addr,
+                              const unsigned char *write_buff, const size_t size,
+                              const i2c_stop_bit_t stop_bit) {
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);
     wait_for_idle_busstate(sercom_inst);
 }
 
 void
-_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
-                        size_t amount_of_bytes) {
+_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr, unsigned char *read_buff,
+                        const size_t amount_of_bytes) {
     _i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, amount_of_bytes);
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
 }
 
 void
-_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
-                            size_t amount_of_bytes) {
+_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr, unsigned char *read_buff,
+                            const size_t amount_of_bytes) {
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
     volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];

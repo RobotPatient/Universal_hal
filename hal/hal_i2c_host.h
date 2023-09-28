@@ -128,10 +128,10 @@ _i2c_host_deinit(i2c_peripheral_num);\
  *                                                                       Value 0 is without stop-bit
  */
 void
-_i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr,
+_i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned char addr,
                          const unsigned char *write_buff,
-                         size_t size,
-                         i2c_stop_bit_t stop_bit);
+                         const size_t size,
+                         const i2c_stop_bit_t stop_bit);
 
 #define I2C_HOST_WRITE_BLOCKING(i2c_peripheral_num, addr, write_buff, size, stop_bit) \
 do {                                                                            \
@@ -150,10 +150,10 @@ _i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit); 
  *                                                                       Value 0 is without stop-bit
  */
 void
-_i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr,
+_i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr,
                              const unsigned char *write_buff,
-                             size_t size,
-                             i2c_stop_bit_t stop_bit);
+                             const size_t size,
+                             const i2c_stop_bit_t stop_bit);
 
 #define I2C_HOST_WRITE_NON_BLOCKING(i2c_peripheral_num, addr, write_buff, size, stop_bit) \
 do {                                                                            \
@@ -170,8 +170,8 @@ _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bi
  * @param amount_of_bytes The amount of bytes which have to be read
  */
 void
-_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
-                        size_t amount_of_bytes);
+_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr, unsigned char *read_buff,
+                        const size_t amount_of_bytes);
 
 #define I2C_HOST_READ_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
 do {                                                                            \
@@ -188,8 +188,8 @@ _i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size);             
  * @param amount_of_bytes The amount of bytes which have to be read
  */
 void
-_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
-                            size_t amount_of_bytes);
+_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr, unsigned char *read_buff,
+                            const size_t amount_of_bytes);
 
 #define I2C_HOST_READ_NON_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
 do {                                                                            \
