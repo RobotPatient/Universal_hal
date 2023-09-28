@@ -42,7 +42,8 @@
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
 
-static Sercom* i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
+static Sercom *i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
+
 /**
  * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.
  *        By continually reading its I2CM syncbusy register.
@@ -53,8 +54,8 @@ static Sercom* i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SER
  *                                           SERCOM_I2CM_SYNCBUSY_SYSOP
  * @note This function can only be used for use with I2C host/master configuration
  */
-static inline void i2c_master_wait_for_sync(const void* const hw, const uint32_t bits_to_read) {
-    while (((Sercom*)hw)->I2CM.SYNCBUSY.reg & bits_to_read) {};
+static inline void i2c_master_wait_for_sync(const void *const hw, const uint32_t bits_to_read) {
+    while (((Sercom *) hw)->I2CM.SYNCBUSY.reg & bits_to_read) {};
 }
 
 /**
@@ -68,9 +69,9 @@ static inline void i2c_master_wait_for_sync(const void* const hw, const uint32_t
  *                              Other: N/A
  * @note This function can only be used for use with I2C host/master configuration
  */
-uint8_t get_i2c_master_busstate(const void* const hw) {
+uint8_t get_i2c_master_busstate(const void *const hw) {
     i2c_master_wait_for_sync(hw, SERCOM_I2CM_SYNCBUSY_SYSOP);
-    return (((Sercom*)hw)->I2CM.STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE_Msk) >> SERCOM_I2CM_STATUS_BUSSTATE_Pos;
+    return (((Sercom *) hw)->I2CM.STATUS.reg & SERCOM_I2CM_STATUS_BUSSTATE_Msk) >> SERCOM_I2CM_STATUS_BUSSTATE_Pos;
 }
 
 /**
@@ -81,7 +82,7 @@ uint8_t get_i2c_master_busstate(const void* const hw) {
  *
  * @note This function can only be used for use with I2C host/master configuration
  */
-void wait_for_idle_busstate(Sercom* SercomInst) {
+void wait_for_idle_busstate(Sercom *SercomInst) {
     int timeout = 65535;
     int timeout_attempt = 4;
     while (get_i2c_master_busstate(SercomInst) != 0x1) {
@@ -118,7 +119,7 @@ static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sourc
     return slow_clk_val;
 }
 
-static inline Sercom* get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
+static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
     return i2c_peripheral_mapping_table[peripheral_inst_num];
 }
 
@@ -126,14 +127,15 @@ static inline Sercom* get_sercom_inst(const i2c_periph_inst_t peripheral_inst_nu
  * @brief Internal function used for disabling the SERCOM i2c Host driver
  * @param hw Pointer to the SERCOM peripheral to be manipulated or read
  */
-static inline void disable_host_i2c_driver(const void* const hw) {
-    ((Sercom*)hw)->I2CM.CTRLA.reg &= ~SERCOM_I2CM_CTRLA_ENABLE;
+static inline void disable_host_i2c_driver(const void *const hw) {
+    ((Sercom *) hw)->I2CM.CTRLA.reg &= ~SERCOM_I2CM_CTRLA_ENABLE;
     const uint32_t waitflags = (SERCOM_I2CM_SYNCBUSY_SWRST | SERCOM_I2CM_SYNCBUSY_ENABLE);
     i2c_master_wait_for_sync(hw, waitflags);
 }
 
 uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
-                             const uint32_t periph_clk_freq, const uint32_t baud_rate_freq, const i2c_extra_opt_t extra_configuration_options) {
+                             const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
+                             const i2c_extra_opt_t extra_configuration_options) {
 #ifdef __SAMD51__
 
 #else
@@ -141,29 +143,27 @@ uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i
     if (clock_sources != I2C_CLK_SOURCE_USE_DEFAULT) {
         const uint8_t clk_gen_slow = get_slow_clk_gen_val(clock_sources);
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
-        while (GCLK->STATUS.bit.SYNCBUSY)
-            ;
+        while (GCLK->STATUS.bit.SYNCBUSY);
         const uint8_t clk_gen_fast = get_fast_clk_gen_val(clock_sources);
         GCLK->CLKCTRL.reg =
-            GCLK_CLKCTRL_GEN(clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+                GCLK_CLKCTRL_GEN(clk_gen_fast) |
+                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
-        while (GCLK->STATUS.bit.SYNCBUSY)
-            ;
+        while (GCLK->STATUS.bit.SYNCBUSY);
     } else {
         const uint8_t clk_gen_slow = 3;
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
-        while (GCLK->STATUS.bit.SYNCBUSY)
-            ;
+        while (GCLK->STATUS.bit.SYNCBUSY);
         const uint8_t clk_gen_fast = 0;
         GCLK->CLKCTRL.reg =
-            GCLK_CLKCTRL_GEN(clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+                GCLK_CLKCTRL_GEN(clk_gen_fast) |
+                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
-        while (GCLK->STATUS.bit.SYNCBUSY)
-            ;
+        while (GCLK->STATUS.bit.SYNCBUSY);
     }
 #endif
 
-    Sercom*    SercomInst = get_sercom_inst(i2c_peripheral_num);
+    Sercom *SercomInst = get_sercom_inst(i2c_peripheral_num);
     const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
     if (SercomEnabled) {
         disable_host_i2c_driver(SercomInst);
@@ -216,49 +216,55 @@ uhal_status_t _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i
 }
 
 uhal_status_t _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
+    Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     disable_host_i2c_driver(sercom_inst);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, const unsigned char* write_buff, size_t size,
+uhal_status_t _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr,
+                                           const unsigned char *write_buff, size_t size,
                                            i2c_stop_bit_t stop_bit) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
+    Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
-    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
-    while ((sercom_inst->I2CM.STATUS.bit.BUSSTATE != 0x1) && sercom_bustrans_buffer[i2c_peripheral_num].transaction_type != SERCOMACT_NONE
-           && sercom_inst->I2CM.INTFLAG.reg == 0)
-        ;
+    volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
+    while ((sercom_inst->I2CM.STATUS.bit.BUSSTATE != 0x1) &&
+           sercom_bustrans_buffer[i2c_peripheral_num].transaction_type != SERCOMACT_NONE
+           && sercom_inst->I2CM.INTFLAG.reg == 0);
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     TransactionData->write_buffer = write_buff;
     TransactionData->buf_size = size;
-    TransactionData->transaction_type = stop_bit ? SERCOMACT_I2C_DATA_TRANSMIT_STOP : SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP;
+    TransactionData->transaction_type = stop_bit ? SERCOMACT_I2C_DATA_TRANSMIT_STOP
+                                                 : SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP;
     TransactionData->buf_cnt = 0;
     sercom_inst->I2CM.ADDR.reg = (addr << 1);
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr, const unsigned char* write_buff, size_t size,
+uhal_status_t _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned char addr,
+                                       const unsigned char *write_buff, size_t size,
                                        i2c_stop_bit_t stop_bit) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
+    Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);
     wait_for_idle_busstate(sercom_inst);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t _i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes) {
+uhal_status_t
+_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
+                        size_t amount_of_bytes) {
     _i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, amount_of_bytes);
-    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
+    Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t _i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char* read_buff,
-                                          size_t amount_of_bytes) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_peripheral_num);
+uhal_status_t
+_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, unsigned char *read_buff,
+                            size_t amount_of_bytes) {
+    Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
-    volatile bustransaction_t* TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
+    volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     TransactionData->read_buffer = read_buff;
     TransactionData->buf_size = amount_of_bytes;

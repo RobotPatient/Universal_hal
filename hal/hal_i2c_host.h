@@ -150,7 +150,8 @@ _i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit); 
  *                                                                       Value 0 is without stop-bit
  */
 uhal_status_t
-_i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr, const unsigned char *write_buff,
+_i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, unsigned short addr,
+                             const unsigned char *write_buff,
                              size_t size,
                              i2c_stop_bit_t stop_bit);
 
@@ -195,6 +196,7 @@ do {                                                                            
 I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size); \
 _i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, size);             \
 }while(0);
+
 /**
  * @brief IRQ handler for I2C host data receive interrupt.
  *        Gets run when a host read action is executed.
