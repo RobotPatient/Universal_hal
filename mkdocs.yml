@@ -79,14 +79,17 @@ extra_javascript:
 nav:
   - Home: "index.md"
   - API:
+      - 'GPIO':
+        - 'Compatibility': "API/GPIO/gpio_compatibility.md"
+        - 'General API': "API/GPIO/gpio_api.md"
       - 'I2C Host':
-        - 'Compatibility': "API/i2c_compatibility.md"
-        - 'General API': "API/i2c_host_api.md"
+        - 'Compatibility': "API/I2C_host/i2c_compatibility.md"
+        - 'General API': "API/I2C_host/i2c_host_api.md"
         - 'API platform':
            - SAMD:
-             - "About": API/platform/about.md
-             - "Usage": API/platform/Usage.md
-             - "Critical Notes": API/platform/Critical_notes.md
+             - "About": API/I2C_host/platform/atmelsam/about.md
+             - "Usage": API/I2C_host/platform/atmelsam/Usage.md
+             - "Critical Notes": API/I2C_host/platform/atmelsam/Critical_notes.md
              - Doxygen:
                - "Struct List": "atmelsam_i2c_host/annotated.md"
                - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"
