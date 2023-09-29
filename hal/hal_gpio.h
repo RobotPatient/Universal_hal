@@ -116,7 +116,7 @@ retval;                                         \
  */
 uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
 
-#define GPIO_SET_PIN_LVL(pin, pin_mode) \
+#define GPIO_SET_PIN_LVL(pin, level) \
 ({                                     \
 int retval; \
 GPIO_PIN_PARAMETER_CHECK(pin);           \
