@@ -7,12 +7,12 @@ plugins:
           full-doc: True
           doxy-cfg:
             FILE_PATTERNS: "i2c.c 
-            				i2c_host.h 
             				i2c_platform_specific.h 
             				peripheral_clocking.h 
             				sercom_stuff.h 
             				default_isr_handlers.h 
-            				default_irq_handlers.c"
+            				default_irq_handlers.c
+            				hal_i2c_host.h"
             RECURSIVE: False
             EXTRACT_ALL: True
 markdown_extensions:
