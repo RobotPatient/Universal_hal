@@ -43,7 +43,7 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
     
      SERCOMx/PAD[1] corresponds to the SCL output of the SERCOM. 
     
-     For example configuring PA4 and PA5 of the SAMD21 to the SDA and SCL output of SERCOM 0: ![samd io table](../../assets/samd_io_table.png) Means that we have to set pin PA4 and PA5 to pin mode D (the column letter). The resulting function call will be:
+     For example configuring PA4 and PA5 of the SAMD21 to the SDA and SCL output of SERCOM 0: ![samd io table](../../../../assets/samd_io_table.png) Means that we have to set pin PA4 and PA5 to pin mode D (the column letter). The resulting function call will be:
      ```c
      {
      const gpio_pin_t SDA_PIN = {.port_num = GPIO_PORT_A, 
@@ -138,7 +138,7 @@ Within this function the following parameters can be set:
 	_i2c_host_init(I2C_PERIPHERAL_0, I2C_PERIPHERAL_CLK_SOURCES, ...
 	```
 	
-	**If not sure which clockgenerator to use. Try the `I2C_CLK_SOURCE_USE_DEFAULT` flag. **
+	**If not sure which clockgenerator to use. Try the `I2C_CLK_SOURCE_USE_DEFAULT` flag.**
 	
 	This should work out of the box on ASF and Arduino.
 
