@@ -327,9 +327,19 @@ The `gpio_set_interrupt_on_pin` function configures a specified GPIO (General Pu
 - Usage Note: **Utilize this function when dealing with pin or irq_opt values determined at runtime.**
 
 #### Parameters
+1. pin (const gpio_pin_t):
 
+	The specific GPIO pin on which the interrupt will be configured.
+
+2. irq_opt (gpio_irq_opt_t):
+
+	The condition or event that will trigger the interrupt. The options could include events like a rising edge, falling edge, or level changes, as defined by the gpio_irq_opt_t enumeration or structure.
+	
 #### Return
+**uhal_status_t**: The function returns a status of type uhal_status_t, indicating the success or failure of the operation.
 
 #### Working
+1. The function takes the pin and the desired irq_opt as arguments.
 
+2. It configures the interrupt on the pin based on the specified condition or event in irq_opt.
 
