@@ -82,6 +82,9 @@ nav:
       - 'GPIO':
         - 'Compatibility': "API/GPIO/gpio_compatibility.md"
         - 'General API': "API/GPIO/gpio_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/GPIO/platform/atmelsam/about.md
       - 'I2C Host':
         - 'Compatibility': "API/I2C_host/i2c_compatibility.md"
         - 'General API': "API/I2C_host/i2c_host_api.md"
