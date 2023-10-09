@@ -32,7 +32,7 @@ gpio_mode_t GPIO_GET_PIN_MODE(const gpio_pin_t pin);
 
 /* Function to set pin options (without compile-time parameter checking) */
 uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
-/* Function to set set pin options (with compile-time parameter checking) */
+/* Function to set pin options (with compile-time parameter checking) */
 uhal_status_t GPIO_SET_PIN_OPTIONS(const gpio_pin_t pin, const gpio_opt_t opt);
 
 /* Function to get the currently set pin options (without compile-time parameter checking) */
@@ -242,7 +242,7 @@ The `gpio_get_pin_mode` function retrieves the current mode of a specified GPIO 
 ```c
 /* Function to set pin options (without compile-time parameter checking) */
 uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
-/* Function to set set pin options (with compile-time parameter checking) */
+/* Function to set pin options (with compile-time parameter checking) */
 uhal_status_t GPIO_SET_PIN_OPTIONS(const gpio_pin_t pin, const gpio_opt_t opt);
 ```
 
