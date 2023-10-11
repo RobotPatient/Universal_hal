@@ -69,4 +69,18 @@ typedef struct {
     sercom_dopo_pad_t dopo_pad;
 } spi_periph_inst_t;
 
+typedef enum {
+    SPI_EXTRA_OPT_USE_DEFAULT = 0,
+    SPI_EXTRA_OPT_CLOCK_POLARITY_SCK_HIGH = 0x01,
+    SPI_EXTRA_OPT_DATA_ORDER_LSB_FIRST = 0x02,
+    SPI_EXTRA_OPT_DOPO_PAD_0 = 0x04,
+    SPI_EXTRA_OPT_DOPO_PAD_1 = 0x08,
+    SPI_EXTRA_OPT_DOPO_PAD_2 = 0x0C,
+    SPI_EXTRA_OPT_DOPO_PAD_3 = 0x10,
+    SPI_EXTRA_OPT_DIPO_PAD_0 = 0x20,
+    SPI_EXTRA_OPT_DIPO_PAD_1 = 0x30,
+    SPI_EXTRA_OPT_DIPO_PAD_2 = 0x50,
+    SPI_EXTRA_OPT_DIPO_PAD_3 = 0x60,
+} spi_extra_opt_t;
+
 #endif //ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
