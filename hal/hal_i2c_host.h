@@ -75,7 +75,7 @@ extern "C" {
 
 #include "assert.h"
 #include "error_handling.h"
-#include "i2c_platform_specific.h"
+#include "i2c_common/i2c_platform_specific.h"
 
 typedef enum {
     I2C_NO_STOP_BIT,
@@ -94,27 +94,27 @@ typedef enum {
  *                                                                          - 4-Wire mode
  *                                                                          - IRQ priority
  */
-void i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
                    const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
                    const i2c_extra_opt_t extra_configuration_options);
 
 #define I2C_HOST_INIT(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options) \
 do {                                                                                                                    \
     I2C_HOST_INIT_FUNC_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options); \
-    _i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options);               \
+    i2c_host_init(i2c_peripheral_num, clock_sources, periph_clk_freq, baud_rate_freq, extra_configuration_options);               \
 }while(0);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_peripheral_num I2C options used when configuring the HW peripheral.
  */
-void i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
+uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
 
 
 #define I2C_HOST_DEINIT(i2c_peripheral_num) \
 do {                                        \
 I2C_HOST_DEINIT_FUNC_PARAMETER_CHECK(i2c_peripheral_num);    \
-_i2c_host_deinit(i2c_peripheral_num);\
+i2c_host_deinit(i2c_peripheral_num);\
 }while(0);
 
 /**
@@ -127,7 +127,7 @@ _i2c_host_deinit(i2c_peripheral_num);\
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
                              const uint16_t addr,
                              const uint8_t *write_buff,
                              const size_t size,
@@ -136,7 +136,7 @@ void i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
 #define I2C_HOST_WRITE_BLOCKING(i2c_peripheral_num, addr, write_buff, size, stop_bit) \
 do {                                                                            \
 I2C_HOST_WRITE_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, write_buff, size, stop_bit); \
-_i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);             \
+i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);             \
 }while(0);
 
 /**
@@ -149,7 +149,7 @@ _i2c_host_write_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit); 
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-void i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
                                  const uint16_t addr,
                                  const uint8_t *write_buff,
                                  const size_t size,
@@ -158,7 +158,7 @@ void i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
 #define I2C_HOST_WRITE_NON_BLOCKING(i2c_peripheral_num, addr, write_buff, size, stop_bit) \
 do {                                                                            \
 I2C_HOST_WRITE_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, write_buff, size, stop_bit); \
-_i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);             \
+i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);             \
 }while(0);
 
 /**
@@ -169,7 +169,7 @@ _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bi
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
                             const uint16_t addr,
                             uint8_t *read_buff,
                             const size_t amount_of_bytes);
@@ -177,7 +177,7 @@ void i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
 #define I2C_HOST_READ_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
 do {                                                                            \
 I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size); \
-_i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size);             \
+i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size);             \
 }while(0);
 
 /**
@@ -188,7 +188,7 @@ _i2c_host_read_blocking(i2c_peripheral_num, addr, read_buff, size);             
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-void i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
                                 const uint16_t addr,
                                 uint8_t *read_buff,
                                 const size_t amount_of_bytes);
@@ -196,7 +196,7 @@ void i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
 #define I2C_HOST_READ_NON_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
 do {                                                                            \
 I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size); \
-_i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, size);             \
+i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, size);             \
 }while(0);
 
 /**

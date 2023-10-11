@@ -31,7 +31,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "hal_gpio.h"
-#include "spi_platform_specific.h"
+#include "spi_common/spi_platform_specific.h"
 
 /**
  * @brief SPI device struct

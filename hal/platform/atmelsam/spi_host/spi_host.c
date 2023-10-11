@@ -23,10 +23,10 @@
 */
 #include <stddef.h>
 #include "bit_manipulation.h"
-#include "default_irq_handlers.h"
+#include "irq/default_irq_handlers.h"
 #include "hal_gpio.h"
 #include "hal_spi_host.h"
-#include "spi_platform_specific.h"
+#include "spi_common/spi_platform_specific.h"
 
 /**
  * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.

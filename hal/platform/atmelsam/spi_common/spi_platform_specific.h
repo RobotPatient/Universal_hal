@@ -27,8 +27,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sam.h>
-#include "sercom_stuff.h"
-#include "peripheral_clocking.h"
+#include "irq/sercom_stuff.h"
+#include "clock_system/peripheral_clocking.h"
 
 typedef enum {
     SPI_OPERATING_MODE_SLAVE = 0x2, SPI_OPERATING_MODE_MASTER

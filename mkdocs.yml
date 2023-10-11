@@ -7,12 +7,12 @@ plugins:
           full-doc: True
           doxy-cfg:
             FILE_PATTERNS: "i2c.c 
-            				i2c_host.h 
             				i2c_platform_specific.h 
             				peripheral_clocking.h 
             				sercom_stuff.h 
             				default_isr_handlers.h 
-            				default_irq_handlers.c"
+            				default_irq_handlers.c
+            				hal_i2c_host.h"
             RECURSIVE: False
             EXTRACT_ALL: True
 markdown_extensions:
@@ -79,14 +79,20 @@ extra_javascript:
 nav:
   - Home: "index.md"
   - API:
-      - 'I2C Host':
-        - 'Compatibility': "API/i2c_compatibility.md"
-        - 'General API': "API/i2c_host_api.md"
+      - 'GPIO':
+        - 'Compatibility': "API/GPIO/gpio_compatibility.md"
+        - 'General API': "API/GPIO/gpio_api.md"
         - 'API platform':
            - SAMD:
-             - "About": API/platform/about.md
-             - "Usage": API/platform/Usage.md
-             - "Critical Notes": API/platform/Critical_notes.md
+             - "About": API/GPIO/platform/atmelsam/about.md
+      - 'I2C Host':
+        - 'Compatibility': "API/I2C_host/i2c_compatibility.md"
+        - 'General API': "API/I2C_host/i2c_host_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/I2C_host/platform/atmelsam/about.md
+             - "Usage": API/I2C_host/platform/atmelsam/Usage.md
+             - "Critical Notes": API/I2C_host/platform/atmelsam/Critical_notes.md
              - Doxygen:
                - "Struct List": "atmelsam_i2c_host/annotated.md"
                - "Struct Member Variables": "atmelsam_i2c_host/class_member_variables.md"

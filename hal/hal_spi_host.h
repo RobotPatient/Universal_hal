@@ -25,7 +25,7 @@
  */
 #ifndef HAL_SPI_HOST_H
 #define HAL_SPI_HOST_H
-#include "spi_platform_specific.h"
+#include "spi_common/spi_platform_specific.h"
 #include "hal_gpio.h"
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus

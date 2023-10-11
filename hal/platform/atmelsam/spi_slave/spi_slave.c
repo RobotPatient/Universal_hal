@@ -23,7 +23,7 @@
 */
 #include <stddef.h>
 #include "bit_manipulation.h"
-#include "default_irq_handlers.h"
+#include "irq/default_irq_handlers.h"
 #include "hal_gpio.h"
 #include "hal_spi_slave.h"
 

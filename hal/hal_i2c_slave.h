@@ -24,7 +24,7 @@
 #ifndef HAL_I2C_SLAVE_H
 #define HAL_I2C_SLAVE_H
 /* Extern c for compiling with c++*/
-#include "i2c_platform_specific.h"
+#include "i2c_common/i2c_platform_specific.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,18 +34,17 @@ extern "C" {
  * @brief Initialize the hardware peripheral with I2C slave functionality.
  * @param i2c_instance The i2c instance to initialize
  */
-void
-i2c_slave_init(const i2c_periph_inst_t i2c_instance,
-               const uint16_t slave_addr,
-               const i2c_clock_sources_t clock_sources,
-               const uint32_t clock_frequency,
-               const i2c_extra_opt_t extra_opt);
+uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
+                    const uint16_t slave_addr,
+                    const i2c_clock_sources_t clock_sources,
+                    const uint32_t clock_frequency,
+                    const i2c_extra_opt_t extra_configuration_options);
 
 /**
  * @brief De-initialize an i2c slave initialized hardware peripheral.
  * @param i2c_instance
  */
-void i2c_slave_deinit(const i2c_periph_inst_t i2c_instance);
+uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance);
 
 /**
  * @brief IRQ handler for I2C Client address match interrupt.

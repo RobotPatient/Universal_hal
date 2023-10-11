@@ -76,7 +76,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include <error_handling.h>
-#include <gpio_platform_specific.h>
+#include <gpio/gpio_platform_specific.h>
 
 /**
  * @brief Toggles output of given gpio pin.
@@ -85,12 +85,29 @@ extern "C" {
  */
 uhal_status_t gpio_toggle_pin_output(const gpio_pin_t pin);
 
+#define GPIO_TOGGLE_PIN_OUTPUT(pin) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);           \
+retval = gpio_toggle_pin_output(pin);        \
+retval;                                         \
+})
+
 /**
  * @brief Sets the gpio pin to INPUT,OUTPUT or special pin-mux functions (platform dependent).
  * @param pin The pin to set to specific mode.
  * @param pin_mode The pin mode to set the pin to.
  */
 uhal_status_t gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
+
+#define GPIO_SET_PIN_MODE(pin, pin_mode) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);           \
+GPIO_PIN_MODE_PARAMETER_CHECK(pin_mode); \
+retval = gpio_set_pin_mode(pin, pin_mode);        \
+retval;                                         \
+})
 
 /**
  * @brief Sets the gpio pin output level (HIGH, LOW, HIGH_IMPEDANCE (if supported) ).
@@ -99,12 +116,29 @@ uhal_status_t gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
  */
 uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
 
+#define GPIO_SET_PIN_LVL(pin, level) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);           \
+GPIO_PIN_LEVEL_PARAMETER_CHECK(level); \
+retval = gpio_set_pin_lvl(pin, level);        \
+retval;                                         \
+})
+
 /**
  * @brief Gets the current input level or set output level (depending on if pin is set to input or output direction).
  * @param pin The pin to get the in/output level from.
  * @return The in/output level of the pin.
  */
-gpio_level_t gpio_get_pin_level(const gpio_pin_t pin);
+gpio_level_t gpio_get_pin_lvl(const gpio_pin_t pin);
+
+#define GPIO_GET_PIN_LVL(pin) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);\
+retval = gpio_get_pin_lvl(pin);        \
+retval;                                         \
+})
 
 /**
  * @brief Gets the currently set gpio pin-mode (INPUT, OUTPUT, e.g.).
@@ -113,12 +147,29 @@ gpio_level_t gpio_get_pin_level(const gpio_pin_t pin);
  */
 gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin);
 
+#define GPIO_GET_PIN_MODE(pin) \
+({                                     \
+int retval;                             \
+GPIO_PIN_PARAMETER_CHECK(pin);         \
+retval = gpio_get_pin_mode(pin);        \
+retval;                                \
+})
+
 /**
  * @brief Sets gpio pin options like pull-downs, pull-ups and driver strength among things.
  * @param pin The pin to apply the new options to.
  * @param opt The options to set.
  */
 uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
+
+#define GPIO_SET_PIN_OPTIONS(pin, opt) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);         \
+GPIO_PIN_OPTIONS_PARAMETER_CHECK(opt);   \
+retval = gpio_set_pin_options(pin, opt);        \
+retval;                                         \
+})
 
 /**
  * @brief Gets the currently set options for the specified pin.
@@ -127,12 +178,29 @@ uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt);
  */
 gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin);
 
+#define GPIO_GET_PIN_OPTIONS(pin) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);           \
+retval = gpio_get_pin_options(pin);        \
+retval;                                         \
+})
+
+
 /**
  * @brief Setup interrupts on the given pin.
  * @param pin The pin on which the interrupt has to be triggered.
  * @param irq_opt The options needed to setup the pin with interrupts (channels, trigger options (rising, falling, etc...), e.g. )
  */
 uhal_status_t gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq_opt);
+
+#define GPIO_SET_INTERRUPT_ON_PIN(pin, irq_opt) \
+({                                     \
+int retval; \
+GPIO_PIN_PARAMETER_CHECK(pin);           \
+retval = gpio_set_interrupt_on_pin(pin, irq_opt);        \
+retval;                                         \
+})
 
 /**
  * @brief Default GPIO irq handler function.

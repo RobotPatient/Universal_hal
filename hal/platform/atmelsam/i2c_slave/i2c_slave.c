@@ -24,7 +24,12 @@
 #include <stdbool.h>
 #include <hal_i2c_slave.h>
 #include <stddef.h>
-#include <default_irq_handlers.h>
+#include "irq/default_irq_handlers.h"
+
+
+#define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
+
+Sercom *i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 
 /**
  * @brief Helper function which waits for the SERCOM peripheral to get in sync and finish requested operations.
@@ -36,14 +41,13 @@
  *                                           SERCOM_I2CS_SYNCBUSY_SYSOP
  * @note This function can only be used for use with I2C client/slave configuration
  */
-static inline void i2c_slave_wait_for_sync(const void *const hw, const uint32_t bits_to_read)
-{
-    while (((Sercom *)hw)->I2CS.SYNCBUSY.reg & bits_to_read) {
+static inline void i2c_slave_wait_for_sync(const void *const hw, const uint32_t bits_to_read) {
+    while (((Sercom *) hw)->I2CS.SYNCBUSY.reg & bits_to_read) {
     };
 }
 
 void disable_i2c_interface(const void *const hw) {
-    ((Sercom*)hw)->I2CM.CTRLA.reg &= ~SERCOM_I2CM_CTRLA_ENABLE;
+    ((Sercom *) hw)->I2CM.CTRLA.reg &= ~SERCOM_I2CM_CTRLA_ENABLE;
     const uint32_t waitflags = (SERCOM_I2CS_SYNCBUSY_SWRST | SERCOM_I2CS_SYNCBUSY_ENABLE);
     i2c_slave_wait_for_sync(hw, waitflags);
 }
@@ -62,15 +66,16 @@ static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_nu
     return i2c_peripheral_mapping_table[peripheral_inst_num];
 }
 
-void
-i2c_slave_init(const i2c_periph_inst_t i2c_instance, const uint16_t slave_addr, const i2c_clock_sources_t clock_sources,
-               const uint32_t clock_frequency, const i2c_extra_opt_t extra_opt) {
-//    const bool InvalidSercomInstNum = (i2c_instance->sercom_inst_num < 0 || i2c_instance->sercom_inst_num > 5);
-//    const bool InvalidSercomInst = (i2c_instance->sercom_inst == NULL);
-//    const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
-//    if (InvalidSercomInst || InvalidSercomInstNum || InvalidClockGen){
-//        return;
-//    }
+uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
+                             const uint16_t slave_addr,
+                             const i2c_clock_sources_t clock_sources,
+                             const uint32_t clock_frequency,
+                             const i2c_extra_opt_t extra_configuration_options) {
+    const bool InvalidSercomInstNum = (i2c_instance < 0 || i2c_instance);
+    //const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
+    if (InvalidSercomInstNum){
+        return UHAL_STATUS_INVALID_PARAMETERS;
+    }
 // Set the clock system
 #ifdef __SAMD51__
 
@@ -82,7 +87,7 @@ i2c_slave_init(const i2c_periph_inst_t i2c_instance, const uint16_t slave_addr, 
         const uint8_t clk_gen_fast = get_fast_clk_gen_val(clock_sources);
         GCLK->CLKCTRL.reg =
                 GCLK_CLKCTRL_GEN(clk_gen_fast) |
-                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_instance) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
         while (GCLK->STATUS.bit.SYNCBUSY);
     } else {
@@ -92,14 +97,14 @@ i2c_slave_init(const i2c_periph_inst_t i2c_instance, const uint16_t slave_addr, 
         const uint8_t clk_gen_fast = 0;
         GCLK->CLKCTRL.reg =
                 GCLK_CLKCTRL_GEN(clk_gen_fast) |
-                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_instance) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
         while (GCLK->STATUS.bit.SYNCBUSY);
     }
 #endif
-    Sercom* SercomInst = i2c_instance->sercom_inst;
+    Sercom *SercomInst = get_sercom_inst(i2c_instance);
     const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
-    if(SercomEnabled){
+    if (SercomEnabled) {
         disable_i2c_interface(SercomInst);
     }
     SercomInst->I2CS.CTRLA.reg = (SERCOM_I2CS_CTRLA_SWRST | SERCOM_I2CS_CTRLA_MODE(4));
@@ -114,18 +119,25 @@ i2c_slave_init(const i2c_periph_inst_t i2c_instance, const uint16_t slave_addr, 
                                   | 4 << SERCOM_I2CS_CTRLA_MODE_Pos);
     SercomInst->I2CS.CTRLB.reg |= SERCOM_I2CS_CTRLB_SMEN;
     i2c_slave_wait_for_sync(SercomInst, SERCOM_I2CS_SYNCBUSY_MASK);
-    const uint8_t slave_addr = i2c_instance->i2c_slave_addr;
     SercomInst->I2CS.ADDR.reg = (0 << SERCOM_I2CS_ADDR_ADDRMASK_Pos       /* Address Mask: 0 */
                                  | 0 << SERCOM_I2CS_ADDR_TENBITEN_Pos /* Ten Bit Addressing Enable: disabled */
                                  | 0 << SERCOM_I2CS_ADDR_GENCEN_Pos   /* General Call Address Enable: disabled */
                                  | (slave_addr) << SERCOM_I2CS_ADDR_ADDR_Pos);
     SercomInst->I2CS.CTRLA.reg |= SERCOM_I2CS_CTRLA_ENABLE;
     SercomInst->I2CS.INTENSET.reg = SERCOM_I2CS_INTENSET_AMATCH | SERCOM_I2CS_INTENSET_PREC | SERCOM_I2CS_INTENSET_DRDY;
-    const enum IRQn irq_type = (SERCOM0_IRQn + i2c_instance->sercom_inst_num);
+    const enum IRQn irq_type = (SERCOM0_IRQn + i2c_instance);
     NVIC_EnableIRQ(irq_type);
-    NVIC_SetPriority(irq_type, i2c_instance->irq_priority);
+    const uint16_t irq_options = extra_configuration_options >> 8;
+    if (irq_options) {
+        NVIC_SetPriority(irq_type, irq_options - 1);
+    } else {
+        NVIC_SetPriority(irq_type, 2);
+    }
+    return UHAL_STATUS_OK;
 }
 
-void i2c_slave_deinit(const i2c_periph_inst_t i2c_instance){
-    disable_i2c_interface(i2c_instance->sercom_inst);
+uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance) {
+    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    disable_i2c_interface(sercom_inst);
+    return UHAL_STATUS_OK;
 }

@@ -24,7 +24,11 @@
 
 #ifndef GPIO_PLATFORM_SPECIFIC
 #define GPIO_PLATFORM_SPECIFIC
-#include "peripheral_clocking.h"
+
+#include "clock_system/peripheral_clocking.h"
+#include "gpio/pins.h"
+#include <assert.h>
+#include "bit_manipulation.h"
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
@@ -32,7 +36,7 @@ extern "C" {
 /**
  * @brief The SAMD series support two GPIO levels,
  *        LOW AND HIGH... Use this when using the
- *        set_gpio_pin_level() or gpio_get_pin_level() functions.
+ *        set_gpio_pin_level() or gpio_get_pin_lvl() functions.
  */
 typedef enum {
     GPIO_LOW,
@@ -44,8 +48,8 @@ typedef enum {
  *        MACRO's for the specific device can be placed to expand the list.
  */
 typedef enum {
-    GPIO_PORT_A,
-    GPIO_PORT_B
+    GPIO_PORT_A = 0x100,
+    GPIO_PORT_B = 0x200,
 } gpio_port_t;
 
 /**
@@ -75,10 +79,7 @@ typedef enum {
  * @brief A pin on the SAMD series consists of a PORT letter with a number, to imitate this as closely as possible a port_num and pin_num is used:
  *        PA11 -> GPIO_PORT_A, 11
  */
-typedef struct {
-    gpio_port_t port_num;
-    uint8_t     pin_num;
-} gpio_pin_t;
+typedef uint16_t gpio_pin_t;
 
 /**
  * @brief The SAMD series have some special options:
@@ -133,6 +134,11 @@ typedef enum {
     GPIO_IRQ_COND_LOW_LVL
 } gpio_irq_condition_t;
 
+typedef union {
+    uint64_t pin_num: 40;
+    uint8_t port_num: 1;
+} pin_base_t;
+
 /**
  * @brief These are extra options the SAMD series support besides the normal options:
  *        GPIO_IRQ_EXTRA_NONE: Will disable all other special functions
@@ -156,11 +162,34 @@ typedef enum {
  */
 typedef struct {
     clk_gen_num_t irq_clk_generator;
-    gpio_irq_channel_t   irq_channel;
+    gpio_irq_channel_t irq_channel;
     gpio_irq_condition_t irq_condition;
     gpio_irq_extra_opt_t irq_extra_opt;
 } gpio_irq_opt_t;
 
+
+#define GPIO_PIN_PARAMETER_CHECK(pin) \
+do {                                  \
+static_assert(pin <= (((PORT_GROUPS + 1) << 8) | 0x1F), "Selected pin not available on this mcu!"); \
+}while(0);
+
+#define GPIO_PIN_MODE_PARAMETER_CHECK(pin_mode) \
+do {                                                          \
+static_assert(pin_mode <= GPIO_MODE_OUTPUT, "Selected pin mode not supported!");   \
+}while(0);
+
+#define GPIO_PIN_LEVEL_PARAMETER_CHECK(level) \
+do {                                                          \
+static_assert(pin_mode <= GPIO_HIGH, "Selected pin level not supported!");   \
+}while(0);
+
+#define GPIO_PIN_OPTIONS_PARAMETER_CHECK(options) \
+do {                                              \
+const uint8_t pull_up_defined = (BITMASK_COMPARE(options, GPIO_OPT_PULL_UP)); \
+const uint8_t pull_down_defined = (BITMASK_COMPARE(options, GPIO_OPT_PULL_DOWN));\
+static_assert(((options >= GPIO_OPT_PULL_UP) &&  (options <= GPIO_OPT_DRIVE_STRENGTH_HIGH)), "Invalid pin options set!"); \
+static_assert((pull_up_defined && pull_down_defined) < 1, "Pull-up and Pull-down functionality on the same pin is not allowed!" );    \
+}while(0);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

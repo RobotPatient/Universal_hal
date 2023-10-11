@@ -16,17 +16,16 @@
 
 get_directory_property(PLATFORM_DEFINED COMPILE_DEFINITIONS)
 if(PLATFORM_DEFINED MATCHES "^__SAMD21")
-    add_library(Universal_hall "hal/platform/atmelsam/default_irq_handlers.c"
-                               "hal/platform/atmelsam/gpio_samd.c"
-                               "hal/platform/atmelsam/i2c.c"
+    add_library(Universal_hall "hal/platform/atmelsam/irq/default_irq_handlers.c"
+                               "hal/platform/atmelsam/gpio/gpio_samd.c"
+                               "hal/platform/atmelsam/i2c_host/i2c.c"
             hal/universal_hal.h
-            hal/platform/atmelsam/spi_host.c
+            hal/platform/atmelsam/spi_host/spi_host.c
             hal/hal_spi_slave.h
-            hal/platform/atmelsam/spi_slave.c
-            hal/platform/atmelsam/spi_slave.c
-            hal/platform/atmelsam/spi_platform_specific.h
-            hal/platform/atmelsam/peripheral_clocking.h
-            hal/platform/atmelsam/sercom_stuff.h
+            hal/platform/atmelsam/spi_slave/spi_slave.c
+            hal/platform/atmelsam/spi_common/spi_platform_specific.h
+            hal/platform/atmelsam/clock_system/peripheral_clocking.h
+            hal/platform/atmelsam/irq/sercom_stuff.h
             hal/hal_i2c_host.h)
     target_include_directories(Universal_hall PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hall INTERFACE board_sdk)

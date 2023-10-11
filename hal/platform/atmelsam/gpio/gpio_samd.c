@@ -30,6 +30,9 @@
 #define GPIO_OPT_PULL_DOWN_POS           3
 #define GPIO_OPT_SAMPLE_CONTINUOUSLY_POS 5
 
+#define GPIO_PIN_GROUP(pin) ((pin >> 8) - 1)
+#define GPIO_PIN(pin) (pin & 0xFF)
+
 uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
 
     if (level) {
@@ -38,12 +41,12 @@ uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level) {
          * This will set a high output state if a pin is set to the output direction
          * or manually enable pull-ups if the pin is set to output and PULLEN bit is set.
          */
-        PORT->Group[pin.port_num].OUTSET.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+        PORT->Group[GPIO_PIN_GROUP(pin)].OUTSET.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     } else {
         /* GPIO LEVEL LOW: Set the OUTCLR register to (1 << pin_num).
          * This will set a low output state if pin is set to the output direction.
          */
-        PORT->Group[pin.port_num].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+        PORT->Group[GPIO_PIN_GROUP(pin)].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     }
     return UHAL_STATUS_OK;
 }
@@ -54,23 +57,23 @@ uhal_status_t gpio_toggle_pin_output(const gpio_pin_t pin) {
      * This will toggle the output status of the given pin.
      * @note This might cause unwanted behavior if a pin is set as input instead of output.
      */
-    PORT->Group[pin.port_num].OUTTGL.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+    PORT->Group[GPIO_PIN_GROUP(pin)].OUTTGL.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     return UHAL_STATUS_OK;
 }
 
-gpio_level_t gpio_get_pin_level(const gpio_pin_t pin) {
+gpio_level_t gpio_get_pin_lvl(const gpio_pin_t pin) {
     /*
      * The IN register will be read, and the bit corresponding to the pin gets returned.
      * This gives the current input status of the pin.
      */
-    const gpio_level_t res = BIT_IS_SET(PORT->Group[pin.port_num].IN.reg, pin.pin_num);
+    const gpio_level_t res = BIT_IS_SET(PORT->Group[GPIO_PIN_GROUP(pin)].IN.reg, GPIO_PIN(pin));
     return res;
 }
 
 static inline void prv_set_function(const gpio_pin_t pin, const uint8_t function) {
     /* Enable the internal pin-mux function */
-    PORT->Group[pin.port_num].PINCFG[pin.pin_num].bit.PMUXEN = 0x01;
-    //    PORT->Group[pin.pin_num].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+    PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].bit.PMUXEN = 0x01;
+    //    PORT->Group[GPIO_PIN(pin)].OUTCLR.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     /* There is a separate pin-mux for even and odd pins (See datasheet)
      * Pin.pin.num has to be shifted to the right by two to divide in two,
      * Then the corresponding even or uneven register can be written.
@@ -79,21 +82,21 @@ static inline void prv_set_function(const gpio_pin_t pin, const uint8_t function
      * the PORT FUNCTION MULTIPLEXING table 7-1. This value goes from group A...H
      * and is mapped to numbers using the function enum.
      */
-    if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
-        PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].bit.PMUXE = function;
+    if (PIN_IS_EVEN_NUMBER(GPIO_PIN(pin))) {
+        PORT->Group[GPIO_PIN_GROUP(pin)].PMUX[GPIO_PIN(pin) >> 1].bit.PMUXE = function;
     } else {
-        PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].bit.PMUXO = function;
+        PORT->Group[GPIO_PIN_GROUP(pin)].PMUX[GPIO_PIN(pin) >> 1].bit.PMUXO = function;
     }
 }
 
 static inline void prv_set_dir(const gpio_pin_t pin, const uint8_t direction) {
-    PORT->Group[pin.port_num].PINCFG[pin.pin_num].bit.PMUXEN = 0;
+    PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].bit.PMUXEN = 0;
     if (direction == GPIO_MODE_OUTPUT) {
-        PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg &= ~(PORT_PINCFG_INEN);
-        PORT->Group[pin.port_num].DIRSET.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+        PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].reg &= ~(PORT_PINCFG_INEN);
+        PORT->Group[GPIO_PIN_GROUP(pin)].DIRSET.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     } else {
-        PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = PORT_PINCFG_INEN;
-        PORT->Group[pin.port_num].DIRCLR.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+        PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].reg = PORT_PINCFG_INEN;
+        PORT->Group[GPIO_PIN_GROUP(pin)].DIRCLR.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     }
 }
 
@@ -111,9 +114,9 @@ uhal_status_t gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode) {
 }
 
 static inline gpio_mode_t prv_get_function(const gpio_pin_t pin) {
-    const uint8_t pmux_reg = PORT->Group[pin.port_num].PMUX[pin.pin_num >> 1].reg;
+    const uint8_t pmux_reg = PORT->Group[GPIO_PIN_GROUP(pin)].PMUX[GPIO_PIN(pin) >> 1].reg;
     uint8_t       res;
-    if (PIN_IS_EVEN_NUMBER(pin.pin_num)) {
+    if (PIN_IS_EVEN_NUMBER(GPIO_PIN(pin))) {
         res = GET_LOWER_4_BITS_OF_BYTE(pmux_reg);
         return res;
     } else {
@@ -123,7 +126,7 @@ static inline gpio_mode_t prv_get_function(const gpio_pin_t pin) {
 }
 
 static inline gpio_mode_t prv_get_dir(const gpio_pin_t pin) {
-    const uint32_t pin_is_set_as_output_pin = BITMASK_COMPARE(PORT->Group[pin.port_num].DIR.reg, SHIFT_ONE_LEFT_BY_N(pin.pin_num));
+    const uint32_t pin_is_set_as_output_pin = BITMASK_COMPARE(PORT->Group[GPIO_PIN_GROUP(pin)].DIR.reg, SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin)));
     if (pin_is_set_as_output_pin) {
         return GPIO_MODE_OUTPUT;
     } else {
@@ -131,8 +134,8 @@ static inline gpio_mode_t prv_get_dir(const gpio_pin_t pin) {
     }
 }
 
-gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin) {
-    const uint8_t pincfg_reg = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
+gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin) {;
+    const uint8_t pincfg_reg = PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].reg;
     if (pincfg_reg & PORT_PINCFG_PMUXEN) {
         return prv_get_function(pin);
     } else {
@@ -141,7 +144,7 @@ gpio_mode_t gpio_get_pin_mode(const gpio_pin_t pin) {
 }
 
 static inline uint8_t get_non_settable_pincfg_options(const gpio_pin_t pin) {
-    const uint8_t prev_pincfg_val = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
+    const uint8_t prev_pincfg_val = PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].reg;
     const uint8_t non_settable_opt = (BITMASK_COMPARE(prev_pincfg_val, PORT_PINCFG_PMUXEN) | BITMASK_COMPARE(prev_pincfg_val, PORT_PINCFG_INEN));
     return non_settable_opt;
 }
@@ -163,14 +166,14 @@ uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
     const uint8_t pull_up_en = BITMASK_COMPARE(opt, GPIO_OPT_PULL_UP);
     const uint8_t pull_en = ((BITMASK_COMPARE(opt, GPIO_OPT_PULL_DOWN) >> 1) | (pull_up_en));
     const uint8_t reg_val = non_settable_pincfg_options | pull_en | BITMASK_COMPARE(opt, GPIO_OPT_DRIVE_STRENGTH_HIGH);
-    PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg = reg_val;
+    PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].reg = reg_val;
 
     /*
      * When the pull-up option is set, we need to do one extra operation.
      * Set the OUTSET register to disable the default pull_down and enable pull_up.
      */
     if (pull_up_en && pull_en) {
-        PORT->Group[pin.port_num].OUTSET.reg = SHIFT_ONE_LEFT_BY_N(pin.pin_num);
+        PORT->Group[GPIO_PIN_GROUP(pin)].OUTSET.reg = SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
     }
 
     /*
@@ -178,13 +181,13 @@ uhal_status_t gpio_set_pin_options(const gpio_pin_t pin, const gpio_opt_t opt) {
      * the CTRL register. That is what this section does.
      */
     const uint8_t sampling_opt_set = BITMASK_COMPARE(opt, GPIO_OPT_SAMPLE_CONTINUOUSLY);
-    uint32_t      res = PORT->Group[pin.port_num].CTRL.reg;
+    uint32_t      res = PORT->Group[GPIO_PIN_GROUP(pin)].CTRL.reg;
     if (sampling_opt_set) {
-        res |= SHIFT_ONE_LEFT_BY_N(pin.pin_num);
-        PORT->Group[pin.port_num].CTRL.reg = res;
+        res |= SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin));
+        PORT->Group[GPIO_PIN_GROUP(pin)].CTRL.reg = res;
     } else {
-        res &= ~(SHIFT_ONE_LEFT_BY_N(pin.pin_num));
-        PORT->Group[pin.port_num].CTRL.reg = res;
+        res &= ~(SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin)));
+        PORT->Group[GPIO_PIN_GROUP(pin)].CTRL.reg = res;
     }
     return UHAL_STATUS_OK;
 }
@@ -193,9 +196,9 @@ gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin) {
     /*
      * Get the pincfg register to extract the PULL_EN and DRIVE_STR bits from.
      */
-    const uint8_t pincfg_register = PORT->Group[pin.port_num].PINCFG[pin.pin_num].reg;
+    const uint8_t pincfg_register = PORT->Group[GPIO_PIN_GROUP(pin)].PINCFG[GPIO_PIN(pin)].reg;
 
-    const uint8_t sampling_opt_en = BIT_IS_SET(PORT->Group[pin.port_num].CTRL.reg, pin.pin_num);
+    const uint8_t sampling_opt_en = BIT_IS_SET(PORT->Group[GPIO_PIN_GROUP(pin)].CTRL.reg, GPIO_PIN(pin));
 
     uint8_t res = BITMASK_COMPARE(pincfg_register, GPIO_OPT_DRIVE_STRENGTH_HIGH) | (sampling_opt_en << GPIO_OPT_SAMPLE_CONTINUOUSLY_POS);
 
@@ -203,7 +206,7 @@ gpio_opt_t gpio_get_pin_options(const gpio_pin_t pin) {
         /*
          * Pull-up requires out register to be set... This will be used to distinguish whether a pull-up or pull-down is set.
          */
-        const uint8_t pull_up_en = BIT_IS_SET(PORT->Group[pin.port_num].OUT.reg, pin.pin_num);
+        const uint8_t pull_up_en = BIT_IS_SET(PORT->Group[GPIO_PIN_GROUP(pin)].OUT.reg, GPIO_PIN(pin));
         const uint8_t pull_down_en = (pull_up_en == 0) << GPIO_OPT_PULL_DOWN_POS; /* PULL_UP is not set, then it must be a PULL_DOWN */
         res |= (pull_down_en) | (pull_up_en << GPIO_OPT_PULL_UP_POS);             /* Add flags to the end result */
         return res;
@@ -232,7 +235,7 @@ uhal_status_t gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq
     /*
      * Check whether pin given is set as output or input. If set as output, make it an input.
      */
-    const uint32_t pin_is_set_as_output = BITMASK_COMPARE(PORT->Group[pin.port_num].DIR.reg, SHIFT_ONE_LEFT_BY_N(pin.pin_num));
+    const uint32_t pin_is_set_as_output = BITMASK_COMPARE(PORT->Group[GPIO_PIN_GROUP(pin)].DIR.reg, SHIFT_ONE_LEFT_BY_N(GPIO_PIN(pin)));
     if (pin_is_set_as_output) {
         prv_set_dir(pin, GPIO_MODE_INPUT);
     }
