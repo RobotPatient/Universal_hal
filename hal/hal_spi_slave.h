@@ -60,13 +60,13 @@ typedef struct {
  *
  * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
  */
-void spi_slave_init(const spi_slave_dev_t* spi_instance);
+uhal_status_t spi_slave_init(const spi_slave_dev_t* spi_instance);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-void spi_slave_deinit(const spi_slave_dev_t* spi_instance);
+uhal_status_t spi_slave_deinit(const spi_slave_dev_t* spi_instance);
 
 /**
  * @brief IRQ handler for SPI Client address match interrupt.

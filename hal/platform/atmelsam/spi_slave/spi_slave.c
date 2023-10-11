@@ -40,7 +40,7 @@ static inline void spi_wait_for_sync(const void* const hw, const uint32_t bits_t
     while (((Sercom*)hw)->SPI.SYNCBUSY.reg & bits_to_read) {};
 }
 
-void spi_slave_init(const spi_slave_dev_t* spi_instance) {
+uhal_status_t spi_slave_init(const spi_slave_dev_t* spi_instance) {
     const spi_periph_inst_t* spi_peripheral_inst = spi_instance->spi_peripheral;
     const uint8_t            invalid_sercom_instance_num = (spi_peripheral_inst->sercom_inst_num > SERCOM_INST_NUM - 1);
     const uint8_t            hw_handle_is_null = (spi_peripheral_inst->sercom_inst == NULL);
@@ -79,5 +79,5 @@ void spi_slave_init(const spi_slave_dev_t* spi_instance) {
     sercom_bustrans_buffer[spi_peripheral_inst->sercom_inst_num].transaction_type = SERCOMACT_IDLE_SPI_SLAVE;
 }
 
-void spi_slave_deinit(const spi_slave_dev_t* spi_instance) {
+uhal_status_t spi_slave_deinit(const spi_slave_dev_t* spi_instance) {
 }
