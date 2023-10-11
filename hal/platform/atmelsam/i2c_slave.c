@@ -48,7 +48,23 @@ void disable_i2c_interface(const void *const hw) {
     i2c_slave_wait_for_sync(hw, waitflags);
 }
 
-void i2c_slave_init(i2c_periph_inst_t *i2c_instance){
+static inline uint8_t get_fast_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+    const uint16_t fast_clk_val = (clock_sources & 0xFF) - 1;
+    return fast_clk_val;
+}
+
+static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+    const uint16_t slow_clk_val = SERCOM_SLOW_CLOCK_SOURCE(clock_sources) - 1;
+    return slow_clk_val;
+}
+
+static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
+    return i2c_peripheral_mapping_table[peripheral_inst_num];
+}
+
+void
+i2c_slave_init(const i2c_periph_inst_t i2c_instance, const uint16_t slave_addr, const i2c_clock_sources_t clock_sources,
+               const uint32_t clock_frequency, const i2c_extra_opt_t extra_opt) {
 //    const bool InvalidSercomInstNum = (i2c_instance->sercom_inst_num < 0 || i2c_instance->sercom_inst_num > 5);
 //    const bool InvalidSercomInst = (i2c_instance->sercom_inst == NULL);
 //    const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
@@ -59,14 +75,27 @@ void i2c_slave_init(i2c_periph_inst_t *i2c_instance){
 #ifdef __SAMD51__
 
 #else
-    PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + i2c_instance->sercom_inst_num);
-    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(i2c_instance->clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
-    while (GCLK->STATUS.bit.SYNCBUSY)
-        ;
-    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(i2c_instance->clk_gen_fast) | ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_instance->sercom_inst_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
-    GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(i2c_instance->clk_gen_fast);
-    while (GCLK->STATUS.bit.SYNCBUSY)
-        ;
+    if (clock_sources != I2C_CLK_SOURCE_USE_DEFAULT) {
+        const uint8_t clk_gen_slow = get_slow_clk_gen_val(clock_sources);
+        GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
+        while (GCLK->STATUS.bit.SYNCBUSY);
+        const uint8_t clk_gen_fast = get_fast_clk_gen_val(clock_sources);
+        GCLK->CLKCTRL.reg =
+                GCLK_CLKCTRL_GEN(clk_gen_fast) |
+                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+        GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
+        while (GCLK->STATUS.bit.SYNCBUSY);
+    } else {
+        const uint8_t clk_gen_slow = 3;
+        GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
+        while (GCLK->STATUS.bit.SYNCBUSY);
+        const uint8_t clk_gen_fast = 0;
+        GCLK->CLKCTRL.reg =
+                GCLK_CLKCTRL_GEN(clk_gen_fast) |
+                ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + i2c_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+        GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
+        while (GCLK->STATUS.bit.SYNCBUSY);
+    }
 #endif
     Sercom* SercomInst = i2c_instance->sercom_inst;
     const bool SercomEnabled = SercomInst->I2CM.CTRLA.bit.ENABLE;
@@ -97,6 +126,6 @@ void i2c_slave_init(i2c_periph_inst_t *i2c_instance){
     NVIC_SetPriority(irq_type, i2c_instance->irq_priority);
 }
 
-void i2c_slave_deinit(i2c_periph_inst_t *i2c_instance){
+void i2c_slave_deinit(const i2c_periph_inst_t i2c_instance){
     disable_i2c_interface(i2c_instance->sercom_inst);
 }

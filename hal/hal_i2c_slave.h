@@ -34,13 +34,18 @@ extern "C" {
  * @brief Initialize the hardware peripheral with I2C slave functionality.
  * @param i2c_instance The i2c instance to initialize
  */
-void i2c_slave_init(i2c_periph_inst_t *i2c_instance);
+void
+i2c_slave_init(const i2c_periph_inst_t i2c_instance,
+               const uint16_t slave_addr,
+               const i2c_clock_sources_t clock_sources,
+               const uint32_t clock_frequency,
+               const i2c_extra_opt_t extra_opt);
 
 /**
  * @brief De-initialize an i2c slave initialized hardware peripheral.
  * @param i2c_instance
  */
-void i2c_slave_deinit(i2c_periph_inst_t *i2c_instance);
+void i2c_slave_deinit(const i2c_periph_inst_t i2c_instance);
 
 /**
  * @brief IRQ handler for I2C Client address match interrupt.

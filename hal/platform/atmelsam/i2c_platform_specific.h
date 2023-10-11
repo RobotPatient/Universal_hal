@@ -35,6 +35,8 @@ extern "C" {
 #include "sercom_stuff.h"
 #include "error_handling.h"
 
+static Sercom *i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
+
 typedef enum {
     I2C_OPERATING_MODE_MASTER,
     I2C_OPERATING_MODE_SLAVE
