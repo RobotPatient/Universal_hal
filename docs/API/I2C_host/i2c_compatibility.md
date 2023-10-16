@@ -1,4 +1,4 @@
-# I2C compatibility
+# I2C Host driver compatibility
 
 ## Platform compatibility:
 

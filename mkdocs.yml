@@ -100,6 +100,14 @@ nav:
                - "Variables": "atmelsam_i2c_host/variables.md"
                - "Macros": "atmelsam_i2c_host/macros.md"
                - "Files": "atmelsam_i2c_host/files.md"
+      - 'I2C Slave':
+        - 'Compatibility': "API/I2C_slave/i2c_compatibility.md"
+        - 'General API': "API/I2C_slave/i2c_slave_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/I2C_slave/platform/atmelsam/About.md
+             - "Usage": API/I2C_slave/platform/atmelsam/Usage.md
+             - "Critical Notes": API/I2C_slave/platform/atmelsam/Critical_notes.md
   - Contributing:
     - 'General': 'contributing.md'
     - 'Code style': 'code_style.md'
