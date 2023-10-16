@@ -25,8 +25,8 @@
  */
 #ifndef HAL_SPI_HOST_H
 #define HAL_SPI_HOST_H
-#include "spi_common/spi_platform_specific.h"
 #include "hal_gpio.h"
+#include "spi_common/spi_platform_specific.h"
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
@@ -45,32 +45,59 @@ extern "C" {
  *
  * @param spi_bus_frequency The SPI Clock frequency to be used in transactions
  */
-uhal_status_t spi_host_init(const spi_host_inst_t spi_instance,
-                            const uint32_t spi_clock_source,
-                            const uint32_t spi_clock_source_freq,
-                            const unsigned long spi_bus_frequency,
-                            const spi_bus_opt_t spi_extra_configuration_opt);
+uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint32_t spi_clock_source, const uint32_t spi_clock_source_freq,
+                            const unsigned long spi_bus_frequency, const spi_bus_opt_t spi_extra_configuration_opt);
+
+#define SPI_HOST_INIT(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency, spi_extra_configuration_opt)            \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_INIT_PARAMETER_CHECK(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency,                         \
+                                      spi_extra_configuration_opt);                                                                                  \
+        retval = spi_host_init(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency, spi_extra_configuration_opt);  \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-uhal_status_t spi_host_deinit(const spi_host_inst_t spi_instance);
+uhal_status_t spi_host_deinit(const spi_host_inst_t spi_peripheral_num);
 
+#define SPI_HOST_DEINIT(spi_peripheral_num)                                                                                                          \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_DEINIT_PARAMETER_CHECK(spi_peripheral_num);                                                                                         \
+        retval = spi_host_deinit(spi_peripheral_num);                                                                                                \
+        retval;                                                                                                                                      \
+    })
 /**
  * @brief Start a spi transaction (sets the chip select line low)
- * @param spi_instance The SPI device to start a transaction with.
+ * @param spi_peripheral_num The SPI device to start a transaction with.
  */
-uhal_status_t spi_start_transaction(const spi_host_inst_t spi_instance,
-                                    const gpio_pin_t chip_select_pin,
+uhal_status_t spi_host_start_transaction(const spi_host_inst_t spi_peripheral_num, const gpio_pin_t chip_select_pin,
                                     const spi_extra_dev_opt_t device_specific_config_opt);
+
+#define SPI_HOST_START_TRANSACTION(spi_peripheral_num, chip_select_pin, device_specific_config_opt)                                                       \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_START_TRANSACTION_PARAMETER_CHECK(spi_peripheral_num, chip_select_pin, device_specific_config_opt);                                 \
+        retval = spi_host_start_transaction(spi_peripheral_num, chip_select_pin, device_specific_config_opt);                                        \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief End a spi transaction (sets the chip select line high)
- * @param spi_instance The SPI device to start a transaction with.
+ * @param spi_peripheral_num The SPI device to start a transaction with.
  */
-uhal_status_t spi_end_transaction(const spi_host_inst_t spi_instance,
-                                  const gpio_pin_t chip_select_pin);
+uhal_status_t spi_host_end_transaction(const spi_host_inst_t spi_peripheral_num, const gpio_pin_t chip_select_pin);
+
+#define SPI_HOST_END_TRANSACTION(spi_peripheral_num, chip_select_pin)                                                                                     \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_END_TRANSACTION_PARAMETER_CHECK(spi_peripheral_num, chip_select_pin);                                                               \
+        retval = spi_host_end_transaction(spi_peripheral_num, chip_select_pin);                                                                      \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
@@ -82,9 +109,15 @@ uhal_status_t spi_end_transaction(const spi_host_inst_t spi_instance,
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t spi_write_blocking(const spi_host_inst_t spi_instance,
-                                 const unsigned char *write_buff,
-                                 size_t size);
+uhal_status_t spi_host_write_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size);
+
+#define SPI_HOST_WRITE_BLOCKING(spi_peripheral_num, write_buff, size)                                                                                     \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_WRITE_PARAMETER_CHECK(spi_peripheral_num, write_buff, size);                                                                        \
+        retval = spi_host_write_blocking(spi_peripheral_num, write_buff, size);                                                                           \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -96,9 +129,15 @@ uhal_status_t spi_write_blocking(const spi_host_inst_t spi_instance,
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t spi_write_non_blocking(const spi_host_inst_t spi_instance,
-                                     const unsigned char *write_buff,
-                                     size_t size);
+uhal_status_t spi_host_write_non_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size);
+
+#define SPI_HOST_WRITE_NON_BLOCKING(spi_peripheral_num, write_buff, size)                                                                                     \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_WRITE_PARAMETER_CHECK(spi_peripheral_num, write_buff, size);                                                                        \
+        retval = spi_host_write_non_blocking(spi_peripheral_num, write_buff, size);                                                                           \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -108,9 +147,15 @@ uhal_status_t spi_write_non_blocking(const spi_host_inst_t spi_instance,
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t spi_read_blocking(const spi_host_inst_t spi_instance,
-                                unsigned char *read_buff,
-                                size_t amount_of_bytes);
+uhal_status_t spi_host_read_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes);
+
+#define SPI_HOST_READ_BLOCKING(spi_peripheral_num, read_buff, amount_of_bytes)                                                                            \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_READ_PARAMETER_CHECK(spi_peripheral_num, read_buff, amount_of_bytes);                                                               \
+        retval = spi_host_read_blocking(spi_peripheral_num, read_buff, amount_of_bytes);                                                                  \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
@@ -120,9 +165,16 @@ uhal_status_t spi_read_blocking(const spi_host_inst_t spi_instance,
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t spi_read_non_blocking(const spi_host_inst_t spi_instance,
-                                    unsigned char *read_buff,
-                                    size_t amount_of_bytes);
+uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes);
+
+#define SPI_HOST_READ_NON_BLOCKING(spi_peripheral_num, read_buff, amount_of_bytes)                                                                            \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        SPI_HOST_READ_PARAMETER_CHECK(spi_peripheral_num, read_buff, amount_of_bytes);                                                               \
+        retval = spi_host_read_non_blocking(spi_peripheral_num, read_buff, amount_of_bytes);                                                              \
+        retval;                                                                                                                                      \
+    })
+
 
 /**
  * @brief IRQ handler for I2C host data receive interrupt.

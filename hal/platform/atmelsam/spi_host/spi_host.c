@@ -88,9 +88,9 @@ static inline uint8_t get_dipo_pad_from_bus_opt(const spi_bus_opt_t bus_opt) {
     return BITMASK_COMPARE(bus_opt, 0x1C0) >> 6;
 }
 
-uhal_status_t spi_host_init(const spi_host_inst_t spi_instance, const uint32_t spi_clock_source, const uint32_t spi_clock_source_freq,
+uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint32_t spi_clock_source, const uint32_t spi_clock_source_freq,
                             const unsigned long spi_bus_frequency, const spi_bus_opt_t spi_extra_configuration_opt) {
-Sercom* sercom_instance = get_sercom_inst(spi_instance);
+Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
 //    const spi_periph_inst_t* spi_peripheral_inst = spi_instance->spi_peripheral;
 //    const uint8_t            invalid_sercom_instance_num = (spi_peripheral_inst->sercom_inst_num > SERCOM_INST_NUM - 1);
 //    const uint8_t            hw_handle_is_null = (spi_peripheral_inst->sercom_inst == NULL);
@@ -103,7 +103,7 @@ Sercom* sercom_instance = get_sercom_inst(spi_instance);
 #ifdef __SAMD51__
 
 #else
-PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + spi_instance);
+PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + spi_peripheral_num);
 if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
         const uint8_t clk_gen_slow = get_slow_clk_gen_val(spi_clock_source);
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
@@ -111,7 +111,7 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
         const uint8_t clk_gen_fast = get_fast_clk_gen_val(spi_clock_source);
         GCLK->CLKCTRL.reg =
             GCLK_CLKCTRL_GEN(clk_gen_fast) |
-            ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + spi_instance) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+            ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + spi_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
         while (GCLK->STATUS.bit.SYNCBUSY);
 } else {
@@ -121,7 +121,7 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
         const uint8_t clk_gen_fast = 0;
         GCLK->CLKCTRL.reg =
             GCLK_CLKCTRL_GEN(clk_gen_fast) |
-            ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + spi_instance) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
+            ((GCLK_CLKCTRL_ID_SERCOM0_CORE_Val + spi_peripheral_num) << GCLK_CLKCTRL_ID_Pos) | GCLK_CLKCTRL_CLKEN;
         GCLK->GENDIV.reg = GCLK_GENDIV_DIV(0x01) | GCLK_GENDIV_ID(clk_gen_fast);
         while (GCLK->STATUS.bit.SYNCBUSY);
 }
@@ -142,50 +142,56 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
     sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_RXC | SERCOM_SPI_INTENSET_TXC | SERCOM_SPI_INTENSET_SSL;
     sercom_instance->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_ENABLE;
     spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_ENABLE);
-    const enum IRQn irq_type = (SERCOM0_IRQn + spi_instance);
+    const enum IRQn irq_type = (SERCOM0_IRQn + spi_peripheral_num);
     NVIC_EnableIRQ(irq_type);
     NVIC_SetPriority(irq_type, 2);
-    sercom_bustrans_buffer[spi_instance].transaction_type = SERCOMACT_IDLE_SPI_HOST;
+    sercom_bustrans_buffer[spi_peripheral_num].transaction_type = SERCOMACT_IDLE_SPI_HOST;
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_host_deinit(const spi_host_inst_t spi_instance) {
+uhal_status_t spi_host_deinit(const spi_host_inst_t spi_peripheral_num) {
+    return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_start_transaction(const spi_host_inst_t spi_instance, const gpio_pin_t chip_select_pin,
+uhal_status_t spi_host_start_transaction(const spi_host_inst_t spi_peripheral_num, const gpio_pin_t chip_select_pin,
                                     const spi_extra_dev_opt_t device_specific_config_opt) {
     gpio_set_pin_lvl(chip_select_pin, GPIO_LOW);
+    return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_end_transaction(const spi_host_inst_t spi_instance, const gpio_pin_t chip_select_pin) {
+uhal_status_t spi_host_end_transaction(const spi_host_inst_t spi_peripheral_num, const gpio_pin_t chip_select_pin) {
     gpio_set_pin_lvl(chip_select_pin, GPIO_HIGH);
+    return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_write_blocking(const spi_host_inst_t spi_instance, const unsigned char* write_buff, size_t size) {
-    spi_write_non_blocking(spi_instance, write_buff, size);
-    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[spi_instance], SERCOMACT_IDLE_SPI_HOST);
+uhal_status_t spi_host_write_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size) {
+    spi_host_write_non_blocking(spi_peripheral_num, write_buff, size);
+    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[spi_peripheral_num], SERCOMACT_IDLE_SPI_HOST);
+    return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_write_non_blocking(const spi_host_inst_t spi_instance, const unsigned char* write_buff, size_t size) {
-    Sercom* sercom_instance = get_sercom_inst(spi_instance);
-    const sercom_num_t sercom_inst_num = spi_instance;
+uhal_status_t spi_host_write_non_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size) {
+    Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
+    const sercom_num_t sercom_inst_num = spi_peripheral_num;
     spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
     sercom_bustrans_buffer[sercom_inst_num].buf_cnt = 0;
     sercom_bustrans_buffer[sercom_inst_num].buf_size = size;
     sercom_bustrans_buffer[sercom_inst_num].write_buffer = write_buff;
     sercom_bustrans_buffer[sercom_inst_num].transaction_type = SERCOMACT_SPI_DATA_TRANSMIT;
     sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_DRE;
+    return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_read_blocking(const spi_host_inst_t spi_instance, unsigned char* read_buff, size_t amount_of_bytes) {
-    const sercom_num_t sercom_inst_num = spi_instance;
-    spi_read_non_blocking(spi_instance, read_buff, amount_of_bytes);
+uhal_status_t spi_host_read_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes) {
+    const sercom_num_t sercom_inst_num = spi_peripheral_num;
+    spi_host_read_non_blocking(spi_peripheral_num, read_buff, amount_of_bytes);
     spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
+    return UHAL_STATUS_OK;
 }
 
-uhal_status_t spi_read_non_blocking(const spi_host_inst_t spi_instance, unsigned char* read_buff, size_t amount_of_bytes) {
-    Sercom* sercom_instance = get_sercom_inst(spi_instance);
-    const sercom_num_t sercom_inst_num = spi_instance;
+uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes) {
+    Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
+    const sercom_num_t sercom_inst_num = spi_peripheral_num;
     spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
     sercom_bustrans_buffer[sercom_inst_num].buf_cnt = 0;
     sercom_bustrans_buffer[sercom_inst_num].buf_size = amount_of_bytes;
@@ -194,4 +200,5 @@ uhal_status_t spi_read_non_blocking(const spi_host_inst_t spi_instance, unsigned
     sercom_instance->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_RXEN;
     sercom_instance->SPI.DATA.reg = 0;
     sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_DRE;
+    return UHAL_STATUS_OK;
 }

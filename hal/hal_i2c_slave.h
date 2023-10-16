@@ -32,19 +32,32 @@ extern "C" {
 
 /**
  * @brief Initialize the hardware peripheral with I2C slave functionality.
- * @param i2c_instance The i2c instance to initialize
+ * @param i2c_peripheral_num The i2c instance to initialize
  */
-uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
-                    const uint16_t slave_addr,
-                    const i2c_clock_sources_t clock_sources,
-                    const uint32_t clock_frequency,
-                    const i2c_extra_opt_t extra_configuration_options);
+uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_peripheral_num, const uint16_t slave_addr, const i2c_clock_sources_t clock_sources,
+                             const uint32_t clock_frequency, const i2c_extra_opt_t extra_configuration_options);
+
+#define I2C_SLAVE_INIT(i2c_peripheral_num, slave_addr, clock_sources, clock_frequency, extra_configuration_options)                                  \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        I2C_SLAVE_INIT_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, clock_frequency, extra_configuration_options);                             \
+        retval = i2c_slave_init(i2c_peripheral_num, slave_addr, clock_sources, clock_frequency, extra_configuration_options);                        \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief De-initialize an i2c slave initialized hardware peripheral.
- * @param i2c_instance
+ * @param i2c_peripheral_num
  */
-uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance);
+uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_peripheral_num);
+
+#define I2C_SLAVE_DEINIT(i2c_peripheral_num)                                                                                                         \
+    ({                                                                                                                                               \
+        int retval;                                                                                                                                  \
+        I2C_SLAVE_DEINIT_PARAMETER_CHECK(i2c_peripheral_num);                                                                                        \
+        retval = i2c_slave_deinit(i2c_peripheral_num);                                                                                               \
+        retval;                                                                                                                                      \
+    })
 
 /**
  * @brief IRQ handler for I2C Client address match interrupt.
@@ -56,7 +69,7 @@ uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance);
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_address_match_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
+void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client stop interrupt.
@@ -68,7 +81,7 @@ void i2c_slave_address_match_irq(const void *hw, volatile bustransaction_t *tran
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_stop_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
+void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client receive interrupt.
@@ -80,7 +93,7 @@ void i2c_slave_stop_irq(const void *hw, volatile bustransaction_t *transaction) 
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
+void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client send interrupt.
@@ -92,7 +105,7 @@ void i2c_slave_data_recv_irq(const void *hw, volatile bustransaction_t *transact
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
+void i2c_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }

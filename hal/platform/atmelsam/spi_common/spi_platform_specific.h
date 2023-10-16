@@ -24,11 +24,11 @@
 #ifndef ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
 #define ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
 
+#include <sam.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <sam.h>
-#include "irq/sercom_stuff.h"
 #include "clock_system/peripheral_clocking.h"
+#include "irq/sercom_stuff.h"
 
 typedef enum {
     SPI_PERIPHERAL_0,
@@ -59,7 +59,6 @@ typedef enum {
     SPI_CLK_SOURCE_SLOW_CLKGEN7 = 0x800,
 } spi_clock_sources_t;
 
-
 typedef enum {
     SPI_BUS_OPT_USE_DEFAULT = 0,
     SPI_BUS_OPT_CLOCK_POLARITY_SCK_HIGH = 0x01,
@@ -80,5 +79,49 @@ typedef enum {
     SPI_EXTRA_OPT_CLOCK_POLARITY_SCK_HIGH = 0x01,
     SPI_EXTRA_OPT_DATA_ORDER_LSB_FIRST = 0x02,
 } spi_extra_dev_opt_t;
+
+#define SPI_HOST_INIT_PARAMETER_CHECK(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency,                         \
+                                      spi_extra_configuration_opt)                                                                                   \
+    {                                                                                                                                                \
+        const uint32_t max_freq = 48000000;                                                                                                          \
+        const uint32_t min_freq = 200000;                                                                                                            \
+        const uint32_t max_supported_baud_rate = 24000000;                                                                                           \
+        const uint32_t min_supported_baud_rate = 100000;                                                                                             \
+        static_assert((spi_peripheral_num <= SERCOM_INST_NUM - 1 && spi_peripheral_num >= 0), "SPI_HOST_INIT: Invalid peripheral!");                 \
+        static_assert(peripheral_clock_source <= SPI_CLK_SOURCE_SLOW_CLKGEN7 && peripheral_clock_source >= SPI_CLK_SOURCE_USE_DEFAULT,               \
+                      "SPI_HOST_INIT: Invalid clock-source!");                                                                                       \
+        static_assert(peripheral_clock_freq <= max_freq, "SPI_HOST_INIT: Peripheral clock frequency too high!");                                     \
+        static_assert(peripheral_clock_freq >= min_freq,                                                                                             \
+                      "SPI_HOST_INIT: Peripheral clock frequency has to be atleast higher than 2x the minimum spi baud_rate of 100KHz");             \
+        static_assert(spi_bus_frequency <= max_supported_baud_rate && spi_bus_frequency >= min_supported_baud_rate,                                  \
+                      "SPI_HOST_INIT: Unsupported bus frequency option set!");                                                                       \
+        static_assert(spi_extra_configuration_opt <= SPI_BUS_OPT_DIPO_PAD_3, "SPI_HOST_INIT: Unsupported extra configuration options set!");         \
+    }                                                                                                                                                \
+    while (0)                                                                                                                                        \
+        ;
+
+#define SPI_HOST_DEINIT_PARAMETER_CHECK(spi_peripheral_num)                                                                                          \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_HOST_DEINIT_PARAMETER_CHECK(spi_peripheral_num)                                                                                          \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_HOST_START_TRANSACTION_PARAMETER_CHECK(spi_peripheral_num, chip_select_pin, device_specific_config_opt)                                  \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_HOST_END_TRANSACTION_PARAMETER_CHECK(spi_peripheral_num, chip_select_pin)                                                                \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_HOST_WRITE_PARAMETER_CHECK(spi_peripheral_num, write_buffer, buffer_size)                                                                \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_HOST_READ_PARAMETER_CHECK(spi_peripheral_num, read_buffer, size)                                                                         \
+    do {                                                                                                                                             \
+    } while (0);
 
 #endif //ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
