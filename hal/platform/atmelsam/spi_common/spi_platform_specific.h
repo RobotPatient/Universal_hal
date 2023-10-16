@@ -39,6 +39,8 @@ typedef enum {
     SPI_PERIPHERAL_5
 } spi_host_inst_t;
 
+typedef spi_host_inst_t spi_slave_inst_t;
+
 typedef enum {
     SPI_CLK_SOURCE_USE_DEFAULT = 0x00,
     SPI_CLK_SOURCE_FAST_CLKGEN0 = 0x01,
@@ -121,6 +123,14 @@ typedef enum {
     } while (0);
 
 #define SPI_HOST_READ_PARAMETER_CHECK(spi_peripheral_num, read_buffer, size)                                                                         \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_SLAVE_INIT_PARAMETER_CHECK(spi_peripheral_num, peripheral_clock_source, spi_extra_configuration_opt)                                     \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define SPI_SLAVE_DEINIT_PARAMETER_CHECK(spi_peripheral_num)                                                                                         \
     do {                                                                                                                                             \
     } while (0);
 

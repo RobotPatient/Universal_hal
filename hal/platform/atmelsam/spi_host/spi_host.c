@@ -90,15 +90,7 @@ static inline uint8_t get_dipo_pad_from_bus_opt(const spi_bus_opt_t bus_opt) {
 
 uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint32_t spi_clock_source, const uint32_t spi_clock_source_freq,
                             const unsigned long spi_bus_frequency, const spi_bus_opt_t spi_extra_configuration_opt) {
-Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
-//    const spi_periph_inst_t* spi_peripheral_inst = spi_instance->spi_peripheral;
-//    const uint8_t            invalid_sercom_instance_num = (spi_peripheral_inst->sercom_inst_num > SERCOM_INST_NUM - 1);
-//    const uint8_t            hw_handle_is_null = (spi_peripheral_inst->sercom_inst == NULL);
-//    const uint8_t            invalid_clk_gen_num =
-//        (spi_peripheral_inst->clk_gen_slow > GCLK_GEN_NUM - 1 || spi_peripheral_inst->clk_gen_fast > GCLK_GEN_NUM - 1);
-//    if (hw_handle_is_null || invalid_sercom_instance_num || invalid_clk_gen_num) {
-//        return;
-//    }
+
     // Set the clock system
 #ifdef __SAMD51__
 
@@ -126,6 +118,7 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
         while (GCLK->STATUS.bit.SYNCBUSY);
 }
 #endif
+    Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
     const uint8_t dopo_pad = get_dopo_pad_from_bus_opt(spi_extra_configuration_opt);
     const uint8_t dipo_pad = get_dipo_pad_from_bus_opt(spi_extra_configuration_opt);
     const uint8_t clock_polarity = get_clock_polarity_from_bus_opt(spi_extra_configuration_opt);
