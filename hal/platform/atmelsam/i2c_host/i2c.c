@@ -23,12 +23,12 @@
 */
 
 #include <assert.h>
-#include <default_irq_handlers.h>
 #include <hal_i2c_host.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include "bit_manipulation.h"
 #include "error_handling.h"
+
 /**
  * @brief This formula is used to calculate the baud rate steps.
  * The formula is a rewritten form of the formula found on page 483 (section 28.10.3) of the SAMD21 Family datasheet.
@@ -42,7 +42,7 @@
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
 
-static Sercom *i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
+Sercom *i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 
 /**
  * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.
@@ -133,9 +133,11 @@ static inline void disable_host_i2c_driver(const void *const hw) {
     i2c_master_wait_for_sync(hw, waitflags);
 }
 
-void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_sources_t clock_sources,
-                             const uint32_t periph_clk_freq, const uint32_t baud_rate_freq,
-                             const i2c_extra_opt_t extra_configuration_options) {
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num,
+                            const i2c_clock_sources_t clock_sources,
+                            const uint32_t periph_clk_freq,
+                            const uint32_t baud_rate_freq,
+                            const i2c_extra_opt_t extra_configuration_options) {
 #ifdef __SAMD51__
 
 #else
@@ -196,7 +198,7 @@ void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_
             if (--timeout_attempt) {
                 timeout = 65535;
             } else {
-                return;
+                return UHAL_STATUS_PERIPHERAL_CLOCK_ERROR;
             }
             SercomInst->I2CM.STATUS.reg = SERCOM_I2CM_STATUS_BUSSTATE(0x1);
             i2c_master_wait_for_sync(SercomInst, SERCOM_I2CM_SYNCBUSY_SYSOP);
@@ -212,16 +214,20 @@ void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, const i2c_clock_
     } else {
         NVIC_SetPriority(irq_type, 2);
     }
+    return UHAL_STATUS_OK;
 }
 
-void _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num) {
+uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num) {
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     disable_host_i2c_driver(sercom_inst);
+    return UHAL_STATUS_OK;
 }
 
-void _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr,
-                                  const unsigned char *write_buff, const size_t size,
-                                  const i2c_stop_bit_t stop_bit) {
+uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                          const uint16_t addr,
+                                          const uint8_t *write_buff,
+                                          const size_t size,
+                                          const i2c_stop_bit_t stop_bit) {
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
     volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
@@ -236,27 +242,31 @@ void _i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, co
     TransactionData->buf_cnt = 0;
     sercom_inst->I2CM.ADDR.reg = (addr << 1);
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    return UHAL_STATUS_OK;
 }
 
-void _i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned char addr,
-                              const unsigned char *write_buff, const size_t size,
-                              const i2c_stop_bit_t stop_bit) {
+uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num, const uint16_t addr,
+                                      const uint8_t *write_buff, const size_t size,
+                                      const i2c_stop_bit_t stop_bit) {
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
-    _i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);
+    i2c_host_write_non_blocking(i2c_peripheral_num, addr, write_buff, size, stop_bit);
     wait_for_idle_busstate(sercom_inst);
+    return UHAL_STATUS_OK;
 }
 
-void
-_i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr, unsigned char *read_buff,
-                        const size_t amount_of_bytes) {
-    _i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, amount_of_bytes);
+uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                     const uint16_t addr, uint8_t *read_buff,
+                                     const size_t amount_of_bytes) {
+    i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, amount_of_bytes);
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
+    return UHAL_STATUS_OK;
 }
 
-void
-_i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const unsigned short addr, unsigned char *read_buff,
-                            const size_t amount_of_bytes) {
+uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                         const uint16_t addr, uint8_t *read_buff,
+                                         const size_t amount_of_bytes) {
+
     Sercom *sercom_inst = get_sercom_inst(i2c_peripheral_num);
     wait_for_idle_busstate(sercom_inst);
     volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
@@ -267,4 +277,5 @@ _i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num, const un
     TransactionData->buf_cnt = 0;
     sercom_inst->I2CM.ADDR.reg = (addr << 1) | 1;
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
+    return UHAL_STATUS_OK;
 }

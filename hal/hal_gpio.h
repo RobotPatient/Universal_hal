@@ -76,7 +76,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include <error_handling.h>
-#include <gpio_platform_specific.h>
+#include <gpio/gpio_platform_specific.h>
 
 /**
  * @brief Toggles output of given gpio pin.
@@ -116,7 +116,7 @@ retval;                                         \
  */
 uhal_status_t gpio_set_pin_lvl(const gpio_pin_t pin, gpio_level_t level);
 
-#define GPIO_SET_PIN_LVL(pin, pin_mode) \
+#define GPIO_SET_PIN_LVL(pin, level) \
 ({                                     \
 int retval; \
 GPIO_PIN_PARAMETER_CHECK(pin);           \

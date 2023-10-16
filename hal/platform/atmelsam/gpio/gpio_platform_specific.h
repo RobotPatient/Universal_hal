@@ -25,10 +25,12 @@
 #ifndef GPIO_PLATFORM_SPECIFIC
 #define GPIO_PLATFORM_SPECIFIC
 
-#include "peripheral_clocking.h"
-#include "pins.h"
+#include <stdint.h>
 #include <assert.h>
+#include "clock_system/peripheral_clocking.h"
+#include "gpio/pins.h"
 #include "bit_manipulation.h"
+
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
@@ -133,11 +135,6 @@ typedef enum {
     GPIO_IRQ_COND_HIGH_LVL,
     GPIO_IRQ_COND_LOW_LVL
 } gpio_irq_condition_t;
-
-typedef union {
-    uint64_t pin_num: 40;
-    uint8_t port_num: 1;
-} pin_base_t;
 
 /**
  * @brief These are extra options the SAMD series support besides the normal options:

@@ -20,12 +20,11 @@ import sys
 from os.path import join, realpath
 
 platform = env.get("PIOPLATFORM")
-path = join(os.getcwd()+"/hal/platform/", platform)
-if(os.path.exists(path)):
-    env.Append(CPPPATH=[realpath("hal"), realpath(join("hal/platform/", platform))])
-    env.Replace(SRC_FILTER=["+<hal/platform/%s/*>" % platform])
+path = join(os.getcwd() + "/hal/platform/", platform)
+if (os.path.exists(path)):
+    base_platform_path = realpath(join("hal/platform/", platform))
+    env.Append(CPPPATH=[realpath("hal"), base_platform_path])
+    env.Replace(SRC_FILTER=["+<hal/platform/%s/*>" % platform, "+<hal/platform/%s/*/*" % platform])
 else:
     print("ERROR! MCU: %s specified in pio config is not supported" % platform)
     sys.exit()
-
-
