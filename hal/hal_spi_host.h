@@ -32,17 +32,6 @@
 extern "C" {
 #endif /* __cplusplus */
 /**
- * @brief SPI device struct
- */
-typedef struct {
-    const spi_periph_inst_t *spi_peripheral;
-    const spi_clock_polarity_t clock_polarity;
-    const spi_data_order_t data_order;
-    const spi_character_size_t character_size;
-    const gpio_pin_t cs_pin;
-} spi_host_dev_t;
-
-/**
  * @brief Function to initialize the specified HW peripheral with SPI functionality.
  *        Uses the options set in the i2c_periph_inst_t struct defined platform_specific.h.
  *        To ensure platform compatibility place static i2c_periph_inst_t for each hw peripheral in an board_options.h file
@@ -54,27 +43,34 @@ typedef struct {
  *                                                     HW peripheral instance number
  *                                                     HW peripheral handle
  *
- * @param baud_rate The I2C Clock frequency to be used in transactions (only used in host mode, when in slave mode every value will be discarded)
+ * @param spi_bus_frequency The SPI Clock frequency to be used in transactions
  */
-uhal_status_t spi_host_init(const spi_host_dev_t *spi_instance, unsigned long baud_rate);
+uhal_status_t spi_host_init(const spi_host_inst_t spi_instance,
+                            const uint32_t spi_clock_source,
+                            const uint32_t spi_clock_source_freq,
+                            const unsigned long spi_bus_frequency,
+                            const spi_bus_opt_t spi_extra_configuration_opt);
 
 /**
  * @brief Function to de-initialize the specified HW peripheral (disables I2C on the HW peripheral).
  * @param i2c_instance I2C options used when configuring the HW peripheral.
  */
-uhal_status_t spi_host_deinit(const spi_host_dev_t *spi_instance);
+uhal_status_t spi_host_deinit(const spi_host_inst_t spi_instance);
 
 /**
  * @brief Start a spi transaction (sets the chip select line low)
  * @param spi_instance The SPI device to start a transaction with.
  */
-uhal_status_t spi_start_transaction(const spi_host_dev_t *spi_instance);
+uhal_status_t spi_start_transaction(const spi_host_inst_t spi_instance,
+                                    const gpio_pin_t chip_select_pin,
+                                    const spi_extra_dev_opt_t device_specific_config_opt);
 
 /**
  * @brief End a spi transaction (sets the chip select line high)
  * @param spi_instance The SPI device to start a transaction with.
  */
-uhal_status_t spi_end_transaction(const spi_host_dev_t *spi_instance);
+uhal_status_t spi_end_transaction(const spi_host_inst_t spi_instance,
+                                  const gpio_pin_t chip_select_pin);
 
 /**
  * @brief Function to execute a write blocking transaction (blocking means it will wait till the transaction is finished)
@@ -86,7 +82,9 @@ uhal_status_t spi_end_transaction(const spi_host_dev_t *spi_instance);
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t spi_write_blocking(const spi_host_dev_t *spi_instance, const unsigned char *write_buff, size_t size);
+uhal_status_t spi_write_blocking(const spi_host_inst_t spi_instance,
+                                 const unsigned char *write_buff,
+                                 size_t size);
 
 /**
  * @brief Function to execute a write non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack them in a buffer or such)
@@ -98,7 +96,9 @@ uhal_status_t spi_write_blocking(const spi_host_dev_t *spi_instance, const unsig
  * @param stop_bit Does this transaction end with or without a stop-bit: Value 1 is with stop-bit
  *                                                                       Value 0 is without stop-bit
  */
-uhal_status_t spi_write_non_blocking(const spi_host_dev_t *spi_instance, const unsigned char *write_buff, size_t size);
+uhal_status_t spi_write_non_blocking(const spi_host_inst_t spi_instance,
+                                     const unsigned char *write_buff,
+                                     size_t size);
 
 /**
  * @brief Function to execute a read blocking transaction (blocking means it will wait till the transaction is finished)
@@ -108,7 +108,9 @@ uhal_status_t spi_write_non_blocking(const spi_host_dev_t *spi_instance, const u
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t spi_read_blocking(const spi_host_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes);
+uhal_status_t spi_read_blocking(const spi_host_inst_t spi_instance,
+                                unsigned char *read_buff,
+                                size_t amount_of_bytes);
 
 /**
  * @brief Function to execute a read non-blocking transaction (non-blocking means it will not wait till the transaction is finished and stack the transactions in to a buffer)
@@ -118,8 +120,9 @@ uhal_status_t spi_read_blocking(const spi_host_dev_t *spi_instance, unsigned cha
  * @param read_buff Pointer to the read buffer where all read bytes will be written
  * @param amount_of_bytes The amount of bytes which have to be read
  */
-uhal_status_t spi_read_non_blocking(const spi_host_dev_t *spi_instance, unsigned char *read_buff, size_t amount_of_bytes);
-
+uhal_status_t spi_read_non_blocking(const spi_host_inst_t spi_instance,
+                                    unsigned char *read_buff,
+                                    size_t amount_of_bytes);
 
 /**
  * @brief IRQ handler for I2C host data receive interrupt.

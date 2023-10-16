@@ -36,12 +36,6 @@ extern "C" {
 #include "error_handling.h"
 
 typedef enum {
-    I2C_OPERATING_MODE_MASTER,
-    I2C_OPERATING_MODE_SLAVE
-} i2c_operating_mode_t;
-
-
-typedef enum {
   I2C_PERIPHERAL_0,
   I2C_PERIPHERAL_1,
   I2C_PERIPHERAL_2,

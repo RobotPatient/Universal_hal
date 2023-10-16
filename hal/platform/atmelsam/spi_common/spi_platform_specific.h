@@ -31,56 +31,54 @@
 #include "clock_system/peripheral_clocking.h"
 
 typedef enum {
-    SPI_OPERATING_MODE_SLAVE = 0x2, SPI_OPERATING_MODE_MASTER
-} spi_operating_mode_t;
+    SPI_PERIPHERAL_0,
+    SPI_PERIPHERAL_1,
+    SPI_PERIPHERAL_2,
+    SPI_PERIPHERAL_3,
+    SPI_PERIPHERAL_4,
+    SPI_PERIPHERAL_5
+} spi_host_inst_t;
 
 typedef enum {
-    SPI_CLOCK_POLARITY_SCK_LOW_IDLE, SPI_CLOCK_POLARITY_SCK_HIGH_IDLE
-} spi_clock_polarity_t;
+    SPI_CLK_SOURCE_USE_DEFAULT = 0x00,
+    SPI_CLK_SOURCE_FAST_CLKGEN0 = 0x01,
+    SPI_CLK_SOURCE_FAST_CLKGEN1 = 0x02,
+    SPI_CLK_SOURCE_FAST_CLKGEN2 = 0x03,
+    SPI_CLK_SOURCE_FAST_CLKGEN3 = 0x04,
+    SPI_CLK_SOURCE_FAST_CLKGEN4 = 0x05,
+    SPI_CLK_SOURCE_FAST_CLKGEN5 = 0x06,
+    SPI_CLK_SOURCE_FAST_CLKGEN6 = 0x07,
+    SPI_CLK_SOURCE_FAST_CLKGEN7 = 0x08,
+    SPI_CLK_SOURCE_SLOW_CLKGEN0 = 0x100,
+    SPI_CLK_SOURCE_SLOW_CLKGEN1 = 0x200,
+    SPI_CLK_SOURCE_SLOW_CLKGEN2 = 0x300,
+    SPI_CLK_SOURCE_SLOW_CLKGEN3 = 0x400,
+    SPI_CLK_SOURCE_SLOW_CLKGEN4 = 0x500,
+    SPI_CLK_SOURCE_SLOW_CLKGEN5 = 0x600,
+    SPI_CLK_SOURCE_SLOW_CLKGEN6 = 0x700,
+    SPI_CLK_SOURCE_SLOW_CLKGEN7 = 0x800,
+} spi_clock_sources_t;
+
 
 typedef enum {
-    SPI_DATA_ORDER_MSB_FIRST, SPI_DATA_ORDER_LSB_FIRST
-} spi_data_order_t;
-
-typedef enum {
-    SERCOM_DIPO_PAD0, SERCOM_DIPO_PAD1, SERCOM_DIPO_PAD2, SERCOM_DIPO_PAD3
-} sercom_dipo_pad_t;
-
-typedef enum {
-    SERCOM_DOPO_PAD0, SERCOM_DOPO_PAD1, SERCOM_DOPO_PAD2, SERCOM_DOPO_PAD3
-} sercom_dopo_pad_t;
-
-typedef enum {
-    SPI_8_BIT_CHARACTER_SIZE, SPI_9_BIT_CHARACTER_SIZE
-} spi_character_size_t;
-
-typedef enum {
-    SPI_ADDRESS_MODE_MASK, SPI_ADDRESS_MODE_2_ADDRS, SPI_ADDRESS_MODE_RANGE
-} spi_slave_addr_mode_t;
-
-typedef struct {
-    sercom_num_t sercom_inst_num;
-    Sercom *sercom_inst;
-    clk_gen_num_t clk_gen_slow;
-    clk_gen_num_t clk_gen_fast;
-    uint32_t fast_clk_gen_frequency;
-    spi_operating_mode_t operating_mode;
-    sercom_dipo_pad_t dipo_pad;
-    sercom_dopo_pad_t dopo_pad;
-} spi_periph_inst_t;
+    SPI_BUS_OPT_USE_DEFAULT = 0,
+    SPI_BUS_OPT_CLOCK_POLARITY_SCK_HIGH = 0x01,
+    SPI_BUS_OPT_DATA_ORDER_LSB_FIRST = 0x02,
+    SPI_BUS_OPT_CHAR_SIZE_10_BIT = 0x04,
+    SPI_BUS_OPT_DOPO_PAD_0 = 0x08,
+    SPI_BUS_OPT_DOPO_PAD_1 = 0x10,
+    SPI_BUS_OPT_DOPO_PAD_2 = 0x18,
+    SPI_BUS_OPT_DOPO_PAD_3 = 0x20,
+    SPI_BUS_OPT_DIPO_PAD_0 = 0x40,
+    SPI_BUS_OPT_DIPO_PAD_1 = 0x80,
+    SPI_BUS_OPT_DIPO_PAD_2 = 0xC0,
+    SPI_BUS_OPT_DIPO_PAD_3 = 0x100
+} spi_bus_opt_t;
 
 typedef enum {
     SPI_EXTRA_OPT_USE_DEFAULT = 0,
     SPI_EXTRA_OPT_CLOCK_POLARITY_SCK_HIGH = 0x01,
     SPI_EXTRA_OPT_DATA_ORDER_LSB_FIRST = 0x02,
-    SPI_EXTRA_OPT_DOPO_PAD_0 = 0x04,
-    SPI_EXTRA_OPT_DOPO_PAD_1 = 0x08,
-    SPI_EXTRA_OPT_DOPO_PAD_2 = 0x0C,
-    SPI_EXTRA_OPT_DOPO_PAD_3 = 0x10,
-    SPI_EXTRA_OPT_DIPO_PAD_0 = 0x20,
-    SPI_EXTRA_OPT_DIPO_PAD_1 = 0x30,
-    SPI_EXTRA_OPT_DIPO_PAD_2 = 0x50,
-    SPI_EXTRA_OPT_DIPO_PAD_3 = 0x60,
-} spi_extra_opt_t;
+} spi_extra_dev_opt_t;
 
 #endif //ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H

@@ -21,8 +21,8 @@ if(PLATFORM_DEFINED MATCHES "^__SAMD21")
                                "hal/platform/atmelsam/i2c_host/i2c.c"
             hal/universal_hal.h
             hal/platform/atmelsam/spi_host/spi_host.c
-            hal/hal_spi_slave.h
-            hal/platform/atmelsam/spi_slave/spi_slave.c
+           # hal/hal_spi_slave.h
+            #hal/platform/atmelsam/spi_slave/spi_slave.c
             hal/platform/atmelsam/spi_common/spi_platform_specific.h
             hal/platform/atmelsam/clock_system/peripheral_clocking.h
             hal/platform/atmelsam/irq/sercom_stuff.h
