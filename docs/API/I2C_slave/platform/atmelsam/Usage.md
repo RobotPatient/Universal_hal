@@ -25,7 +25,7 @@ Some frameworks like Arduino and ASF using the Atmel Start tool will configure m
 Both frameworks have clockgenerator 0 set-up with a frequency of 48 (Arduino) or 8 MHz (ASF). And clockgenerator 3 set-up with a frequency of 32.768KHz. 
 
 !!! Warning
-    The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation.
+    The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation. Although the fast one is not really needed for the i2c slave driver, it is recommended to set it anyway.
 
 ### GPIO pinmux settings
 
