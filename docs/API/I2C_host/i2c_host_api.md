@@ -5,329 +5,327 @@
 The API for I2C host functionality has the following functions available:
 
 ```c
-void I2C_HOST_INIT(const i2c_periph_inst_t* i2c_peripheral_num, unsigned long baud_rate);
-void i2c_host_deinit(const i2c_periph_inst_t* i2c_peripheral_num);
-void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_peripheral_num, unsigned long baud_rate);
-void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
-void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
-void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
-void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
-void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
-					const i2c_clock_sources_t clock_sources,
-                    const uint32_t periph_clk_freq, 
-                    const uint32_t baud_rate_freq,
-                    const i2c_extra_opt_t extra_configuration_options);
+/* I2C driver initialization function (without compile-time parameter checking)*/
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
+							const i2c_clock_sources_t clock_sources,
+                    		const uint32_t periph_clk_freq, 
+                    		const uint32_t baud_rate_freq,
+                    		const i2c_extra_opt_t extra_configuration_options);
+/* I2C driver initialization function (with compile-time parameter checking)   */
+uhal_status_t I2C_HOST_INIT(const i2c_periph_inst_t i2c_peripheral_num, 
+							const i2c_clock_sources_t clock_sources, 
+							const uint32_t periph_clk_freq, 
+							const uint32_t baud_rate_freq, 
+							const i2c_extra_opt_t extra_configuration_options);
+
+
+/* I2C driver deinitialization function (without compile-time parameter checking) */
+uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
+
+/* I2C driver deinitialization function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_DEINIT(const i2c_periph_inst_t i2c_peripheral_num);
+
+/* I2C driver write blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                             const uint16_t addr,
+                             const uint8_t *write_buff,
+                             const size_t size,
+                             const i2c_stop_bit_t stop_bit);
+
+/* I2C driver write blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_WRITE_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                             const uint16_t addr,
+                             const uint8_t *write_buff,
+                             const size_t size,
+                             const i2c_stop_bit_t stop_bit);
+
+/* I2C driver write non-blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                 const uint16_t addr,
+                                 const uint8_t *write_buff,
+                                 const size_t size,
+                                 const i2c_stop_bit_t stop_bit);
+
+/* I2C driver write non-blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_WRITE_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                                 const uint16_t addr,
+                                 const uint8_t *write_buff,
+                                 const size_t size,
+                                 const i2c_stop_bit_t stop_bit);
+
+/* I2C driver read blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                            const uint16_t addr,
+                            uint8_t *read_buff,
+                            const size_t amount_of_bytes);
+
+/* I2C driver read blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_READ_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                            const uint16_t addr,
+                            uint8_t *read_buff,
+                            const size_t amount_of_bytes);
+
+/* I2C driver read non-blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                const uint16_t addr,
+                                uint8_t *read_buff,
+                                const size_t amount_of_bytes);
+
+/* I2C driver read non-blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_READ_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                                const uint16_t addr,
+                                uint8_t *read_buff,
+                                const size_t amount_of_bytes);
+
+
+
 ```
 
-### i2c_host_init function
+## i2c_host_init function
 
 ```c
-void i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
-					const i2c_clock_sources_t clock_sources,
-                    const uint32_t periph_clk_freq, 
-                    const uint32_t baud_rate_freq,
-                    const i2c_extra_opt_t extra_configuration_options);
+/* I2C driver initialization function (without compile-time parameter checking)*/
+uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
+                            const i2c_clock_sources_t clock_sources,
+                            const uint32_t periph_clk_freq, 
+                            const uint32_t baud_rate_freq,
+                            const i2c_extra_opt_t extra_configuration_options);
+
+/* I2C driver initialization function (with compile-time parameter checking)   */
+uhal_status_t I2C_HOST_INIT(const i2c_periph_inst_t i2c_peripheral_num, 
+                            const i2c_clock_sources_t clock_sources, 
+                            const uint32_t periph_clk_freq, 
+                            const uint32_t baud_rate_freq, 
+                            const i2c_extra_opt_t extra_configuration_options);
 ```
 
-#### Description:
+### Description:
 
-The i2c_host_init function is employed to initialize the I2C peripheral within a microcontroller for I2C communication. It does not involve any pin assignments or clock generator setups but ensures the hardware peripheral is ready for I2C operations.
+The `i2c_host_init` and `I2C_HOST_INIT` functions are designed to initialize an I2C peripheral with specific configurations.
 
-#### Parameters:
+### Error Checking:
 
-1. i2c_peripheral_num (const i2c_periph_inst_t):
-	
-	 The hardware peripheral to use. See the platform dependent `i2c_periph_inst_t` enum and the API platform -> platform_name -> Usage page for the details.
+- **I2C_HOST_INIT**: Written in uppercase letters, this version of the function includes compile-time parameter checking to ensure the validity of the provided parameters. The parameters such as `i2c_peripheral_num` and `clock_sources` are checked against valid definitions at compile time. This safeguard helps detect configuration errors early in the development phase.
+  
+	- **Usage Note**: Utilize this function only when the parameters are known at compile time.
 
-2. clock_sources (const i2c_clock_sources_t):
+- **i2c_host_init**: This function provides the same I2C initialization capabilities but without the compile-time parameter check. 
+  
+	- **Usage Note**: Opt for this function when dealing with parameters that might be determined at runtime.
 
-	The hardware clock source to use for configuring the hardware peripheral. 
-	
-3. periph_clk_freq (const uint32_t)
+### Parameters:
 
-	The frequency of clock on which the hardware peripheral will be configured.
-	
-4. baud_rate_freq (unsigned long):
-	
-	The desired baud rate for I2C communication, representing the frequency of the SCL line. Common values are 100 KHz or 400 KHz, but the function allows for other baud rates, including up to 1 MHz, depending on the hardware peripheral capabilities and the connected slave device requirements.
+1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to initialize.
+2. **clock_sources (const i2c_clock_sources_t)**: The clock source that will be used for the I2C peripheral.
+3. **periph_clk_freq (const uint32_t)**: The frequency of the peripheral clock in Hertz.
+4. **baud_rate_freq (const uint32_t)**: The desired baud rate frequency in Hertz for I2C communication.
+5. **extra_configuration_options (const i2c_extra_opt_t)**: Additional configuration options to further customize the I2C peripheral behavior.
 
-5. extra_configuration_options (const i2c_extra_opt_t):
+### Return:
 
-	Extra configuration options that are platform-dependent can be set here. Things like DMA use, IRQ priority's, etc.
+- **uhal_status_t**: The function will return a status indicating the success or failure of the initialization process. The exact definitions of possible return values should be referenced in the "error_checking.h" header file.
 
-#### Return Type:
+### Working:
 
-void:
+1. The function starts by validating the provided parameters, ensuring they're within acceptable ranges.
+2. It then configures the clock source for the I2C peripheral based on the `clock_sources` parameter.
+3. The function sets the peripheral clock frequency and baud rate as specified.
+4. Any additional configurations specified in `extra_configuration_options` are applied.
+5. Finally, the function activates the I2C peripheral, making it ready for communication.
 
-- This function does not return any value.
 
-#### Working:
-
-1. The function takes the configuration options as inputs.
-2. It initializes the I2C hardware peripheral using the given clock settings with the specified baud_rate.
-3. The initialization process ensures the I2C peripheral is properly configured and ready for further I2C operations.
-
-### i2c_host_deinit function
+## i2c_host_deinit function
 
 ```c
-void i2c_host_deinit(const i2c_periph_inst_t* i2c_peripheral_num);
+/* I2C driver deinitialization function (without compile-time parameter checking) */
+uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
+
+/* I2C driver deinitialization function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_DEINIT(const i2c_periph_inst_t i2c_peripheral_num);
 ```
 
-#### Description:
+### Description:
+The `i2c_host_deinit` and `I2C_HOST_DEINIT` functions deinitialize a previously initialized I2C peripheral.
 
-The i2c_host_deinit function is used to de-initialize or reset the I2C peripheral to a non-operational state. This helps in conserving power and preventing further I2C operations, ensuring that the I2C peripheral is safely turned off.
+### Error Checking:
+- **I2C_HOST_DEINIT**: This uppercase version includes compile-time parameter checking for the peripheral number.
+	- **Usage Note**: Use this when the peripheral number is known at compile time.
+  
+- **i2c_host_deinit**: This function does the deinitialization without compile-time checks.
+	- **Usage Note**: Use this when the peripheral number might be determined at runtime.
 
-#### Parameters:
+### Parameters:
+1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to deinitialize.
 
-1. i2c_peripheral_num (const i2c_periph_inst_t*):
-	
-	A pointer to an instance of the I2C peripheral structure. This parameter holds information regarding the I2C peripheral's configuration and state.
+### Return:
+- **uhal_status_t**: Success or failure status of the deinitialization.
 
-#### Return Type:
+### Working:
+1. Validates the peripheral number.
+2. Resets the I2C peripheral settings and configurations.
+3. Turns off the I2C peripheral, releasing its resources.
 
-void:
 
-- This function does not return any value.
 
-#### Working:
-
-The i2c_host_deinit function takes a pointer to an I2C peripheral instance as an input.
-It resets the I2C peripheral pointed to by i2c_peripheral_num, rendering it inactive and unavailable for further I2C communication.
-This process is crucial for power management and ensuring the secure termination of I2C operations.
-
-### i2c_host_set_baudrate function
+## i2c_host_write_blocking function
 
 ```c
-void i2c_host_set_baud_rate(const i2c_periph_inst_t* i2c_peripheral_num, unsigned long baud_rate);
+/* I2C driver write blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                             const uint16_t addr,
+                             const uint8_t *write_buff,
+                             const size_t size,
+                             const i2c_stop_bit_t stop_bit);
+
+/* I2C driver write blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_WRITE_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                             const uint16_t addr,
+                             const uint8_t *write_buff,
+                             const size_t size,
+                             const i2c_stop_bit_t stop_bit);
 ```
 
-#### Description:
+### Description:
+The `i2c_host_write_blocking` and `I2C_HOST_WRITE_BLOCKING` functions write data to a specified I2C address in a blocking manner.
 
-The i2c_host_set_baud_rate function is used to reconfigure the baud rate of an already initialized I2C peripheral for communication. Adjusting the baud rate is essential for ensuring reliable communication with devices on the I2C bus, especially when changing the communication requirements or working with various devices with different baud rate specifications.
+### Error Checking:
+- **I2C_HOST_WRITE_BLOCKING**: This uppercase version includes compile-time parameter checking.
+	- **Usage Note**: Use this when parameters are known at compile time.
 
-#### Parameters:
+- **i2c_host_write_blocking**: Executes the write operation without compile-time checks.
+	- **Usage Note**: Use this when parameters might be determined at runtime.
 
-1. i2c_peripheral_num (const i2c_periph_inst_t*):
+### Parameters:
+1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to use.
+2. **addr (const uint16_t)**: The I2C address to write to.
+3. **write_buff (const uint8_t*)**: Pointer to the buffer containing data to be written.
+4. **size (const size_t)**: Amount of bytes to write.
+5. **stop_bit (const i2c_stop_bit_t)**: Determines if a stop bit should be sent after the write.
 
-	A pointer to an instance of the I2C peripheral structure, holding the configuration and state information for the I2C peripheral.
+### Return:
+- **uhal_status_t**: Success or failure status of the write operation.
 
-2. baud_rate (unsigned long):
-   
-	The desired new baud rate for I2C communication. It represents the frequency of the SCL line. This value is typically 100 KHz or 400 KHz, but other values can be selected based on the hardware's capability and the slave devices' requirements.
+### Working:
+1. Validates the parameters and ensures the I2C bus is ready.
+2. Sends the data from the buffer to the specified address.
+3. Waits for the operation to complete before returning.
 
-#### Return:
 
-void: 
-
-- The function does not return any value. It’s used only for adjusting the baud rate of the I2C peripheral and doesn’t compute or check for a successful setup.
-
-#### Working:
-
-1. The i2c_host_set_baud_rate function takes a pointer to an already initialized I2C peripheral instance and a desired new baud rate as inputs.
-
-2. It reconfigures the I2C peripheral pointed to by i2c_peripheral_num to operate at the specified baud_rate, allowing for adaptation to new communication speeds as required.
-
-### i2c_host_write_blocking function
+## i2c_host_write_non_blocking function
 
 ```c
-void i2c_host_write_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned char addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
+/* I2C driver write non-blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                 const uint16_t addr,
+                                 const uint8_t *write_buff,
+                                 const size_t size,
+                                 const i2c_stop_bit_t stop_bit);
+
+/* I2C driver write non-blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_WRITE_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                                 const uint16_t addr,
+                                 const uint8_t *write_buff,
+                                 const size_t size,
+                                 const i2c_stop_bit_t stop_bit);
 ```
 
-#### Description:
+### Description:
+The `i2c_host_write_non_blocking` and `I2C_HOST_WRITE_NON_BLOCKING` functions write data to an I2C address without blocking the executing thread.
 
-The i2c_host_write_blocking function is used to execute a blocking write operation on an I2C bus. It sends a sequence of bytes to a specific I2C address. The function will block the execution until the write operation is complete.
+### Error Checking:
+- **I2C_HOST_WRITE_NON_BLOCKING**: This uppercase version includes compile-time parameter checking.
+	- **Usage Note**: Use this when parameters are known at compile time.
 
-#### Parameters:
+- **i2c_host_write_non_blocking**: Executes the write operation without compile-time checks.
+	- **Usage Note**: Use this when parameters might be determined at runtime.
 
-1. i2c_peripheral_num (const i2c_periph_inst_t):
-   
-	The hardware peripheral to use. See the platform dependent `i2c_periph_inst_t` enum and the API platform -> platform_name -> Usage page for the details.
+### Parameters:
+The parameters are the same as the blocking version.
 
-2. addr (const unsigned char):
-   
-	The I2C address of the slave device to which the data will be sent.
+### Return:
+- **uhal_status_t**: Success or failure status of the write operation.
 
-3. write_buff (const unsigned char*):
-   
-	A pointer to the buffer containing the data to be written to the slave device.
+### Working:
+1. Validates the parameters and ensures the I2C bus is ready.
+2. Starts the write operation and immediately returns.
 
-4. size (const size_t):
-   
-	The number of bytes to write from the write_buff to the slave device.
 
-5. stop_bit (const i2c_stop_bit_t):
-   
-	An enumeration type to specify whether a STOP bit should be sent after the write operation is complete.
-
-#### Return Type:
-
-void:
-
-- This function does not return any value.
-
-#### Working:
-
-1. The function begins the write operation by sending the data from the write_buff to the slave device with address addr on the I2C bus defined by i2c_peripheral_num.
-2. It will write size number of bytes from write_buff to the slave device.
-3. The function will wait (block) until the complete data is written.
-4. If stop_bit is set, it will send a STOP bit after completing the write operation to release the I2C bus.
-
-### i2c_host_write_non_blocking function
+## i2c_host_read_blocking function
 
 ```c
-void i2c_host_write_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, const unsigned char* write_buff, size_t size, i2c_stop_bit_t stop_bit);
+/* I2C driver read blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                            const uint16_t addr,
+                            uint8_t *read_buff,
+                            const size_t amount_of_bytes);
+
+
+
+/* I2C driver read blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_READ_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                            const uint16_t addr,
+                            uint8_t *read_buff,
+                            const size_t amount_of_bytes);
 ```
 
-#### Description:
+### Description:
+The `i2c_host_read_blocking` and `I2C_HOST_READ_BLOCKING` functions read data from a specified I2C address, waiting for the operation to complete.
 
-The i2c_host_write_non_blocking function executes a non-blocking write operation on an I2C bus. It sends a sequence of bytes to a specific I2C address and allows the program to continue executing while the write operation is underway.
+### Error Checking:
+- **I2C_HOST_READ_BLOCKING**: This uppercase version includes compile-time parameter checking.
+	- **Usage Note**: Use this when parameters are known at compile time.
 
-#### Parameters:
+- **i2c_host_read_blocking**: Executes the read operation without compile-time checks.
+	- **Usage Note**: Use this when parameters might be determined at runtime.
 
-1. i2c_peripheral_num (const i2c_periph_inst_t):
-   
-	The hardware peripheral to use. See the platform dependent `i2c_periph_inst_t` enum and the API platform -> platform_name -> Usage page for the details.
+### Parameters:
+1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to use.
+2. **addr (const uint16_t)**: The I2C address to read from.
+3. **read_buff (uint8_t*)**: Buffer where the read data will be stored.
+4. **amount_of_bytes (const size_t)**: Amount of bytes to read.
 
-2. addr (const unsigned short):
-   
-	The I2C address of the slave device to which the data will be sent.
+### Return:
+- **uhal_status_t**: Success or failure status of the read operation.
 
-3. write_buff (const unsigned char*):
-   
-	A pointer to the buffer containing the data to be written to the slave device.
+### Working:
+1. Validates the parameters and ensures the I2C bus is ready.
+2. Reads the data from the specified address and stores it in the buffer.
+3. Waits for the operation to complete before returning.
 
-4. size (const size_t):
-   
-	The number of bytes to be written from write_buff to the slave device.
 
-5. stop_bit (const i2c_stop_bit_t):
-   
-	An enumeration indicating whether a STOP bit should be sent after the write operation.
-
-#### Return:
-
-void:
-
-- The function does not return any value, indicating it’s used for performing the read operation and storing the read data into the provided buffer without any success or failure indication.
-
-#### Working:
-
-1. The function starts the write operation by sending the data from write_buff to the slave device with address addr on the I2C bus specified by i2c_peripheral_num.
-2. It will write size number of bytes from write_buff to the slave device.
-   **Unlike the blocking write function, i2c_host_write_non_blocking will not halt the program execution until the write operation is complete.**
-3. If stop_bit is set, a STOP bit will be sent after the write operation to release the I2C bus.
-
-### i2c_host_read_blocking function
+## i2c_host_read_non_blocking function
 
 ```c
-void i2c_host_read_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
+/* I2C driver read non-blocking function (without compile-time parameter checking) */
+uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
+                                const uint16_t addr,
+                                uint8_t *read_buff,
+                                const size_t amount_of_bytes);
+
+/* I2C driver read non-blocking function (with compile-time parameter checking) */
+uhal_status_t I2C_HOST_READ_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
+                                const uint16_t addr,
+                                uint8_t *read_buff,
+                                const size_t amount_of_bytes);
 ```
 
-#### Description:
+### Description:
+The `i2c_host_read_non_blocking` and `I2C_HOST_READ_NON_BLOCKING` functions read data from an I2C address without blocking the executing thread.
 
-The i2c_host_read_blocking function performs a blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, halting the execution until the entire read operation is completed.
+### Error Checking:
+- **I2C_HOST_READ_NON_BLOCKING**: This uppercase version includes compile-time parameter checking.
+	- **Usage Note**: Use this when parameters are known at compile time.
 
-#### Parameters:
+- **i2c_host_read_non_blocking**: Executes the read operation without compile-time checks.
+	- **Usage Note**: Use this when parameters might be determined at runtime.
 
-1. i2c_peripheral_num (const i2c_periph_inst_t):
-   
-	 The hardware peripheral to use. See the platform dependent `i2c_periph_inst_t` enum and the API platform -> platform_name -> Usage page for the details.
+### Parameters:
+The parameters are the same as the blocking version.
 
-2. addr (const unsigned short):
-   
-	 The I2C address of the slave device from which the data will be read.
+### Return:
+- **uhal_status_t**: Success or failure status of the read operation.
 
-3. read_buff (unsigned char*):
-   
-	 A pointer to the buffer where the read data will be stored.
-
-4. amount_of_bytes (const size_t):
-   
-	The number of bytes to be read from the slave device and stored into read_buff.
-
-#### Return:
-
-void:
-
-- The function does not return any value, indicating it’s used for performing the read operation and storing the read data into the provided buffer without any success or failure indication.
-
-#### Working:
-
-1. The function begins the read operation by addressing the slave device with address addr on the I2C bus specified by i2c_peripheral_num.
-2. It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
-3. The i2c_host_read_blocking function will block or halt the program execution until the entire read operation is finished.
-
-### i2c_host_read_non_blocking function
-
-```c
-void i2c_host_read_non_blocking(const i2c_periph_inst_t* i2c_peripheral_num, unsigned short addr, unsigned char* read_buff, size_t amount_of_bytes);
-```
-
-#### Description:
-
-The i2c_host_read_non_blocking function performs a non-blocking read operation on an I2C bus. It reads a sequence of bytes from a specified I2C address into a buffer, allowing the program to continue executing while the read operation is underway.
-
-#### Parameters:
-
-1. i2c_peripheral_num (const i2c_periph_inst_t):
-   
-	The hardware peripheral to use. See the platform dependent `i2c_periph_inst_t` enum and the API platform -> platform_name -> Usage page for the details.
-
-2. addr (const unsigned short):
-   
-	The I2C address of the slave device from which the data will be read.
-
-3. read_buff (unsigned char*):
-   
-	A pointer to the buffer where the read data will be stored.
-
-4. amount_of_bytes (const size_t):
-   
-	The number of bytes to be read from the slave device and stored into read_buff.
-
-#### Return:
-
-void:
-
-- The function does not return any value, indicating it’s used for performing the read operation and storing the read data into the provided buffer without any success or failure indication.
-
-#### Working:
-
-1. The function initiates the read operation by addressing the slave device with address addr on the I2C bus specified by i2c_peripheral_num.
-
-2. It will read amount_of_bytes number of bytes from the slave device and store them into read_buff.
-
-3. Unlike the blocking read function, i2c_read_non_blocking will not halt the program execution until the read operation is complete.
-
-### _i2c_host_deinit function
-
-```c
-void _i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
-```
-
-#### Description:
-
-The _i2c_host_deinit function is used to de-initialize or reset the I2C peripheral to a non-operational state. This helps in conserving power and preventing further I2C operations, ensuring that the I2C peripheral is safely turned off.
-
-#### Parameters:
-
-1. i2c_peripheral_num (const i2c_periph_inst_t):
-	
-	The hardware peripheral to use. See the platform dependent `i2c_periph_inst_t` enum and the API platform -> platform_name -> Usage page for the details.
-
-#### Return Type:
-
-void:
-
-- This function does not return any value.
-
-#### Working:
-
-1. The _i2c_host_deinit function takes the I2C peripheral instance as an input.
-
-2. It resets the I2C peripheral pointed to by i2c_peripheral_num, rendering it inactive and unavailable for further I2C communication.
-
-This process is crucial for power management and ensuring the secure termination of I2C operations.
-
-
+### Working:
+1. Validates the parameters and ensures the I2C bus is ready.
+2. Starts the read operation and immediately returns.
 

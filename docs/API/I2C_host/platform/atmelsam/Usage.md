@@ -12,7 +12,8 @@ To be able to use the peripheral correctly, some pins, clocks and a struct have 
 - [ ] Setup the pins for the peripheral (see the gpio section on this page).
 - [ ] Use the init function with the correct configuration settings
 - [ ] Initialize the i2c hardware peripheral using the i2c_host_init() function.
-  !!! note
+  
+!!! note
     You can click on the checkmarks above to check them off your list ;)
 
 ### Clocks
@@ -46,26 +47,24 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
      For example configuring PA4 and PA5 of the SAMD21 to the SDA and SCL output of SERCOM 0: ![samd io table](../../../../assets/samd_io_table.png) Means that we have to set pin PA4 and PA5 to pin mode D (the column letter). The resulting function call will be:
      ```c
      {
-     const gpio_pin_t SDA_PIN = {.port_num = GPIO_PORT_A, 
-                                  .pin_num = 4};
-     const gpio_pin_t SCL_PIN = {.port_num = GPIO_PORT_A,
-                                  .pin_num = 5};
+     const gpio_pin_t SDA_PIN = GPIO_PIN_PA4;
+     const gpio_pin_t SCL_PIN = GPIO_PIN_PA5;
     
      gpio_set_pin_mode(SDA_PIN, GPIO_MODE_D);
      gpio_set_pin_mode(SCL_PIN, GPIO_MODE_D);
      ...
      ```
 
-### I2C_HOST_INIT function
+### i2c_host_init function
 
 The i2c host init function should be used to initialize the hardware peripheral with the right settings. Each setting can be statically validated using the I2C_HOST_INIT() macro. This macro will first validate in compile time whether valid settings have been entered. If no compile errors are generated the function call will be replaced with the __i2c_host_init function.
 
 ```c
-void _i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
-                    const i2c_clock_sources_t clock_sources,
-                    const uint32_t periph_clk_freq, 
-                    const uint32_t baud_rate_freq,
-                    const i2c_extra_opt_t extra_configuration_options);
+void i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
+                   const i2c_clock_sources_t clock_sources,
+                   const uint32_t periph_clk_freq, 
+                   const uint32_t baud_rate_freq,
+                   const i2c_extra_opt_t extra_configuration_options);
 ```
 
 Within this function the following parameters can be set:
@@ -135,7 +134,7 @@ Within this function the following parameters can be set:
 	or
 	
 	/* Initialize peripheral without parameter checking */ 
-	_i2c_host_init(I2C_PERIPHERAL_0, I2C_PERIPHERAL_CLK_SOURCES, ...
+	i2c_host_init(I2C_PERIPHERAL_0, I2C_PERIPHERAL_CLK_SOURCES, ...
 	```
 	
 	**If not sure which clockgenerator to use. Try the `I2C_CLK_SOURCE_USE_DEFAULT` flag.**
@@ -147,7 +146,7 @@ Within this function the following parameters can be set:
 
     A typical value would be: 
     
-      | Clock generator   | Platform | Framework | fast_clk_gen_frequency                |
+      | Clock generator   | Platform | Framework | periph_clk_freq               |
       | ----------------- | -------- | --------- | ------------------------------------- |
       | Clock generator 0 | SAMD51   | Arduino   | 120000000 (120 MHz)                   |
       | Clock generator 0 | SAMD51   | ASF       | 8000000  (8 MHz)              |
@@ -191,9 +190,10 @@ Within this function the following parameters can be set:
 	Setting one of these flags will do the following things:
 	
 	`I2C_EXTRA_OPT_NONE` flag will use default SERCOMx_handler irq priority of 2 and enable 2-WIRE mode (SCL+SDA line)
+
+	`I2C_EXTRA_OPT_4_WIRE_MODE` flag will enable 4-wire mode
 	
 	`I2C_EXTRA_OPT_IRQ_PRIO_X` flag will overide the default SERCOMx_handler priority of 2 with priority of X. 
-	
 	
 	Multiple flags can be selected in the same manner as with the clock_sources parameter (OR-ing them together).
 	**However please note that only one IRQ_PRIO can be selected.**
@@ -207,9 +207,16 @@ Within this function the following parameters can be set:
     This is an example configuration for a samd21g18a (adafruit feather m0)
     On the Arduino framework with the default clock settings (48 MHz).
     ```c
+	#include <hal_gpio.h>
+	#include <hal_i2c_host.h>
+
     #ifndef F_CPU
     #define F_CPU 48000000 /* Peripheral clock speed of 48 MHz */
     #endif
+	
+	/* Set PA22 as SDA and PA23 as SCL */
+	#define SDA_PIN GPIO_PIN_PA22
+	#define SCL_PIN GPIO_PIN_PA23
 
     #define I2C_CLOCK_SPEED 100000 /* I2C bus speed of 100 KHz */
     
@@ -222,14 +229,9 @@ Within this function the following parameters can be set:
     /* Use the default configuration options */
     #define I2C_EXTRA_CONFIG_OPTIONS I2C_EXTRA_OPT_NONE
     
-    const gpio_pin_t sda_pin = {.port_num = GPIO_PORT_A,
-                                .pin_num = 22};
-    const gpio_pin_t scl_pin = {.port_num = GPIO_PORT_A,
-                                .pin_num = 23};
-    
     void setup(){
-       gpio_set_pin_mode(sda_pin, GPIO_MODE_C);
-       gpio_set_pin_mode(scl_pin, GPIO_MODE_C);
+       GPIO_SET_PIN_MODE(SDA_PIN, GPIO_MODE_C);
+       GPIO_SET_PIN_MODE(SCL_PIN, GPIO_MODE_C);
        I2C_HOST_INIT(I2C_PERIPHERAL, I2C_CLK_SOURCE, F_CPU, I2C_CLOCK_SPEED, I2C_EXTRA_CONFIG_OPTIONS);
     }
     ...
