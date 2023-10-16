@@ -118,7 +118,7 @@ typedef enum {
         static_assert(read_buff != NULL && sizeof(read_buff) >= size, "readbuffer is equal to NULL or buffer overflow!");                            \
     } while (0);
 
-#define I2C_SLAVE_INIT_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, clock_frequency, extra_configuration_options)                              \
+#define I2C_SLAVE_INIT_PARAMETER_CHECK(i2c_peripheral_num, slave_addr, clock_sources, extra_configuration_options)                              \
     do {                                                                                                                                             \
     } while (0);
 

@@ -33,21 +33,24 @@ extern "C" {
 /**
  * @brief Initialize the hardware peripheral with I2C slave functionality.
  * @param i2c_peripheral_num The i2c instance to initialize
+ * @param slave_addr The i2c slave address to set
+ * @param clock_sources The clock sources to use for the i2c peripheral (MCU specific)
+ * @param extra_configuration_options The extra configuration options to use for this i2c slave instance
  */
 uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_peripheral_num, const uint16_t slave_addr, const i2c_clock_sources_t clock_sources,
-                             const uint32_t clock_frequency, const i2c_extra_opt_t extra_configuration_options);
+                             const i2c_extra_opt_t extra_configuration_options);
 
-#define I2C_SLAVE_INIT(i2c_peripheral_num, slave_addr, clock_sources, clock_frequency, extra_configuration_options)                                  \
+#define I2C_SLAVE_INIT(i2c_peripheral_num, slave_addr, clock_sources, extra_configuration_options)                                  \
     ({                                                                                                                                               \
         int retval;                                                                                                                                  \
-        I2C_SLAVE_INIT_PARAMETER_CHECK(i2c_peripheral_num, clock_sources, clock_frequency, extra_configuration_options);                             \
-        retval = i2c_slave_init(i2c_peripheral_num, slave_addr, clock_sources, clock_frequency, extra_configuration_options);                        \
+        I2C_SLAVE_INIT_PARAMETER_CHECK(i2c_peripheral_num, slave_addr, clock_sources, extra_configuration_options);                             \
+        retval = i2c_slave_init(i2c_peripheral_num, slave_addr, clock_sources, extra_configuration_options);                        \
         retval;                                                                                                                                      \
     })
 
 /**
  * @brief De-initialize an i2c slave initialized hardware peripheral.
- * @param i2c_peripheral_num
+ * @param i2c_peripheral_num The i2c peripheral to de-initialize
  */
 uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_peripheral_num);
 

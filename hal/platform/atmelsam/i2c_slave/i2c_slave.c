@@ -69,7 +69,6 @@ static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_nu
 uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
                              const uint16_t slave_addr,
                              const i2c_clock_sources_t clock_sources,
-                             const uint32_t clock_frequency,
                              const i2c_extra_opt_t extra_configuration_options) {
     const bool InvalidSercomInstNum = (i2c_instance < 0 || i2c_instance);
     //const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);

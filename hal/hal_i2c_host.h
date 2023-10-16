@@ -21,20 +21,16 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-/**
+/*
  * The I2C module
  *
  * Possibilities:
- * - Slave/Client and Master/Host functionality : Master means MCU as host and the connecting device as a slave device, with slave meaning the mcu is the connecting slave device.
- * @note Host & Slave functionality is not supported by every hardware peripheral of every microcontroller variant.
+ * - Master/Host functionality : Master means MCU as host and the connecting device as a slave device.
+ * @note Host functionality is not supported by every hardware peripheral of every microcontroller variant.
  *       The universal hal can't check whether your microcontroller supports this, please make sure that the microcontroller has
  *       this feature and if the feature is supported by this hal, see wiki (https://hoog-v.github.io/Universal_hal/).
- * @note Slave functionality is very difficult to implement with a generic api. Therefore this module only supports Slave functionality with
- *       the interrupt functions listed below. The read_(non_)blocking and write_(non_)blocking functions do not work with this mode. Why?
- *       Because every slave device has other functionality and way of interacting with the host. It is way easier to give the user of the library/framework
- *       full control of the slave functionality, instead of abstracting away these interfaces in to write and read functions.
  * - Blocking and non-blocking write and read functions for I2C host functionality.
- * @note The write and read functions are implemented using interrupts. Keep in mind that this might mess with other timing-critical applications implemented
+ * @note The write and read functions might be implemented using interrupts. Keep in mind that this might mess with other timing-critical applications implemented
  *       on the microcontroller.
  * @note The implementation of non-blocking functions differ for each microcontroller variant. Some microcontroller variants have built-in functionality for
  *       stacking transactions. Other microcontrollers don't have it and have to be implemented manually in software.
@@ -42,7 +38,7 @@
  * @note The supported clock-frequencies are dependent on which frequencies are supported by the hardware peripheral of the microcontroller variant.
  *       The I2C module checks for this, you have to... Keep a eye on the datasheet of the MCU and the wiki (https://hoog-v.github.io/Universal_hal/).
  *       Software bit-banged implementations of the I2C driver only support standard mode speeds (100KHz)
- * - Linking your own custom interrupt handlers to this module for master as well as slave functionality.
+ * - Linking your own custom interrupt handlers to this module for master functionality
  * @note Linking custom implementations of i2c master irq functions will certainly break the write and read functions...
  *       This is not the case if you facilitate the usage of the read and write functions in your custom implementation.
  *       See the default handler in the default_irq_handlers.c file.
@@ -51,17 +47,13 @@
  * - Although the platform specific details have been abstracted away in to the i2c_periph_inst_t struct, you still have to manually configure this struct
  *   with the right settings when porting between different microcontroller platforms.
  * @note The recommended way to make porting easier is by making a general board_define file included with your main.c which has all the peripheral configurations and
- *      pin_definitions defined. When porting the name of the structs will be the same, but the implementation details will differ, which means there will be only one place
+ *      pin_definitions defined. When porting the name of the definitions will be the same, but the implementation details will differ, which means there will be only one place
  *      to edit when porting.
- * - Read and write functions for slave functionality. As said in the note above, every slave device is different. One is a big block of memory, while the other might be an active sensor.
- *   It is very difficult to create a generic API that facilitates every possible slave device ever created. That's why only the IRQ handlers and init function work in this mode.
- * @note The irq handlers trigger on the same moment in every device making porting easier.
+ * @note The irq handlers try to trigger on the same moment in every device making porting easier.
  * @note The irq handlers are weakly linked to the default handler, meaning that this might not be a misra compatible solution. But it is certainly better than passing callback function
  *       pointers.
  * - When using a microcontroller with extensive clock systems: Cortex-M based microcontrollers for example. The i2c module will not configure clock generators or other clock system options.
- *   It might depending on the implementation of the init function link to an already configured clock generator listed in the i2c_periph_inst_t struct.
- * - Due to the minimalistic interface there has not been a lot of error checking incorporated in the library... This is still an in progress.
- *
+ *   It might depending on the implementation, link to an already configured clock generator listed in the i2c_periph_inst_t struct.
  * - The ISR handlers are shared among all hardware peripherals. It is very difficult to provide a separate handler for every hardware instance since this differs for every mcu variant.
  *   The bustransaction_t struct helps to identify which peripheral it runs on. But keep this in mind.
  *
