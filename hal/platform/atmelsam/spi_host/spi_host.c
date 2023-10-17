@@ -81,11 +81,11 @@ static inline uint8_t get_data_order_from_bus_opt(const spi_bus_opt_t bus_opt) {
 }
 
 static inline uint8_t get_dopo_pad_from_bus_opt(const spi_bus_opt_t bus_opt) {
-    return BITMASK_COMPARE(bus_opt, 0x38) >> 3;
+    return (BITMASK_COMPARE(bus_opt, 0x38) >> 3)-1;
 }
 
 static inline uint8_t get_dipo_pad_from_bus_opt(const spi_bus_opt_t bus_opt) {
-    return BITMASK_COMPARE(bus_opt, 0x1C0) >> 6;
+    return (BITMASK_COMPARE(bus_opt, 0x1C0) >> 6)-1;
 }
 
 uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint32_t spi_clock_source, const uint32_t spi_clock_source_freq,
@@ -132,8 +132,9 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
         | (SERCOM_SPI_CTRLA_DOPO(dopo_pad));
     sercom_instance->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_PLOADEN | SERCOM_SPI_CTRLB_CHSIZE(character_size);
     sercom_instance->SPI.BAUD.reg = spi_clock_source_freq / spi_bus_frequency / 2;
-    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_RXC | SERCOM_SPI_INTENSET_TXC | SERCOM_SPI_INTENSET_SSL;
+//    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_RXC | SERCOM_SPI_INTENSET_TXC | SERCOM_SPI_INTENSET_SSL;
     sercom_instance->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_ENABLE;
+    sercom_instance->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_RXEN;
     spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_ENABLE);
     const enum IRQn irq_type = (SERCOM0_IRQn + spi_peripheral_num);
     NVIC_EnableIRQ(irq_type);
@@ -190,8 +191,7 @@ uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_nu
     sercom_bustrans_buffer[sercom_inst_num].buf_size = amount_of_bytes;
     sercom_bustrans_buffer[sercom_inst_num].read_buffer = read_buff;
     sercom_bustrans_buffer[sercom_inst_num].transaction_type = SERCOMACT_SPI_DATA_RECEIVE;
-    sercom_instance->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_RXEN;
-    sercom_instance->SPI.DATA.reg = 0;
-    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_DRE;
+    sercom_instance->SPI.DATA.reg = 0x00;
+    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_TXC;
     return UHAL_STATUS_OK;
 }

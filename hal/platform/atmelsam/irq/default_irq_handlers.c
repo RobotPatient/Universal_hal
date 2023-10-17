@@ -90,8 +90,13 @@ void spi_host_data_send_irq(const void* hw, volatile bustransaction_t* transacti
 void spi_host_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) {
     Sercom* sercom_instance = ((Sercom*)hw);
     if (transaction->transaction_type == SERCOMACT_SPI_DATA_RECEIVE) {
-        if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size) {
-            transaction->read_buffer[transaction->buf_cnt++] = sercom_instance->SPI.DATA.reg;
+        if (transaction->read_buffer != NULL && transaction->buf_cnt < transaction->buf_size+1) {
+            if(transaction->buf_cnt == 0) {
+                transaction->read_buffer[transaction->buf_cnt] = sercom_instance->SPI.DATA.reg;
+            } else {
+                transaction->read_buffer[transaction->buf_cnt-1] = sercom_instance->SPI.DATA.reg;
+            }
+            transaction->buf_cnt++;
             const bool last_byte_read = transaction->buf_cnt >= transaction->buf_size;
             if (!last_byte_read) {
                 sercom_instance->SPI.DATA.reg = 0;
