@@ -127,8 +127,8 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
     sercom_instance->SPI.CTRLA.reg = SERCOM_SPI_CTRLA_SWRST;
     spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_SWRST | SERCOM_SPI_SYNCBUSY_ENABLE);
     sercom_instance->SPI.CTRLA.reg =
-        SERCOM_SPI_CTRLA_MODE_SPI_MASTER | (clock_polarity << SERCOM_SPI_CTRLA_CPHA_Pos)
-        | (data_order << SERCOM_SPI_CTRLA_CPOL_Pos) | (SERCOM_SPI_CTRLA_DIPO(dipo_pad))
+        SERCOM_SPI_CTRLA_MODE_SPI_MASTER | (0 << SERCOM_SPI_CTRLA_CPHA_Pos)
+        | (0 << SERCOM_SPI_CTRLA_CPOL_Pos) | (SERCOM_SPI_CTRLA_DIPO(dipo_pad))
         | (SERCOM_SPI_CTRLA_DOPO(dopo_pad));
     sercom_instance->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_PLOADEN | SERCOM_SPI_CTRLB_CHSIZE(character_size);
     sercom_instance->SPI.BAUD.reg = spi_clock_source_freq / spi_bus_frequency / 2;
@@ -149,49 +149,57 @@ uhal_status_t spi_host_deinit(const spi_host_inst_t spi_peripheral_num) {
 
 uhal_status_t spi_host_start_transaction(const spi_host_inst_t spi_peripheral_num, const gpio_pin_t chip_select_pin,
                                     const spi_extra_dev_opt_t device_specific_config_opt) {
+    Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
     gpio_set_pin_lvl(chip_select_pin, GPIO_LOW);
+    sercom_instance->SPI.CTRLA.reg |= (SERCOM_SPI_CTRLA_ENABLE);
+    spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_ENABLE);
     return UHAL_STATUS_OK;
 }
 
 uhal_status_t spi_host_end_transaction(const spi_host_inst_t spi_peripheral_num, const gpio_pin_t chip_select_pin) {
+    Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
+    sercom_instance->SPI.CTRLA.reg &= ~(SERCOM_SPI_CTRLA_ENABLE);
+    spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_ENABLE);
     gpio_set_pin_lvl(chip_select_pin, GPIO_HIGH);
     return UHAL_STATUS_OK;
 }
 
 uhal_status_t spi_host_write_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size) {
     spi_host_write_non_blocking(spi_peripheral_num, write_buff, size);
-    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[spi_peripheral_num], SERCOMACT_IDLE_SPI_HOST);
+//    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[spi_peripheral_num], SERCOMACT_IDLE_SPI_HOST);
+    sercom_bustrans_buffer[spi_peripheral_num].transaction_type = SERCOMACT_IDLE_SPI_HOST;
     return UHAL_STATUS_OK;
+}
+
+uint8_t transferdata(Sercom* sercom, uint8_t data) {
+    sercom->SPI.DATA.bit.DATA = data; // Writing data into Data register
+
+    while( sercom->SPI.INTFLAG.bit.RXC == 0 )
+    {
+        // Waiting Complete Reception
+    }
+
+    return sercom->SPI.DATA.bit.DATA;  // Reading data
 }
 
 uhal_status_t spi_host_write_non_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size) {
     Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
-    const sercom_num_t sercom_inst_num = spi_peripheral_num;
-    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
-    sercom_bustrans_buffer[sercom_inst_num].buf_cnt = 0;
-    sercom_bustrans_buffer[sercom_inst_num].buf_size = size;
-    sercom_bustrans_buffer[sercom_inst_num].write_buffer = write_buff;
-    sercom_bustrans_buffer[sercom_inst_num].transaction_type = SERCOMACT_SPI_DATA_TRANSMIT;
-    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_DRE;
+    for (uint8_t i =0; i< size; i++) {
+        transferdata(sercom_instance, write_buff[i]);
+    }
     return UHAL_STATUS_OK;
 }
 
 uhal_status_t spi_host_read_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes) {
-    const sercom_num_t sercom_inst_num = spi_peripheral_num;
     spi_host_read_non_blocking(spi_peripheral_num, read_buff, amount_of_bytes);
-    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
+//    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
     return UHAL_STATUS_OK;
 }
 
 uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes) {
     Sercom* sercom_instance = get_sercom_inst(spi_peripheral_num);
-    const sercom_num_t sercom_inst_num = spi_peripheral_num;
-    spi_wait_for_transaction_finish(&sercom_bustrans_buffer[sercom_inst_num], SERCOMACT_IDLE_SPI_HOST);
-    sercom_bustrans_buffer[sercom_inst_num].buf_cnt = 0;
-    sercom_bustrans_buffer[sercom_inst_num].buf_size = amount_of_bytes;
-    sercom_bustrans_buffer[sercom_inst_num].read_buffer = read_buff;
-    sercom_bustrans_buffer[sercom_inst_num].transaction_type = SERCOMACT_SPI_DATA_RECEIVE;
-    sercom_instance->SPI.DATA.reg = 0x00;
-    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_TXC;
+    for (uint8_t i =0; i< amount_of_bytes; i++) {
+        read_buff[i] = transferdata(sercom_instance, 0x00);
+    }
     return UHAL_STATUS_OK;
 }
