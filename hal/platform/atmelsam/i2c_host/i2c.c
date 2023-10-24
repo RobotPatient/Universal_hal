@@ -22,11 +22,8 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#include <assert.h>
 #include <hal_i2c_host.h>
 #include <stdbool.h>
-#include <stddef.h>
-#include "bit_manipulation.h"
 #include "error_handling.h"
 
 /**
@@ -42,7 +39,6 @@
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
 
-Sercom *i2c_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 
 /**
  * @brief Helper function which waits for the sercom peripheral to get in sync and finish requested operations.
@@ -120,7 +116,7 @@ static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sourc
 }
 
 static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
-    return i2c_peripheral_mapping_table[peripheral_inst_num];
+    return (Sercom*)(SERCOM0 + (peripheral_inst_num * 0x400));
 }
 
 /**
