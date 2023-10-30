@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include "error_handling.h"
 
+
+static Sercom *i2c_host_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 /**
  * @brief This formula is used to calculate the baud rate steps.
  * The formula is a rewritten form of the formula found on page 483 (section 28.10.3) of the SAMD21 Family datasheet.
@@ -116,7 +118,7 @@ static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sourc
 }
 
 static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
-    return (Sercom*)(SERCOM0 + (peripheral_inst_num * 0x400));
+    return i2c_host_peripheral_mapping_table[peripheral_inst_num];
 }
 
 /**
