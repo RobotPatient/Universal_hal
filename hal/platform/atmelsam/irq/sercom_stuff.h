@@ -33,6 +33,9 @@ typedef struct {
     uint8_t* read_buffer;
     uint8_t buf_size;
     uint8_t buf_cnt;
+    uint8_t rx_status;
+    uint8_t bus_state;
+    uint8_t bus_errorstate;
 } bustransaction_t;
 
 
