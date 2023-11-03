@@ -302,7 +302,7 @@ const i2c_state_t i2c_host_get_bus_state(const i2c_periph_inst_t i2c_peripheral_
 
 const i2c_state_t i2c_host_get_bus_error_state(const i2c_periph_inst_t i2c_peripheral_num) {
   volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
-  if (TransactionData->bus_errorstate == 0) {
+  if (TransactionData->bus_error == 0) {
     return I2C_BUSSTATE_OK;
   }
   return I2C_BUSSTATE_ERROR;
@@ -310,7 +310,7 @@ const i2c_state_t i2c_host_get_bus_error_state(const i2c_periph_inst_t i2c_perip
 
 const i2c_state_t i2c_host_get_arbitration_state(const i2c_periph_inst_t i2c_peripheral_num) {
   volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
-  if (TransactionData->bus_arbitrationstate == 0) {
+  if (TransactionData->bus_arblost == 0) {
     return I2C_BUS_ARBSTATE_OK;
   }
   return I2C_BUS_ARBSTATE_LOST;
@@ -318,7 +318,7 @@ const i2c_state_t i2c_host_get_arbitration_state(const i2c_periph_inst_t i2c_per
 
 const i2c_state_t i2c_host_get_lenerr_state(const i2c_periph_inst_t i2c_peripheral_num) {
   volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
-  if (TransactionData->bus_arbitrationstate == 0) {
+  if (TransactionData->state_lenerr == 0) {
     return I2C_STATE_OK;
   }
   return I2C_LENERR;
@@ -326,7 +326,7 @@ const i2c_state_t i2c_host_get_lenerr_state(const i2c_periph_inst_t i2c_peripher
 
 const i2c_state_t i2c_host_get_sexttout_state(const i2c_periph_inst_t i2c_peripheral_num) {
   volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
-  if (TransactionData->bus_arbitrationstate == 0) {
+  if (TransactionData->state_sexttout == 0) {
     return I2C_BUS_TOUTSTATE_OK;
   }
   return I2C_BUS_SEXTTOUT;
@@ -334,8 +334,24 @@ const i2c_state_t i2c_host_get_sexttout_state(const i2c_periph_inst_t i2c_periph
 
 const i2c_state_t i2c_host_get_mexttout_state(const i2c_periph_inst_t i2c_peripheral_num) {
   volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
-  if (TransactionData->bus_arbitrationstate == 0) {
+  if (TransactionData->state_mexttout == 0) {
     return I2C_BUS_TOUTSTATE_OK;
   }
   return I2C_BUS_MEXTTOUT;
+}
+
+const i2c_state_t i2c_host_get_lowtout_state(const i2c_periph_inst_t i2c_peripheral_num) {
+  volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
+  if (TransactionData->state_lowtout == 0) {
+    return I2C_BUS_TOUTSTATE_OK;
+  }
+  return I2C_BUS_LOWTOUT;
+}
+
+const i2c_state_t i2c_host_get_clkhold_state(const i2c_periph_inst_t i2c_peripheral_num) {
+  volatile bustransaction_t *TransactionData = &sercom_bustrans_buffer[i2c_peripheral_num];
+  if (TransactionData->state_clkhold == 0) {
+    return I2C_STATE_OK;
+  }
+  return I2C_BUS_CLKHOLD;
 }

@@ -21,8 +21,9 @@ typedef enum {
     I2C_BUS_ARBSTATE_LOST,
     I2C_BUS_TOUTSTATE_OK,
     I2C_BUS_SEXTTOUT,
-    I2C_BUS_MEXTTOUT
-
+    I2C_BUS_MEXTTOUT,
+    I2C_BUS_LOWTOUT,
+    I2C_BUS_CLKHOLD
 } i2c_state_t;
 
 

@@ -264,7 +264,7 @@ const i2c_state_t i2c_host_get_lenerr_state(const i2c_periph_inst_t i2c_peripher
  * @brief Returns i2c client timeout state.
  * @param i2c_peripheral_num The i2c peripheral to use
  *
- * @return i2c_state_t OK (0), or ARBLOST (1)
+ * @return i2c_state_t OK (0), or LENERR (1)
  */
 const i2c_state_t i2c_host_get_sexttout_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
 
@@ -272,9 +272,25 @@ const i2c_state_t i2c_host_get_sexttout_state(const i2c_periph_inst_t i2c_periph
  * @brief Returns i2c host timeout state.
  * @param i2c_peripheral_num The i2c peripheral to use
  *
- * @return i2c_state_t OK (0), or ARBLOST (1)
+ * @return i2c_state_t OK (0), or TIMEOUT (1)
  */
 const i2c_state_t i2c_host_get_mexttout_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
+
+/**
+ * @brief Returns i2c clock line low timeout state.
+ * @param i2c_peripheral_num The i2c peripheral to use
+ *
+ * @return i2c_state_t OK (0), or TIMEOUT (1)
+ */
+const i2c_state_t i2c_host_get_lowtout_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
+
+/**
+ * @brief Returns i2c clock hold state (in case host holds clock low).
+ * @param i2c_peripheral_num The i2c peripheral to use
+ *
+ * @return i2c_state_t OK (0), or CLKHOLD (1)
+ */
+const i2c_state_t i2c_host_get_clkhold_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
 
 #ifdef __cplusplus
 }
