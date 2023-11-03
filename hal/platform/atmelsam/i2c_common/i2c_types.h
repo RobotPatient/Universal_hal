@@ -1,0 +1,21 @@
+//
+// Created by J.A. Korten on 03/11/2023.
+//
+
+#ifndef ATMELSAMD21_I2C_TYPES_H
+#define ATMELSAMD21_I2C_TYPES_H
+
+
+typedef enum {
+    I2C_RX_NACK,
+    I2C_RX_ACK,
+    I2C_BUSSTATE_UNKNOWN,
+    I2C_BUSSTATE_IDLE,
+    I2C_BUSSTATE_OWNER,
+    I2C_BUSSTATE_BUSY,
+    I2C_BUSSTATE_ERROR,
+    I2C_BUSSTATE_OK
+} i2c_state_t;
+
+
+#endif //ATMELSAMD21_I2C_TYPES_H
