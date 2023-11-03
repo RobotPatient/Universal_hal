@@ -241,12 +241,20 @@ const i2c_state_t i2c_host_get_bus_state(const i2c_periph_inst_t i2c_peripheral_
 /**
  * @brief Returns i2c bus error state. This can be used to monitor the error status of the i2c bus.
  * @param hw Handle to the HW peripheral on which the I2C bus is ran
- * @param transaction I2C transaction info about the current initialized transaction on the HW peripheral.
+ * @param i2c_periph_inst_t I2C transaction info about the current initialized transaction on the HW peripheral.
  *                    The info will be automatically supplied when using the i2c_write and i2c_read functions below.
  *
  * @return i2c_state_t ERROR (1), or NO_ERROR (0)
  */
 const i2c_state_t i2c_host_get_bus_error_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
+
+/**
+ * @brief Returns i2c bus arbitration state.
+ * @param i2c_peripheral_num The i2c peripheral to use
+ *
+ * @return i2c_state_t OK (0), or ARBLOST (1)
+ */
+const i2c_state_t i2c_host_get_arbitration_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
 
 #ifdef __cplusplus
 }

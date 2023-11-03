@@ -36,8 +36,8 @@ typedef struct {
     uint8_t rx_status;
     uint8_t bus_state;
     uint8_t bus_errorstate;
+    uint8_t bus_arbitrationstate;
 } bustransaction_t;
-
 
 extern volatile bustransaction_t sercom_bustrans_buffer[6];
 
