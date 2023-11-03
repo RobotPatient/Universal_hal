@@ -25,6 +25,7 @@
 #include <hal_i2c_host.h>
 #include <stdbool.h>
 #include "error_handling.h"
+#include <i2c_common/i2c_types.h>
 
 static Sercom *i2c_host_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 /**
