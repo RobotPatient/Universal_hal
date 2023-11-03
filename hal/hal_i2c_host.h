@@ -252,6 +252,30 @@ const i2c_state_t i2c_host_get_bus_error_state(const i2c_periph_inst_t i2c_perip
  */
 const i2c_state_t i2c_host_get_arbitration_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
 
+/**
+ * @brief Returns i2c transaction length error state.
+ * @param i2c_peripheral_num The i2c peripheral to use
+ *
+ * @return i2c_state_t OK (0), or ARBLOST (1)
+ */
+const i2c_state_t i2c_host_get_lenerr_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
+
+/**
+ * @brief Returns i2c client timeout state.
+ * @param i2c_peripheral_num The i2c peripheral to use
+ *
+ * @return i2c_state_t OK (0), or ARBLOST (1)
+ */
+const i2c_state_t i2c_host_get_sexttout_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
+
+/**
+ * @brief Returns i2c host timeout state.
+ * @param i2c_peripheral_num The i2c peripheral to use
+ *
+ * @return i2c_state_t OK (0), or ARBLOST (1)
+ */
+const i2c_state_t i2c_host_get_mexttout_state(const i2c_periph_inst_t i2c_peripheral_num) __attribute__((weak));
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
