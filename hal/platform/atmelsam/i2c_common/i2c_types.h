@@ -5,6 +5,7 @@
 #ifndef ATMELSAMD21_I2C_TYPES_H
 #define ATMELSAMD21_I2C_TYPES_H
 
+// See SAMD21 datasheet table 28.10.7
 
 typedef enum {
     I2C_RX_NACK,
