@@ -292,7 +292,7 @@ const i2c_state_t i2c_host_get_bus_state(const i2c_periph_inst_t i2c_peripheral_
     case 1:
       return I2C_BUSSTATE_IDLE;
     case 2:
-      return I2C_BUSSTATE_IDLE;
+      return I2C_BUSSTATE_BUSY;
     case 3:
       return I2C_BUSSTATE_OWNER;
     default:
