@@ -48,16 +48,11 @@ volatile bustransaction_t sercom_bustrans_buffer[6] = {{SERCOMACT_NONE, 0, NULL,
 #define SERCOM_I2C_MASTER_NACK_AND_STOP             SERCOM_I2CM_CTRLB_CMD(3) | SERCOM_I2CM_CTRLB_ACKACT | SERCOM_I2CM_CTRLB_SMEN
 
 
-void updateBusTransactionStates(Sercom* sercom_instance, volatile bustransaction_t* transaction) {
-  transaction->rx_status      = sercom_instance->I2CM.STATUS.bit.RXNACK;
-  transaction->bus_state      = sercom_instance->I2CM.STATUS.bit.BUSSTATE;
-  transaction->state_lenerr   = sercom_instance->I2CM.STATUS.bit.LENERR;
-  transaction->state_sexttout = sercom_instance->I2CM.STATUS.bit.SEXTTOUT;
-  transaction->state_mexttout = sercom_instance->I2CM.STATUS.bit.MEXTTOUT;
-  transaction->state_clkhold  = sercom_instance->I2CM.STATUS.bit.CLKHOLD;
-  transaction->state_lowtout  = sercom_instance->I2CM.STATUS.bit.LOWTOUT;
-  transaction->bus_arblost    = sercom_instance->I2CM.STATUS.bit.ARBLOST;
-  transaction->bus_error      = sercom_instance->I2CM.STATUS.bit.BUSERR;
+void update_i2c_host_bus_transaction_state(Sercom* sercom_instance, volatile bustransaction_t* transaction) {
+  transaction->status = ((sercom_instance->I2CM.STATUS.bit.RXNACK) * UHAL_STATUS_I2C_NACK);
+  transaction->status = ((sercom_instance->I2CM.STATUS.bit.LENERR) * UHAL_STATUS_I2C_LENERR);
+  transaction->status = ((sercom_instance->I2CM.STATUS.bit.ARBLOST) * UHAL_STATUS_I2C_ARBSTATE_LOST);
+  transaction->status = ((sercom_instance->I2CM.STATUS.bit.BUSERR) * UHAL_STATUS_I2C_BUSERR);
 }
 
 
@@ -82,7 +77,7 @@ void i2c_host_data_send_irq(const void* hw, volatile bustransaction_t* transacti
       transaction->transaction_type = SERCOMACT_IDLE_I2CM;
       transaction->buf_cnt = 0;
   }
-  updateBusTransactionStates(sercom_instance, transaction);
+  update_i2c_host_bus_transaction_state(sercom_instance, transaction);
 
 }
 
@@ -175,7 +170,7 @@ void i2c_host_data_recv_irq(const void* hw, volatile bustransaction_t* transacti
       transaction->transaction_type = SERCOMACT_IDLE_I2CM;
       transaction->buf_cnt = 0;
   }
-  updateBusTransactionStates(sercom_instance, transaction);
+  update_i2c_host_bus_transaction_state(sercom_instance, transaction);
 }
 
 void i2c_slave_handler(const void* const hw, volatile bustransaction_t* Transaction) {
