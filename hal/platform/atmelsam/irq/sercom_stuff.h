@@ -33,8 +33,8 @@ typedef struct {
     uint8_t* read_buffer;
     uint8_t buf_size;
     uint8_t buf_cnt;
+    uint8_t status;
 } bustransaction_t;
-
 
 extern volatile bustransaction_t sercom_bustrans_buffer[6];
 
