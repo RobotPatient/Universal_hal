@@ -21,6 +21,8 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+#ifndef DISABLE_I2C_SLAVE_MODULE
+
 #include <stdbool.h>
 #include <hal_i2c_slave.h>
 #include "irq/irq_bindings.h"
@@ -137,3 +139,5 @@ uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance) {
     disable_i2c_interface(sercom_inst);
     return UHAL_STATUS_OK;
 }
+
+#endif /* DISABLE_I2C_SLAVE_MODULE*/

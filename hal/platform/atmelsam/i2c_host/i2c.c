@@ -21,6 +21,7 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+#ifndef DISABLE_I2C_HOST_MODULE
 
 #include <hal_i2c_host.h>
 #include <stdbool.h>
@@ -279,3 +280,5 @@ uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     return TransactionData->status;
 }
+
+#endif /* DISABLE_I2C_HOST_MODULE */

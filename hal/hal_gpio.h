@@ -70,10 +70,14 @@
  */
 #ifndef HAL_GPIO_H
 #define HAL_GPIO_H
+#ifndef DISABLE_GPIO_MODULE
+
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+
 
 #include <error_handling.h>
 #include <gpio/gpio_platform_specific.h>
@@ -212,4 +216,7 @@ void gpio_irq_handler(const void *const hw) __attribute__((weak));
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* IFNDEF DISABLE_GPIO_MODULE */
+
 #endif  /* HAL_GPIO_H */

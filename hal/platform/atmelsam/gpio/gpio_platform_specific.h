@@ -190,4 +190,5 @@ static_assert((pull_up_defined && pull_down_defined) < 1, "Pull-up and Pull-down
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
 #endif

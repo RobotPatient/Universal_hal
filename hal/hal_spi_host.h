@@ -25,6 +25,9 @@
  */
 #ifndef HAL_SPI_HOST_H
 #define HAL_SPI_HOST_H
+
+#ifndef DISABLE_SPI_HOST_MODULE
+
 #include "hal_gpio.h"
 #include "spi_common/spi_platform_specific.h"
 /* Extern c for compiling with c++*/
@@ -194,4 +197,7 @@ void spi_host_data_send_irq(const void* hw, volatile bustransaction_t* transacti
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DISABLE_SPI_HOST_MODULE */
+
 #endif

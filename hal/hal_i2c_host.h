@@ -65,6 +65,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef DISABLE_I2C_HOST_MODULE
+
 #include "assert.h"
 #include "error_handling.h"
 #include "i2c_common/i2c_platform_specific.h"
@@ -188,7 +190,7 @@ uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_
                                          const size_t amount_of_bytes);
 
 #define I2C_HOST_READ_NON_BLOCKING(i2c_peripheral_num, addr, read_buff, size) \
-do {                                                                            \
+do {                                                                          \
 I2C_HOST_READ_FUNC_PARAMETER_CHECK(i2c_peripheral_num, addr, read_buff, size); \
 i2c_host_read_non_blocking(i2c_peripheral_num, addr, read_buff, size);             \
 }while(0);
@@ -219,6 +221,7 @@ void i2c_host_data_recv_irq(const void *hw, volatile bustransaction_t *transacti
  */
 void i2c_host_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
+#endif /* IFNDEF DISABLE_I2C_HOST_MODULE*/
 
 #ifdef __cplusplus
 }

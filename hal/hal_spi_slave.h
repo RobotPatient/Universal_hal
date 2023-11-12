@@ -25,6 +25,9 @@
  */
 #ifndef HAL_SPI_SLAVE_H
 #define HAL_SPI_SLAVE_H
+
+#ifndef DISABLE_SPI_SLAVE_MODULE
+
 /* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
@@ -102,4 +105,7 @@ void spi_slave_data_send_irq(const void* hw, volatile bustransaction_t* transact
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DISABLE_SPI_SLAVE_MODULE */
+
 #endif

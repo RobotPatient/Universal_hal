@@ -21,6 +21,9 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
+#ifndef DISABLE_SPI_HOST_MODULE
+
 #include <stddef.h>
 #include "bit_manipulation.h"
 #include "hal_gpio.h"
@@ -34,7 +37,7 @@
 Sercom *spi_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 
 
-static inline Sercom *get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
+static inline Sercom *get_sercom_inst(const spi_host_inst_t peripheral_inst_num) {
     return spi_peripheral_mapping_table[peripheral_inst_num];
 }
 
@@ -59,12 +62,12 @@ static inline void spi_wait_for_transaction_finish(volatile bustransaction_t* bu
     }
 }
 
-static inline uint8_t get_fast_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+static inline uint8_t get_fast_clk_gen_val(const spi_clock_sources_t clock_sources) {
     const uint16_t fast_clk_val = (clock_sources & 0xFF) - 1;
     return fast_clk_val;
 }
 
-static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+static inline uint8_t get_slow_clk_gen_val(const spi_clock_sources_t clock_sources) {
     const uint16_t slow_clk_val = SERCOM_SLOW_CLOCK_SOURCE(clock_sources) - 1;
     return slow_clk_val;
 }
@@ -97,7 +100,7 @@ uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint
 
 #else
 PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + spi_peripheral_num);
-if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
+if (spi_clock_source != SPI_CLK_SOURCE_USE_DEFAULT) {
         const uint8_t clk_gen_slow = get_slow_clk_gen_val(spi_clock_source);
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
         while (GCLK->STATUS.bit.SYNCBUSY);
@@ -203,3 +206,5 @@ uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_nu
     }
     return UHAL_STATUS_OK;
 }
+
+#endif /* DISABLE_SPI_HOST_MODULE */

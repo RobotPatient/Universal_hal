@@ -23,9 +23,11 @@
 */
 #ifndef HAL_I2C_SLAVE_H
 #define HAL_I2C_SLAVE_H
-/* Extern c for compiling with c++*/
+
+#ifndef DISABLE_I2C_SLAVE_MODULE
 #include "i2c_common/i2c_platform_specific.h"
 
+/* Extern c for compiling with c++*/
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -113,4 +115,7 @@ void i2c_slave_data_send_irq(const void* hw, volatile bustransaction_t* transact
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DISABLE_I2C_SLAVE_MODULE */
+
 #endif //ATMELSAMD21_HAL_I2C_SLAVE_H

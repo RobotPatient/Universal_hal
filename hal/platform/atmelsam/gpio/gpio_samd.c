@@ -21,6 +21,8 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+#ifndef DISABLE_GPIO_MODULE
+
 #include <sam.h>
 #include "bit_manipulation.h"
 #include "gpio_platform_specific.h"
@@ -317,3 +319,4 @@ uhal_status_t gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq
 
     return UHAL_STATUS_OK;
 }
+#endif /* IFNDEF DISABLE_GPIO_MODULE */

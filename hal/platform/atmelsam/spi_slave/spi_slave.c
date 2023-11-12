@@ -21,6 +21,9 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
+#ifndef DISABLE_SPI_SLAVE_MODULE
+
 #include <stddef.h>
 #include "bit_manipulation.h"
 #include "hal_gpio.h"
@@ -135,3 +138,5 @@ uhal_status_t spi_slave_deinit(const spi_slave_inst_t spi_peripheral_num) {
     NVIC_DisableIRQ(irq_type);
     return UHAL_STATUS_OK;
 }
+
+#endif /* DISABLE_SPI_SLAVE_MODULE */

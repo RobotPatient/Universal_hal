@@ -1,11 +1,27 @@
 #include <stddef.h>
 #include <sam.h>
 #include <irq/sercom_stuff.h>
+
+#ifndef DISABLE_GPIO_MODULE
 #include "gpio/gpio_irq_handler.h"
+#endif
+
+#ifndef DISABLE_I2C_HOST_MODULE
 #include "i2c_host/i2c_host_irq_handler.h"
+#endif
+
+#ifndef DISABLE_I2C_SLAVE_MODULE
 #include "i2c_slave/i2c_slave_irq_handler.h"
+#endif
+
+#ifndef DISABLE_SPI_HOST_MODULE
 #include "spi_host/spi_host_irq_handler.h"
+#endif
+
+#ifndef DISABLE_SPI_SLAVE_MODULE
 #include "spi_slave/spi_slave_irq_handler.h"
+#endif
+
 #include "bit_manipulation.h"
 
 void enable_irq_handler(IRQn_Type irq_type, uint8_t priority) {
@@ -32,10 +48,14 @@ volatile bustransaction_t sercom_bustrans_buffer[6] = {{SERCOMACT_NONE, 0, NULL,
 static inline void default_sercom_isr_handler(const void* const hw, volatile bustransaction_t* transaction) {
     Sercom* sercom_instance = ((Sercom*)hw);
     switch (transaction->transaction_type) {
+        #ifndef DISABLE_I2C_SLAVE_MODULE
         case SERCOMACT_IDLE_I2CS: {
             i2c_slave_handler(sercom_instance, transaction);
             break;
         }
+        #endif
+        
+        #ifndef DISABLE_I2C_HOST_MODULE
         case SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP:
         case SERCOMACT_I2C_DATA_TRANSMIT_STOP: {
             i2c_host_data_send_irq(sercom_instance, transaction);
@@ -45,6 +65,9 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
             i2c_host_data_recv_irq(sercom_instance, transaction);
             break;
         }
+        #endif
+
+        #ifndef DISABLE_SPI_HOST_MODULE
         case SERCOMACT_SPI_DATA_RECEIVE: {
             spi_host_data_recv_irq(sercom_instance, transaction);
             break;
@@ -58,6 +81,9 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
             sercom_instance->SPI.INTFLAG.reg = spi_intflag;
             break;
         }
+        #endif
+
+        #ifndef DISABLE_SPI_SLAVE_MODULE
         case SERCOMACT_IDLE_SPI_SLAVE: {
             const uint8_t spi_intflag = sercom_instance->SPI.INTFLAG.reg;
             if (BITMASK_COMPARE(spi_intflag, SERCOM_SPI_INTFLAG_TXC)) {
@@ -68,6 +94,8 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
                 spi_slave_chip_select_irq(sercom_instance, transaction);
             }
         }
+        #endif
+
         default: {
             uint8_t SPI_INTFLAG = sercom_instance->SPI.INTFLAG.reg;
             sercom_instance->SPI.INTFLAG.reg = SPI_INTFLAG;
