@@ -16,13 +16,13 @@
 
 get_directory_property(PLATFORM_DEFINED COMPILE_DEFINITIONS)
 if (PLATFORM_DEFINED MATCHES "^__SAMD21")
-    option(DISABLE_GPIO_MODULE "Disable the GPIO module" NO)
-    option(DISABLE_I2C_HOST_MODULE "Disable the I2C Host module" NO)
-    option(DISABLE_I2C_SLAVE_MODULE "Disable the I2C Slave module" NO)
-    option(DISABLE_SPI_HOST_MODULE "Disable the SPI Host module" NO)
-    option(DISABLE_SPI_SLAVE_MODULE "Disable the SPI Slave module" NO)
+    option(UHAL_DISABLE_GPIO_MODULE "Disable the GPIO module" NO)
+    option(UHAL_DISABLE_I2C_HOST_MODULE "Disable the I2C Host module" NO)
+    option(UHAL_DISABLE_I2C_SLAVE_MODULE "Disable the I2C Slave module" NO)
+    option(UHAL_DISABLE_SPI_HOST_MODULE "Disable the SPI Host module" NO)
+    option(UHAL_DISABLE_SPI_SLAVE_MODULE "Disable the SPI Slave module" NO)
 
-    add_library(Universal_hall 
+    add_library(Universal_hal 
             "hal/platform/atmelsam/irq/irq_bindings.c"
             "hal/platform/atmelsam/gpio/gpio_samd.c"
             "hal/platform/atmelsam/i2c_host/i2c.c"
@@ -30,26 +30,26 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
             "hal/platform/atmelsam/spi_host/spi_host.c"
             "hal/platform/atmelsam/spi_slave/spi_slave.c" 
             )
-    target_include_directories(Universal_hall PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
-    target_link_libraries(Universal_hall INTERFACE board_sdk)
+    target_include_directories(Universal_hal PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
+    target_link_libraries(Universal_hal INTERFACE board_sdk)
 
-    if(DISABLE_GPIO_MODULE)
+    if(UHAL_DISABLE_GPIO_MODULE)
     add_compile_definitions("DISABLE_GPIO_MODULE")
     endif()
 
-    if(DISABLE_I2C_HOST_MODULE)
+    if(UHAL_DISABLE_I2C_HOST_MODULE)
     add_compile_definitions("DISABLE_I2C_HOST_MODULE")
     endif()
 
-    if(DISABLE_I2C_SLAVE_MODULE)
+    if(UHAL_DISABLE_I2C_SLAVE_MODULE)
     add_compile_definitions("DISABLE_I2C_SLAVE_MODULE")
     endif()
 
-    if(DISABLE_SPI_HOST_MODULE)
+    if(UHAL_DISABLE_SPI_HOST_MODULE)
     add_compile_definitions("DISABLE_SPI_HOST_MODULE")
     endif()
 
-    if(DISABLE_SPI_SLAVE_MODULE)
+    if(UHAL_DISABLE_SPI_SLAVE_MODULE)
     add_compile_definitions("DISABLE_SPI_SLAVE_MODULE")
     endif()
 
