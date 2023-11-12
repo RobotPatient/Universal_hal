@@ -21,6 +21,7 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
 #ifndef DISABLE_I2C_SLAVE_MODULE
 
 #include <stdbool.h>
@@ -71,7 +72,7 @@ uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
                              const i2c_extra_opt_t extra_configuration_options) {
     const bool InvalidSercomInstNum = (i2c_instance < 0 || i2c_instance);
     //const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
-    if (InvalidSercomInstNum){
+    if (InvalidSercomInstNum) {
         return UHAL_STATUS_INVALID_PARAMETERS;
     }
 // Set the clock system
@@ -135,7 +136,7 @@ uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
 }
 
 uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    Sercom *sercom_inst = get_sercom_inst(i2c_instance);
     disable_i2c_interface(sercom_inst);
     return UHAL_STATUS_OK;
 }

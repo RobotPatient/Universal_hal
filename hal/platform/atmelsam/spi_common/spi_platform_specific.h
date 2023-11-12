@@ -21,6 +21,7 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
 #ifndef ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
 #define ATMELSAMD21_SPI_PLATFORM_SPECIFIC_H
 
@@ -82,7 +83,7 @@ typedef enum {
     SPI_EXTRA_OPT_DATA_ORDER_LSB_FIRST = 0x02,
 } spi_extra_dev_opt_t;
 
-#define SPI_HOST_INIT_PARAMETER_CHECK(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency,                         \
+#define SPI_HOST_INIT_PARAMETER_CHECK(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency, \
                                       spi_extra_configuration_opt)                                                                                   \
     {                                                                                                                                                \
         const uint32_t max_freq = 48000000;                                                                                                          \

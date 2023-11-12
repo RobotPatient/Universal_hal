@@ -28,35 +28,44 @@
 #include <irq/sercom_stuff.h>
 
 #ifndef DISABLE_GPIO_MODULE
+
 #include "gpio/gpio_irq_handler.h"
+
 #endif
 
 #ifndef DISABLE_I2C_HOST_MODULE
+
 #include "i2c_host/i2c_host_irq_handler.h"
+
 #endif
 
 #ifndef DISABLE_I2C_SLAVE_MODULE
+
 #include "i2c_slave/i2c_slave_irq_handler.h"
+
 #endif
 
 #ifndef DISABLE_SPI_HOST_MODULE
+
 #include "spi_host/spi_host_irq_handler.h"
+
 #endif
 
 #ifndef DISABLE_SPI_SLAVE_MODULE
+
 #include "spi_slave/spi_slave_irq_handler.h"
+
 #endif
 
 #include "bit_manipulation.h"
 
 void enable_irq_handler(IRQn_Type irq_type, uint8_t priority) {
-        NVIC_DisableIRQ(irq_type);
-        NVIC_ClearPendingIRQ(irq_type);
+    NVIC_DisableIRQ(irq_type);
+    NVIC_ClearPendingIRQ(irq_type);
 
-        NVIC_SetPriority(irq_type, priority);
-        NVIC_EnableIRQ(irq_type);
+    NVIC_SetPriority(irq_type, priority);
+    NVIC_EnableIRQ(irq_type);
 }
-
 
 
 /**
@@ -66,21 +75,24 @@ void enable_irq_handler(IRQn_Type irq_type, uint8_t priority) {
  *
  * @todo Replace this implementation with a ringbuffer
  */
-volatile bustransaction_t sercom_bustrans_buffer[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
-                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}, {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
+volatile bustransaction_t sercom_bustrans_buffer[6] = {{SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0},
+                                                       {SERCOMACT_NONE, 0, NULL, NULL, 0, 0}};
 
-static inline void default_sercom_isr_handler(const void* const hw, volatile bustransaction_t* transaction) {
-    Sercom* sercom_instance = ((Sercom*)hw);
+static inline void default_sercom_isr_handler(const void *const hw, volatile bustransaction_t *transaction) {
+    Sercom *sercom_instance = ((Sercom *) hw);
     switch (transaction->transaction_type) {
-        #ifndef DISABLE_I2C_SLAVE_MODULE
+#ifndef DISABLE_I2C_SLAVE_MODULE
         case SERCOMACT_IDLE_I2CS: {
             i2c_slave_handler(sercom_instance, transaction);
             break;
         }
-        #endif
+#endif
 
-        #ifndef DISABLE_I2C_HOST_MODULE
+#ifndef DISABLE_I2C_HOST_MODULE
         case SERCOMACT_I2C_DATA_TRANSMIT_NO_STOP:
         case SERCOMACT_I2C_DATA_TRANSMIT_STOP: {
             i2c_host_data_send_irq(sercom_instance, transaction);
@@ -90,9 +102,9 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
             i2c_host_data_recv_irq(sercom_instance, transaction);
             break;
         }
-        #endif
+#endif
 
-        #ifndef DISABLE_SPI_HOST_MODULE
+#ifndef DISABLE_SPI_HOST_MODULE
         case SERCOMACT_SPI_DATA_RECEIVE: {
             spi_host_data_recv_irq(sercom_instance, transaction);
             break;
@@ -106,9 +118,9 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
             sercom_instance->SPI.INTFLAG.reg = spi_intflag;
             break;
         }
-        #endif
+#endif
 
-        #ifndef DISABLE_SPI_SLAVE_MODULE
+#ifndef DISABLE_SPI_SLAVE_MODULE
         case SERCOMACT_IDLE_SPI_SLAVE: {
             const uint8_t spi_intflag = sercom_instance->SPI.INTFLAG.reg;
             if (BITMASK_COMPARE(spi_intflag, SERCOM_SPI_INTFLAG_TXC)) {
@@ -119,7 +131,7 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
                 spi_slave_chip_select_irq(sercom_instance, transaction);
             }
         }
-        #endif
+#endif
 
         default: {
             uint8_t SPI_INTFLAG = sercom_instance->SPI.INTFLAG.reg;
@@ -130,38 +142,38 @@ static inline void default_sercom_isr_handler(const void* const hw, volatile bus
 }
 
 __attribute__((used)) void SERCOM5_Handler(void) {
-    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[5];
-    Sercom*                    sercom_instance = SERCOM5;
+    volatile bustransaction_t *bustransaction = &sercom_bustrans_buffer[5];
+    Sercom *sercom_instance = SERCOM5;
     default_sercom_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM4_Handler(void) {
-    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[4];
-    Sercom*                    sercom_instance = SERCOM4;
+    volatile bustransaction_t *bustransaction = &sercom_bustrans_buffer[4];
+    Sercom *sercom_instance = SERCOM4;
     default_sercom_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM3_Handler(void) {
-    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[3];
-    Sercom*                    sercom_instance = SERCOM3;
+    volatile bustransaction_t *bustransaction = &sercom_bustrans_buffer[3];
+    Sercom *sercom_instance = SERCOM3;
     default_sercom_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM2_Handler(void) {
-    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[2];
-    Sercom*                    sercom_instance = SERCOM2;
+    volatile bustransaction_t *bustransaction = &sercom_bustrans_buffer[2];
+    Sercom *sercom_instance = SERCOM2;
     default_sercom_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM1_Handler(void) {
-    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[1];
-    Sercom*                    sercom_instance = SERCOM1;
+    volatile bustransaction_t *bustransaction = &sercom_bustrans_buffer[1];
+    Sercom *sercom_instance = SERCOM1;
     default_sercom_isr_handler(sercom_instance, bustransaction);
 }
 
 __attribute__((used)) void SERCOM0_Handler(void) {
-    volatile bustransaction_t* bustransaction = &sercom_bustrans_buffer[0];
-    Sercom*                    sercom_instance = SERCOM0;
+    volatile bustransaction_t *bustransaction = &sercom_bustrans_buffer[0];
+    Sercom *sercom_instance = SERCOM0;
     default_sercom_isr_handler(sercom_instance, bustransaction);
 }
 

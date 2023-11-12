@@ -78,7 +78,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-
 #include <error_handling.h>
 #include <gpio/gpio_platform_specific.h>
 

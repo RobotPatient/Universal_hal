@@ -21,10 +21,12 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
 #ifndef HAL_I2C_SLAVE_H
 #define HAL_I2C_SLAVE_H
 
 #ifndef DISABLE_I2C_SLAVE_MODULE
+
 #include "i2c_common/i2c_platform_specific.h"
 
 /* Extern c for compiling with c++*/
@@ -39,7 +41,8 @@ extern "C" {
  * @param clock_sources The clock sources to use for the i2c peripheral (MCU specific)
  * @param extra_configuration_options The extra configuration options to use for this i2c slave instance
  */
-uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_peripheral_num, const uint16_t slave_addr, const i2c_clock_sources_t clock_sources,
+uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_peripheral_num, const uint16_t slave_addr,
+                             const i2c_clock_sources_t clock_sources,
                              const i2c_extra_opt_t extra_configuration_options);
 
 #define I2C_SLAVE_INIT(i2c_peripheral_num, slave_addr, clock_sources, extra_configuration_options)                                  \
@@ -74,7 +77,7 @@ uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_peripheral_num);
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void i2c_slave_address_match_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client stop interrupt.
@@ -86,7 +89,7 @@ void i2c_slave_address_match_irq(const void* hw, volatile bustransaction_t* tran
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void i2c_slave_stop_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client receive interrupt.
@@ -98,7 +101,7 @@ void i2c_slave_stop_irq(const void* hw, volatile bustransaction_t* transaction) 
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void i2c_slave_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for I2C Client send interrupt.
@@ -110,7 +113,7 @@ void i2c_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transact
  *
  *  @note I2C Slave functionality doesn't use the read/write functions below
  */
-void i2c_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void i2c_slave_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }

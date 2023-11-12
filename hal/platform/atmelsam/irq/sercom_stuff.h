@@ -21,16 +21,18 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
 #ifndef ATMELSAMD21_SERCOM_STUFF_H
 #define ATMELSAMD21_SERCOM_STUFF_H
+
 #include <stdint.h>
 
 
 typedef struct {
     uint8_t transaction_type;
     uint8_t instance_num;
-    const uint8_t* write_buffer;
-    uint8_t* read_buffer;
+    const uint8_t *write_buffer;
+    uint8_t *read_buffer;
     uint8_t buf_size;
     uint8_t buf_cnt;
     uint8_t status;
@@ -39,7 +41,9 @@ typedef struct {
 extern volatile bustransaction_t sercom_bustrans_buffer[6];
 
 
-typedef enum { SERCOM_NUM_0, SERCOM_NUM_1, SERCOM_NUM_2, SERCOM_NUM_3, SERCOM_NUM_4, SERCOM_NUM_5 } sercom_num_t;
+typedef enum {
+    SERCOM_NUM_0, SERCOM_NUM_1, SERCOM_NUM_2, SERCOM_NUM_3, SERCOM_NUM_4, SERCOM_NUM_5
+} sercom_num_t;
 
 typedef enum {
     SERCOMACT_NONE,

@@ -21,8 +21,7 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-/** SPI Module
- */
+
 #ifndef HAL_SPI_SLAVE_H
 #define HAL_SPI_SLAVE_H
 
@@ -47,6 +46,7 @@ extern "C" {
  */
 uhal_status_t spi_slave_init(const spi_slave_inst_t spi_peripheral_num, const uint32_t spi_clock_source,
                              const spi_bus_opt_t spi_extra_configuration_opt);
+
 #define SPI_SLAVE_INIT(spi_peripheral_num, peripheral_clock_source, spi_extra_configuration_opt)                                                     \
     ({                                                                                                                                               \
         int retval;                                                                                                                                  \
@@ -78,7 +78,7 @@ uhal_status_t spi_slave_deinit(const spi_slave_inst_t spi_peripheral_num);
  * @param transaction SPI transaction info about the current initialized transaction on the HW peripheral.
  *
  */
-void spi_slave_chip_select_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void spi_slave_chip_select_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for SPI Slave receive interrupt.
@@ -89,7 +89,7 @@ void spi_slave_chip_select_irq(const void* hw, volatile bustransaction_t* transa
  * @param transaction SPI transaction info about the current initialized transaction on the HW peripheral.
  *
  */
-void spi_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void spi_slave_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for SPI Client send interrupt.
@@ -100,7 +100,7 @@ void spi_slave_data_recv_irq(const void* hw, volatile bustransaction_t* transact
  * @param transaction SPI transaction info about the current initialized transaction on the HW peripheral.
  *
  */
-void spi_slave_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void spi_slave_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }

@@ -21,8 +21,7 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-/** SPI Module
- */
+
 #ifndef HAL_SPI_HOST_H
 #define HAL_SPI_HOST_H
 
@@ -34,6 +33,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
  * @brief Function to initialize the specified HW peripheral with SPI functionality.
  *
@@ -43,7 +43,8 @@ extern "C" {
  * @param spi_bus_frequency The frequency/baud rate to use for the SPI communication
  * @param spi_extra_configuration_opt Extra configuration options for the SPI host driver
  */
-uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint32_t spi_clock_source, const uint32_t spi_clock_source_freq,
+uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint32_t spi_clock_source,
+                            const uint32_t spi_clock_source_freq,
                             const unsigned long spi_bus_frequency, const spi_bus_opt_t spi_extra_configuration_opt);
 
 #define SPI_HOST_INIT(spi_peripheral_num, peripheral_clock_source, peripheral_clock_freq, spi_bus_frequency, spi_extra_configuration_opt)            \
@@ -69,6 +70,7 @@ uhal_status_t spi_host_deinit(const spi_host_inst_t spi_peripheral_num);
         retval = spi_host_deinit(spi_peripheral_num);                                                                                                \
         retval;                                                                                                                                      \
     })
+
 /**
  * @brief Start a spi transaction (sets the chip select line low)
  *
@@ -107,7 +109,8 @@ uhal_status_t spi_host_end_transaction(const spi_host_inst_t spi_peripheral_num,
  * @param write_buff Pointer to a buffer containing data to write
  * @param size The amount of bytes to write
  */
-uhal_status_t spi_host_write_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size);
+uhal_status_t
+spi_host_write_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char *write_buff, const size_t size);
 
 #define SPI_HOST_WRITE_BLOCKING(spi_peripheral_num, write_buff, size)                                                                                \
     ({                                                                                                                                               \
@@ -124,7 +127,8 @@ uhal_status_t spi_host_write_blocking(const spi_host_inst_t spi_peripheral_num, 
  * @param write_buff Pointer to a buffer containing data to write
  * @param size The amount of bytes to write
  */
-uhal_status_t spi_host_write_non_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char* write_buff, const size_t size);
+uhal_status_t spi_host_write_non_blocking(const spi_host_inst_t spi_peripheral_num, const unsigned char *write_buff,
+                                          const size_t size);
 
 #define SPI_HOST_WRITE_NON_BLOCKING(spi_peripheral_num, write_buff, size)                                                                            \
     ({                                                                                                                                               \
@@ -141,7 +145,8 @@ uhal_status_t spi_host_write_non_blocking(const spi_host_inst_t spi_peripheral_n
 * @param read_buff Pointer to a read buffer
 * @param amount_of_bytes The amount of bytes to read
  */
-uhal_status_t spi_host_read_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes);
+uhal_status_t
+spi_host_read_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char *read_buff, size_t amount_of_bytes);
 
 #define SPI_HOST_READ_BLOCKING(spi_peripheral_num, read_buff, amount_of_bytes)                                                                       \
     ({                                                                                                                                               \
@@ -158,7 +163,8 @@ uhal_status_t spi_host_read_blocking(const spi_host_inst_t spi_peripheral_num, u
  * @param read_buff Pointer to a read buffer
  * @param amount_of_bytes The amount of bytes to read
  */
-uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char* read_buff, size_t amount_of_bytes);
+uhal_status_t
+spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_num, unsigned char *read_buff, size_t amount_of_bytes);
 
 #define SPI_HOST_READ_NON_BLOCKING(spi_peripheral_num, read_buff, amount_of_bytes)                                                                   \
     ({                                                                                                                                               \
@@ -179,7 +185,7 @@ uhal_status_t spi_host_read_non_blocking(const spi_host_inst_t spi_peripheral_nu
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void spi_host_data_recv_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void spi_host_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 /**
  * @brief IRQ handler for SPI host data send interrupt.
@@ -192,7 +198,7 @@ void spi_host_data_recv_irq(const void* hw, volatile bustransaction_t* transacti
  *
  * @note Using your own custom IRQ handler might break the use of the write and read functions listed above
  */
-void spi_host_data_send_irq(const void* hw, volatile bustransaction_t* transaction) __attribute__((weak));
+void spi_host_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 
 #ifdef __cplusplus
 }
