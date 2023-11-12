@@ -25,7 +25,7 @@
 #include "bit_manipulation.h"
 #include "hal_gpio.h"
 #include "hal_spi_slave.h"
-#include "irq/default_irq_handlers.h"
+#include "irq/irq_bindings.h"
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x) (x >> 8)
 
@@ -44,16 +44,16 @@ static inline void spi_wait_for_sync(const void* const hw, const uint32_t bits_t
     while (((Sercom*)hw)->SPI.SYNCBUSY.reg & bits_to_read) {};
 }
 
-static inline Sercom* get_sercom_inst(const i2c_periph_inst_t peripheral_inst_num) {
+static inline Sercom* get_sercom_inst(const spi_slave_inst_t peripheral_inst_num) {
     return spi_peripheral_mapping_table[peripheral_inst_num];
 }
 
-static inline uint8_t get_fast_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+static inline uint8_t get_fast_clk_gen_val(const spi_clock_sources_t clock_sources) {
     const uint16_t fast_clk_val = (clock_sources & 0xFF) - 1;
     return fast_clk_val;
 }
 
-static inline uint8_t get_slow_clk_gen_val(const i2c_clock_sources_t clock_sources) {
+static inline uint8_t get_slow_clk_gen_val(const spi_clock_sources_t clock_sources) {
     const uint16_t slow_clk_val = SERCOM_SLOW_CLOCK_SOURCE(clock_sources) - 1;
     return slow_clk_val;
 }
@@ -85,7 +85,7 @@ uhal_status_t spi_slave_init(const spi_slave_inst_t spi_peripheral_num, const ui
 
 #else
     PM->APBCMASK.reg |= 1 << (PM_APBCMASK_SERCOM0_Pos + spi_peripheral_num);
-    if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
+    if (spi_clock_source != SPI_CLK_SOURCE_USE_DEFAULT) {
         const uint8_t clk_gen_slow = get_slow_clk_gen_val(spi_clock_source);
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
         while (GCLK->STATUS.bit.SYNCBUSY)
@@ -125,8 +125,7 @@ uhal_status_t spi_slave_init(const spi_slave_inst_t spi_peripheral_num, const ui
     sercom_instance->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_ENABLE;
     spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_ENABLE);
     const enum IRQn irq_type = (SERCOM0_IRQn + spi_peripheral_num);
-    NVIC_EnableIRQ(irq_type);
-    NVIC_SetPriority(irq_type, 2);
+    enable_irq_handler(irq_type, 2);
     sercom_bustrans_buffer[spi_peripheral_num].transaction_type = SERCOMACT_IDLE_SPI_SLAVE;
     return UHAL_STATUS_OK;
 }

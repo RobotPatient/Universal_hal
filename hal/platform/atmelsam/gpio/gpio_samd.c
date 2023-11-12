@@ -25,6 +25,7 @@
 #include "bit_manipulation.h"
 #include "gpio_platform_specific.h"
 #include "hal_gpio.h"
+#include "irq/irq_bindings.h"
 
 #define GPIO_OPT_PULL_UP_POS             2
 #define GPIO_OPT_PULL_DOWN_POS           3
@@ -295,12 +296,7 @@ uhal_status_t gpio_set_interrupt_on_pin(const gpio_pin_t pin, gpio_irq_opt_t irq
         EIC->INTENCLR.reg = SHIFT_ONE_LEFT_BY_N(irq_opt.irq_channel);
         EIC->EVCTRL.reg |= SHIFT_ONE_LEFT_BY_N(irq_opt.irq_channel);
     } else {
-        NVIC_DisableIRQ(EIC_IRQn);
-        NVIC_ClearPendingIRQ(EIC_IRQn);
-
-        NVIC_SetPriority(EIC_IRQn, 0);
-        NVIC_EnableIRQ(EIC_IRQn);
-
+        enable_irq_handler(EIC_IRQn, 2);
         /*
          * Set the interrupt for this specific pin.
          */

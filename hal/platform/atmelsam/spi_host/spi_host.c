@@ -23,10 +23,11 @@
 */
 #include <stddef.h>
 #include "bit_manipulation.h"
-#include "irq/default_irq_handlers.h"
 #include "hal_gpio.h"
 #include "hal_spi_host.h"
+#include "hal_i2c_host.h"
 #include "spi_common/spi_platform_specific.h"
+#include "irq/irq_bindings.h"
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
 
@@ -137,8 +138,7 @@ if (spi_clock_source != I2C_CLK_SOURCE_USE_DEFAULT) {
     sercom_instance->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_RXEN;
     spi_wait_for_sync(sercom_instance, SERCOM_SPI_SYNCBUSY_ENABLE);
     const enum IRQn irq_type = (SERCOM0_IRQn + spi_peripheral_num);
-    NVIC_EnableIRQ(irq_type);
-    NVIC_SetPriority(irq_type, 2);
+    enable_irq_handler(irq_type, 2);
     sercom_bustrans_buffer[spi_peripheral_num].transaction_type = SERCOMACT_IDLE_SPI_HOST;
     return UHAL_STATUS_OK;
 }
