@@ -22,10 +22,12 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
+#ifndef DISABLE_I2C_HOST_MODULE
+
 #include <hal_i2c_host.h>
 #include <stdbool.h>
 #include "error_handling.h"
-#include <i2c_common/i2c_types.h>
+#include "irq/irq_bindings.h"
 
 static Sercom *i2c_host_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 /**
@@ -208,9 +210,9 @@ uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num,
     NVIC_EnableIRQ(irq_type);
     const uint16_t irq_options = extra_configuration_options >> 8;
     if (irq_options) {
-        NVIC_SetPriority(irq_type, irq_options - 1);
+        enable_irq_handler(irq_type, irq_options - 1);
     } else {
-        NVIC_SetPriority(irq_type, 2);
+        enable_irq_handler(irq_type, 2);
     }
     return UHAL_STATUS_OK;
 }
@@ -278,3 +280,5 @@ uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_
     i2c_master_wait_for_sync((sercom_inst), SERCOM_I2CM_SYNCBUSY_SYSOP);
     return TransactionData->status;
 }
+
+#endif /* DISABLE_I2C_HOST_MODULE */

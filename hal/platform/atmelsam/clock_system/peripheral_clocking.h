@@ -21,9 +21,12 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
 #ifndef ATMELSAMD21_PERIPHERAL_CLOCKING_H
 #define ATMELSAMD21_PERIPHERAL_CLOCKING_H
 
-typedef enum { CLKGEN_0, CLKGEN_1, CLKGEN_2, CLKGEN_3, CLKGEN_4, CLKGEN_5, CLKGEN_6, CLKGEN_7, CLKGEN_8 } clk_gen_num_t;
+typedef enum {
+    CLKGEN_0, CLKGEN_1, CLKGEN_2, CLKGEN_3, CLKGEN_4, CLKGEN_5, CLKGEN_6, CLKGEN_7, CLKGEN_8
+} clk_gen_num_t;
 
 #endif //ATMELSAMD21_PERIPHERAL_CLOCKING_H

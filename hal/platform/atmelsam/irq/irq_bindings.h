@@ -1,6 +1,6 @@
 /**
-* \file            gpio_error_handling.h
-* \brief           Error handling for GPIO include file
+* \file            irq_bindings.c
+* \brief           Header file of irq_bindings.c
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -22,26 +22,11 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#ifndef GPIO_ERROR_HANDLING
-#define GPIO_ERROR_HANDLING
-/* Extern c for compiling with c++*/
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#ifndef IRQ_BINDINGS_H
+#define IRQ_BINDINGS_H
 
-typedef enum {
-    UHAL_STATUS_I2C_ARBSTATE_LOST = -7,
-    UHAL_STATUS_I2C_LENERR = -6,
-    UHAL_STATUS_I2C_BUSERR = -5,
-    UHAL_STATUS_I2C_NACK = -4,
-    UHAL_STATUS_INVALID_PARAMETERS = -3,
-    UHAL_STATUS_PERIPHERAL_CLOCK_ERROR = -2,
-    UHAL_STATUS_ERROR = -1,
-    UHAL_STATUS_OK = 0,
-    UHAL_STATUS_PERIPHERAL_IN_USE_WARNING = 1,
-} uhal_status_t;
+#include <sam.h>
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+void enable_irq_handler(IRQn_Type irq_type, uint8_t priority);
+
 #endif

@@ -1,6 +1,6 @@
 /**
-* \file            gpio_error_handling.h
-* \brief           Error handling for GPIO include file
+* \file            gpio_irq_handler.h
+* \brief           Header file which implements the default GPIO IRQ Handler
 */
 /*
 *  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
@@ -22,26 +22,18 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-#ifndef GPIO_ERROR_HANDLING
-#define GPIO_ERROR_HANDLING
-/* Extern c for compiling with c++*/
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#ifndef GPIO_IRQ_HANDLER_H
+#define GPIO_IRQ_HANDLER_H
 
-typedef enum {
-    UHAL_STATUS_I2C_ARBSTATE_LOST = -7,
-    UHAL_STATUS_I2C_LENERR = -6,
-    UHAL_STATUS_I2C_BUSERR = -5,
-    UHAL_STATUS_I2C_NACK = -4,
-    UHAL_STATUS_INVALID_PARAMETERS = -3,
-    UHAL_STATUS_PERIPHERAL_CLOCK_ERROR = -2,
-    UHAL_STATUS_ERROR = -1,
-    UHAL_STATUS_OK = 0,
-    UHAL_STATUS_PERIPHERAL_IN_USE_WARNING = 1,
-} uhal_status_t;
+#include <stdint.h>
+#include <sam.h>
 
-#ifdef __cplusplus
+void gpio_irq_handler(const void *const hw) {
+    Eic *eic_inst = (Eic *) hw;
+    const uint32_t intflag_val = eic_inst->INTFLAG.reg;
+    eic_inst->INTFLAG.reg = intflag_val;
+    const uint32_t nmi_intflag_val = eic_inst->NMIFLAG.reg;
+    eic_inst->NMIFLAG.reg = nmi_intflag_val;
 }
-#endif /* __cplusplus */
+
 #endif
