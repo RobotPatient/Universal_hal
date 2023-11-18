@@ -1,0 +1,55 @@
+/**
+* \file            hal_dma.h
+* \brief           DMA module include file
+*/
+/*
+*  Copyright 2023 (C) Victor Hogeweij <hogeweyv@gmail.com>
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*  http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+*
+* This file is part of the Universal Hal Framework.
+*
+* Author:          Victor Hogeweij <hogeweyv@gmail.com>
+*/
+#ifndef ATMELSAMD21_HAL_DMA_H
+#define ATMELSAMD21_HAL_DMA_H
+
+#include <error_handling.h>
+#include "dma/dma_platform_specific.h"
+#include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+uhal_status_t dma_init(dma_init_opt_t dma_init_options);
+
+uhal_status_t dma_set_transfer_mem(dma_channel_t dma_channel, void *src, void *dst, size_t size,
+                                   dma_trigger_t dma_trigger, dma_opt_t dma_options);
+
+uhal_status_t
+dma_set_transfer_peripheral_to_mem(dma_channel_t dma_channel, void *src, void *dst, size_t size,
+                                   dma_trigger_t dma_trigger, dma_opt_t dma_options);
+
+uhal_status_t
+dma_set_transfer_mem_to_peripheral(dma_channel_t dma_channel, void *src, void *dst, size_t size,
+                                   dma_trigger_t dma_trigger, dma_opt_t dma_options);
+
+uhal_status_t dma_deinit();
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif //ATMELSAMD21_HAL_DMA_H
