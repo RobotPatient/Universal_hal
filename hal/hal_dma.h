@@ -35,18 +35,29 @@ extern "C" {
 
 uhal_status_t dma_init(dma_init_opt_t dma_init_options);
 
-uhal_status_t dma_set_transfer_mem(dma_channel_t dma_channel, void *src, void *dst, size_t size,
-                                   dma_trigger_t dma_trigger, dma_opt_t dma_options);
+uhal_status_t dma_set_transfer_mem(const dma_channel_t dma_channel, const void *src, void *dst,
+                                   const size_t size, const dma_opt_t dma_options,
+                                   const uint8_t do_software_trigger);
 
 uhal_status_t
-dma_set_transfer_peripheral_to_mem(dma_channel_t dma_channel, void *src, void *dst, size_t size,
-                                   dma_trigger_t dma_trigger, dma_opt_t dma_options);
+dma_set_transfer_peripheral_to_mem(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size,
+                                   const dma_trigger_t dma_trigger, const dma_opt_t dma_options);
 
 uhal_status_t
-dma_set_transfer_mem_to_peripheral(dma_channel_t dma_channel, void *src, void *dst, size_t size,
-                                   dma_trigger_t dma_trigger, dma_opt_t dma_options);
+dma_set_transfer_mem_to_peripheral(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size,
+                                   const dma_trigger_t dma_trigger, const dma_opt_t dma_options);
+
+uhal_status_t set_dma_trigger(const dma_channel_t dma_channel, const dma_trigger_t trigger);
+
+
+uhal_status_t unset_dma_trigger(const dma_channel_t dma_channel, const dma_trigger_t trigger);
+
 
 uhal_status_t dma_deinit();
+
+
+
+void dma_irq_handler(const void *const hw) __attribute__((weak));
 
 #ifdef __cplusplus
 }
