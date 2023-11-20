@@ -34,7 +34,15 @@
 
 #define DEFAULT_IRQ_PRIORITY 2
 
-struct dmacdescriptor {
+
+volatile void *peripheral_loc[6] = {&(SERCOM0->I2CM.DATA),
+                                    &(SERCOM1->I2CM.DATA),
+                                    &(SERCOM2->I2CM.DATA),
+                                    &(SERCOM3->I2CM.DATA),
+                                    &(SERCOM4->I2CM.DATA),
+                                    &(SERCOM5->I2CM.DATA)};
+
+struct dmac_descriptor {
     uint16_t btctrl;
     uint16_t btcnt;
     uint32_t srcaddr;
@@ -43,8 +51,8 @@ struct dmacdescriptor {
 };
 
 // 12 channels
-volatile struct dmacdescriptor wrb[12] __attribute__ ((aligned (16)));
-struct dmacdescriptor descriptor_section[12] __attribute__ ((aligned (16)));
+volatile struct dmac_descriptor wrb[12] __attribute__ ((aligned (16)));
+struct dmac_descriptor descriptor_section[12] __attribute__ ((aligned (16)));
 
 static inline uint8_t get_step_size(dma_opt_t dma_options) {
     uint16_t step_size = (BITMASK_COMPARE(dma_options, DMA_OPT_STEP_SIZE_128)) >> 6;
@@ -66,7 +74,9 @@ static inline uint8_t get_irq_priority(dma_init_opt_t dma_init_opt) {
     return res ? res-1 : DEFAULT_IRQ_PRIORITY;
 }
 
-uhal_status_t dma_init(dma_init_opt_t dma_init_options) {
+uhal_status_t dma_init(dma_peripheral_t dma_peripheral,
+                       dma_init_opt_t dma_init_options) {
+
     PM->AHBMASK.reg |= PM_AHBMASK_DMAC;
     PM->APBBMASK.reg |= PM_APBBMASK_DMAC;
     while (GCLK->STATUS.bit.SYNCBUSY);
@@ -80,9 +90,15 @@ uhal_status_t dma_init(dma_init_opt_t dma_init_options) {
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t dma_set_transfer_mem(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size, const dma_opt_t dma_options,
+uhal_status_t dma_set_transfer_mem(const dma_peripheral_t peripheral,
+                                   const dma_channel_t dma_channel,
+                                   const void *src,
+                                   void *dst,
+                                   const size_t size,
+                                   const dma_opt_t dma_options,
                                    const uint8_t do_software_trigger) {
-    struct dmacdescriptor descriptor __attribute__ ((aligned (16)));
+
+    struct dmac_descriptor descriptor __attribute__ ((aligned (16)));
     DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);
     descriptor.descaddr = 0;
 
@@ -112,7 +128,7 @@ uhal_status_t dma_set_transfer_mem(const dma_channel_t dma_channel, const void *
     const uint16_t block_act = SHIFT_BLOCKACT_TO_BTCTRL_POS(dma_options);
     const uint32_t event_output = SHIFT_EVENT_OUTPUT_TO_BTCTRL_POS(dma_options);
     descriptor.btctrl = DMAC_BTCTRL_BEATSIZE(beat_size-1) |src_incr_en | dst_incr_en | DMAC_BTCTRL_VALID | DMAC_BTCTRL_STEPSIZE(step_size) | src_step_size_en | block_act | event_output;
-    memcpy(&descriptor_section[dma_channel],&descriptor, sizeof(struct dmacdescriptor));
+    memcpy(&descriptor_section[dma_channel],&descriptor, sizeof(struct dmac_descriptor));
     DMAC->CHCTRLA.reg = DMAC_CHCTRLA_ENABLE;
 
     DMAC->CHINTENSET.reg |= SHIFT_SUSPEND_IRQ_TO_CHINTENSET_POS(dma_options) |
@@ -126,26 +142,86 @@ uhal_status_t dma_set_transfer_mem(const dma_channel_t dma_channel, const void *
 }
 
 
-uhal_status_t set_dma_trigger(const dma_channel_t dma_channel, const dma_trigger_t trigger) {
+
+uhal_status_t set_dma_trigger(const dma_peripheral_t dma_peripheral,
+                              const dma_channel_t dma_channel,
+                              const dma_trigger_t trigger) {
+
+    DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);
+    DMAC->CHCTRLB.reg |= (DMAC_CHCTRLB_TRIGACT(trigger));
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t unset_dma_trigger(const dma_channel_t dma_channel, const dma_trigger_t trigger) {
+uhal_status_t reset_dma_trigger(const dma_peripheral_t dma_peripheral,
+                                const dma_channel_t dma_channel,
+                                const dma_trigger_t trigger) {
+    DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);
+    DMAC->CHCTRLB.reg &= ~(DMAC_CHCTRLB_TRIGACT(trigger));
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t
-dma_set_transfer_peripheral_to_mem(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size,
-                                   const dma_trigger_t dma_trigger, const dma_opt_t dma_options) {
+uhal_status_t dma_set_transfer_peripheral_to_mem(const dma_peripheral_t dma_peripheral,
+                                                 const dma_channel_t dma_channel,
+                                                 const dma_peripheral_location_t src,
+                                                 void *dst,
+                                                 const size_t size,
+                                                 const dma_opt_t dma_options) {
+    struct dmac_descriptor descriptor __attribute__ ((aligned (16)));
+    DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);
+    DMAC->CHCTRLA.reg &= ~DMAC_CHCTRLA_ENABLE;
+    DMAC->CHCTRLA.reg = DMAC_CHCTRLA_SWRST;
+    DMAC->CHCTRLB.reg =  DMAC_CHCTRLB_LVL(0) |
+                         DMAC_CHCTRLB_TRIGSRC((SERCOM0_DMAC_ID_TX + (src*2))) | DMAC_CHCTRLB_TRIGACT_BEAT;
+    DMAC->CHINTENSET.reg = DMAC_CHINTENSET_MASK ; // enable all 3 interrupts
+    descriptor.srcaddr = (uint32_t) peripheral_loc[src]; // The data register of any SERCOM is just one byte
+    descriptor.dstaddr = (uint32_t) dst;
+    descriptor.btcnt = size;
+    descriptor.btctrl = DMAC_BTCTRL_VALID;
+    DMAC->SWTRIGCTRL.reg &= (uint32_t)(~(1 << dma_channel));
+    memcpy(&descriptor_section[dma_channel],&descriptor, sizeof(struct dmac_descriptor));
+    DMAC->CHCTRLA.reg = DMAC_CHCTRLA_ENABLE;
+
+    DMAC->CHINTENSET.reg |= SHIFT_SUSPEND_IRQ_TO_CHINTENSET_POS(dma_options) |
+                            SHIFT_TRANSFER_COMPLETE_IRQ_TO_CHINTENSET_POS(dma_options) |
+                            SHIFT_ERROR_IRQ_TO_CHINTENSET_POS(dma_options);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t
-dma_set_transfer_mem_to_peripheral(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size,
-                                   const dma_trigger_t dma_trigger, const dma_opt_t dma_options) {
+uhal_status_t dma_set_transfer_mem_to_peripheral(const dma_peripheral_t dma_peripheral,
+                                                 const dma_channel_t dma_channel,
+                                                 const void *src,
+                                                 const dma_peripheral_location_t dst,
+                                                 const size_t size,
+                                                 const dma_trigger_t dma_trigger,
+                                                 const dma_opt_t dma_options) {
+    struct dmac_descriptor descriptor __attribute__ ((aligned (16)));
+    DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);;
+    DMAC->CHCTRLA.reg &= ~DMAC_CHCTRLA_ENABLE;
+    DMAC->CHCTRLA.reg = DMAC_CHCTRLA_SWRST;
+    DMAC->CHCTRLB.reg =  DMAC_CHCTRLB_LVL(0) |
+                         DMAC_CHCTRLB_TRIGSRC((SERCOM0_DMAC_ID_TX + (2 *dst))) | DMAC_CHCTRLB_TRIGACT_BEAT;
+    DMAC->CHINTENSET.reg = DMAC_CHINTENSET_MASK ; // enable all 3 interrupts
+    descriptor.dstaddr = (uint32_t) peripheral_loc[dst]; // The data register of any SERCOM is just one byte
+    descriptor.srcaddr = (uint32_t) src;
+    descriptor.btcnt = size;
+    descriptor.btctrl = DMAC_BTCTRL_VALID;
+    DMAC->SWTRIGCTRL.reg &= (uint32_t)(~(1 << dma_channel));
+    memcpy(&descriptor_section[dma_channel],&descriptor, sizeof(struct dmac_descriptor));
+    DMAC->CHCTRLA.reg = DMAC_CHCTRLA_ENABLE;
+
+    DMAC->CHINTENSET.reg |= SHIFT_SUSPEND_IRQ_TO_CHINTENSET_POS(dma_options) |
+                            SHIFT_TRANSFER_COMPLETE_IRQ_TO_CHINTENSET_POS(dma_options) |
+                            SHIFT_ERROR_IRQ_TO_CHINTENSET_POS(dma_options);
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t dma_deinit() {
+uhal_status_t dma_deinit(const dma_peripheral_t dma_peripheral) {
+    PM->AHBMASK.reg &= ~PM_AHBMASK_DMAC;
+    PM->APBBMASK.reg &= ~PM_APBBMASK_DMAC;
+    while (GCLK->STATUS.bit.SYNCBUSY);
+
+    DMAC->CTRL.reg &= ~DMAC_CTRL_DMAENABLE;
+    NVIC_ClearPendingIRQ(DMAC_IRQn);
+    NVIC_DisableIRQ(DMAC_IRQn);
     return UHAL_STATUS_OK;
 }

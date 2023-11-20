@@ -33,27 +33,35 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-uhal_status_t dma_init(dma_init_opt_t dma_init_options);
+uhal_status_t dma_init(dma_peripheral_t dma_peripheral, dma_init_opt_t dma_init_options);
 
-uhal_status_t dma_set_transfer_mem(const dma_channel_t dma_channel, const void *src, void *dst,
-                                   const size_t size, const dma_opt_t dma_options,
+uhal_status_t dma_set_transfer_mem(const dma_peripheral_t peripheral,
+                                   const dma_channel_t dma_channel,
+                                   const void *src,
+                                   void *dst,
+                                   const size_t size,
+                                   const dma_opt_t dma_options,
                                    const uint8_t do_software_trigger);
 
 uhal_status_t
-dma_set_transfer_peripheral_to_mem(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size,
+dma_set_transfer_peripheral_to_mem(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel,
+                                   const dma_peripheral_location_t src, void *dst, const size_t size,
+                                   const dma_opt_t dma_options);
+
+uhal_status_t
+dma_set_transfer_mem_to_peripheral(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel,
+                                   const void *src, const dma_peripheral_location_t dst, const size_t size,
                                    const dma_trigger_t dma_trigger, const dma_opt_t dma_options);
 
 uhal_status_t
-dma_set_transfer_mem_to_peripheral(const dma_channel_t dma_channel, const void *src, void *dst, const size_t size,
-                                   const dma_trigger_t dma_trigger, const dma_opt_t dma_options);
-
-uhal_status_t set_dma_trigger(const dma_channel_t dma_channel, const dma_trigger_t trigger);
+set_dma_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel, const dma_trigger_t trigger);
 
 
-uhal_status_t unset_dma_trigger(const dma_channel_t dma_channel, const dma_trigger_t trigger);
+uhal_status_t
+reset_dma_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel, const dma_trigger_t trigger);
 
 
-uhal_status_t dma_deinit();
+uhal_status_t dma_deinit(const dma_peripheral_t dma_peripheral);
 
 
 
