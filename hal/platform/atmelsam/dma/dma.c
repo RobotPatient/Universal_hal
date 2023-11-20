@@ -187,19 +187,15 @@ uhal_status_t dma_set_transfer_peripheral_to_mem(const dma_peripheral_t dma_peri
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t dma_set_transfer_mem_to_peripheral(const dma_peripheral_t dma_peripheral,
-                                                 const dma_channel_t dma_channel,
-                                                 const void *src,
-                                                 const dma_peripheral_location_t dst,
-                                                 const size_t size,
-                                                 const dma_trigger_t dma_trigger,
-                                                 const dma_opt_t dma_options) {
+uhal_status_t dma_set_transfer_mem_to_peripheral(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel,
+                                                 const void *src, const dma_peripheral_location_t dst,
+                                                 const size_t size, const dma_opt_t dma_options) {
     struct dmac_descriptor descriptor __attribute__ ((aligned (16)));
     DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);;
     DMAC->CHCTRLA.reg &= ~DMAC_CHCTRLA_ENABLE;
     DMAC->CHCTRLA.reg = DMAC_CHCTRLA_SWRST;
     DMAC->CHCTRLB.reg =  DMAC_CHCTRLB_LVL(0) |
-                         DMAC_CHCTRLB_TRIGSRC((SERCOM0_DMAC_ID_TX + (2 *dst))) | DMAC_CHCTRLB_TRIGACT_BEAT;
+                         DMAC_CHCTRLB_TRIGSRC((SERCOM0_DMAC_ID_RX + (2 *dst))) | DMAC_CHCTRLB_TRIGACT_BEAT;
     DMAC->CHINTENSET.reg = DMAC_CHINTENSET_MASK ; // enable all 3 interrupts
     descriptor.dstaddr = (uint32_t) peripheral_loc[dst]; // The data register of any SERCOM is just one byte
     descriptor.srcaddr = (uint32_t) src;
