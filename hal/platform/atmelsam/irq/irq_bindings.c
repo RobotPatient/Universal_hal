@@ -57,7 +57,12 @@
 
 #endif
 
+#ifndef DISABLE_DMA_MODULE
+#include "dma/dma_irq_handler.h"
+#endif
+
 #include "bit_manipulation.h"
+
 
 void enable_irq_handler(IRQn_Type irq_type, uint8_t priority) {
     NVIC_DisableIRQ(irq_type);
@@ -184,3 +189,10 @@ __attribute__((used)) void EIC_Handler(void) {
 __attribute__((used)) void NonMaskableInt_Handler(void) {
     gpio_irq_handler(EIC);
 }
+
+__attribute__((used)) void DMAC_Handler(){
+#ifndef DISABLE_DMA_HANDLER
+    dma_irq_handler(DMAC);
+#endif
+}
+
