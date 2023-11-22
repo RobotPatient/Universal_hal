@@ -143,7 +143,7 @@ uhal_status_t dma_set_transfer_mem(const dma_peripheral_t peripheral,
 
 
 
-uhal_status_t set_dma_trigger(const dma_peripheral_t dma_peripheral,
+uhal_status_t dma_set_trigger(const dma_peripheral_t dma_peripheral,
                               const dma_channel_t dma_channel,
                               const dma_trigger_t trigger) {
 
@@ -152,7 +152,7 @@ uhal_status_t set_dma_trigger(const dma_peripheral_t dma_peripheral,
     return UHAL_STATUS_OK;
 }
 
-uhal_status_t reset_dma_trigger(const dma_peripheral_t dma_peripheral,
+uhal_status_t dma_reset_trigger(const dma_peripheral_t dma_peripheral,
                                 const dma_channel_t dma_channel,
                                 const dma_trigger_t trigger) {
     DMAC->CHID.reg = DMAC_CHID_ID(dma_channel);

@@ -108,7 +108,7 @@ dma_set_transfer_mem_to_peripheral(const dma_peripheral_t dma_peripheral, const 
  * @return UHAL_STATUS_OK when no errors have occurred
  */
 uhal_status_t
-set_dma_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel, const dma_trigger_t trigger);
+dma_set_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel, const dma_trigger_t trigger);
 
 
 /**
@@ -119,7 +119,7 @@ set_dma_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_c
  * @return UHAL_STATUS_OK when no errors have occurred
  */
 uhal_status_t
-reset_dma_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel, const dma_trigger_t trigger);
+dma_reset_trigger(const dma_peripheral_t dma_peripheral, const dma_channel_t dma_channel, const dma_trigger_t trigger);
 
 
 /**
