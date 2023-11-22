@@ -11,7 +11,7 @@ To be able to use the peripheral correctly, some pins, clocks and a struct have 
 - [ ] Setup the clocks for the peripheral (skip this step when using ASF or arduino).
 - [ ] Setup the pins for the peripheral (see the gpio section on this page).
 - [ ] Use the init function with the correct configuration settings
-- [ ] Initialize the i2c hardware peripheral using the i2c_slave_init() function.
+- [ ] Initialize the i2c hardware peripheral using the i2c_host_init() function.
   
 !!! note
     You can click on the checkmarks above to check them off your list ;)
@@ -22,10 +22,10 @@ Clockgenerators are not set by this implementation. It only hooks the peripheral
 
 Some frameworks like Arduino and ASF using the Atmel Start tool will configure most of the stuff under the hood. It is almost pure coincidence that both frameworks use the same default clockgenerators for the main clock and peripheral clocking.
 
-Both frameworks have clockgenerator 0 set-up with a frequency of 48 (Arduino) or 8 MHz (ASF). And clockgenerator 3 set-up with a frequency of 32.768KHz. 
+Both frameworks have clockgenerator 0 set-up with a frequency of 48 (Arduino) or 8 MHz (ASF). And clockgenerator 1 set-up with a frequency of 32.768KHz. 
 
 !!! Warning
-    The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation. Although the fast one is not really needed for the i2c slave driver, it is recommended to set it anyway.
+    The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation.
 
 ### GPIO pinmux settings
 
@@ -55,14 +55,15 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
      ...
      ```
 
-### i2c_slave_init function
+### i2c_host_init function
 
-The i2c slave init function should be used to initialize the hardware peripheral with the right settings. Each setting can be statically validated using the I2C_SLAVE_INIT() macro. This macro will first validate in compile time whether valid settings have been entered. If no compile errors are generated the function call will be replaced with the i2c_host_init function.
+The i2c host init function should be used to initialize the hardware peripheral with the right settings. Each setting can be statically validated using the I2C_HOST_INIT() macro. This macro will first validate in compile time whether valid settings have been entered. If no compile errors are generated the function call will be replaced with the i2c_host_init function.
 
 ```c
-void i2c_slave_init(const i2c_periph_inst_t i2c_peripheral_num, 
-                   const uint16_t slave_addr,
+void i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
                    const i2c_clock_sources_t clock_sources,
+                   const uint32_t periph_clk_freq, 
+                   const uint32_t baud_rate_freq,
                    const i2c_extra_opt_t extra_configuration_options);
 ```
 
@@ -70,7 +71,7 @@ Within this function the following parameters can be set:
 ??? info  "i2c_peripheral_num"
     The sercom number to couple the module to. 
 	!!! Warning
-		When using these peripherals keep in mind that these peripherals are shared with the UART (master & slave), SPI (master & slave) and I2C host driver.
+		When using these peripherals keep in mind that these peripherals are shared with the UART (master & slave), SPI (master & slave) and I2C slave driver.
 		Make sure that this driver is the only driver using this peripheral. If it is not the case, this driver will overwrite all previous peripheral configurations. 
 		Since the peripheral can only be used for one communication interface type at a time.
 	These are possible configuration values for the SAMD21 series of microcontrollers:
@@ -93,11 +94,6 @@ Within this function the following parameters can be set:
     | ---------- | --------------------- |
     | Sercom 0   | I2C_PERIPHERAL_0      |
     | Sercom ... | I2C_PERIPHERAL_...    |
-
-??? info "slave_addr"
-    This is the slave address to use for this i2c slave driver instance.
-    
-    This can be set to any 8-bit value. But the values 0 and 0xFF are not recommended as they will be ignored and/or cause fault conditions to occur.
 
 ??? info "clock_sources"
     Indicates which clock sources are used for the hardware peripheral clock.
@@ -130,22 +126,52 @@ Within this function the following parameters can be set:
 	
 	To select both the fast and slow clockgenerator, perform an OR operation on these flags like this:
 	```c
-    #define I2C_SLAVE_ADDR 0x28
 	#define I2C_PERIPHERAL_CLK_SOURCES (I2C_CLK_SOURCE_FAST_CLKGEN0 | I2C_CLK_SOURCE_SLOW_CLKGEN3)
 	
 	/* Initialize peripheral with static parameter checking (during compile-time) */
-	I2C_SLAVE_INIT(I2C_PERIPHERAL_0, I2C_SLAVE_ADDR, I2C_PERIPHERAL_CLK_SOURCES, ...
+	I2C_HOST_INIT(I2C_PERIPHERAL_0, I2C_PERIPHERAL_CLK_SOURCES, ...
 	
 	or
 	
 	/* Initialize peripheral without parameter checking */ 
-	i2c_slave_init(I2C_PERIPHERAL_0, I2C_SLAVE_ADDR, I2C_PERIPHERAL_CLK_SOURCES, ...
+	i2c_host_init(I2C_PERIPHERAL_0, I2C_PERIPHERAL_CLK_SOURCES, ...
 	```
 	
 	**If not sure which clockgenerator to use. Try the `I2C_CLK_SOURCE_USE_DEFAULT` flag.**
 	
 	This should work out of the box on ASF and Arduino.
 
+??? info "periph_clk_freq"
+    The output frequency of the selected fast frequency clockgenerator.
+
+    A typical value would be: 
+    
+      | Clock generator   | Platform | Framework | periph_clk_freq               |
+      | ----------------- | -------- | --------- | ------------------------------------- |
+      | Clock generator 0 | SAMD51   | Arduino   | 120000000 (120 MHz)                   |
+      | Clock generator 0 | SAMD51   | ASF       | 8000000  (8 MHz)              |
+      | Clock generator 0 | SAMD21   | Arduino   | 48000000 (48 MHz)                     |
+      | Clock generator 0 | SAMD21   | ASF       | 8000000 (8 MHz)             |
+      
+   	When using the default Arduino clock system, use the internal arduino macro: `F_CPU` for this setting.
+
+??? info "baud_rate_freq"
+	The frequency of the I2C bus.
+	
+	The SAMD series supports frequencies from 100KHz up to 1 MHz.
+	
+	!!! Warning
+		The `periph_clk_freq` has to be atleast ~14 times higher than the baud_rate frequency to function.
+		Otherwise the peripheral won't be able to generate the required baud frequency.
+	
+	Example:
+	```c
+	#define PERIPH_CLOCK_FREQ 48000000 /* Peripheral clock frequency of 48 MHz */
+	#define I2C_CLOCK_FREQ 100000 /* I2C bus frequency of 100 KHz*/
+	
+	I2C_HOST_INIT(I2C_PERIPHERAL_0, I2C_CLK_SOURCE_USE_DEFAULT, PERIPH_CLOCK_FREQ, I2C_CLOCK_FREQ, ...
+	```
+	
 ??? info "extra_configuration_options"
 	Platform dependent extra configuration options like: internal irq_priority, DMA use, 4-wire mode, etc. 
 	
@@ -184,13 +210,16 @@ Within this function the following parameters can be set:
 	#include <hal_gpio.h>
 	#include <hal_i2c_host.h>
 
+    #ifndef F_CPU
+    #define F_CPU 48000000 /* Peripheral clock speed of 48 MHz */
+    #endif
+	
 	/* Set PA22 as SDA and PA23 as SCL */
 	#define SDA_PIN GPIO_PIN_PA22
 	#define SCL_PIN GPIO_PIN_PA23
 
-    /* Use slave address 0x28 */
-    #define I2C_SLAVE_ADDR 0x28
-
+    #define I2C_CLOCK_SPEED 100000 /* I2C bus speed of 100 KHz */
+    
     /* Use SERCOM3 as peripheral */
     #define I2C_PERIPHERAL I2C_PERIPHERAL_3
     
@@ -203,7 +232,7 @@ Within this function the following parameters can be set:
     void setup(){
        GPIO_SET_PIN_MODE(SDA_PIN, GPIO_MODE_C);
        GPIO_SET_PIN_MODE(SCL_PIN, GPIO_MODE_C);
-       I2C_SLAVE_INIT(I2C_PERIPHERAL, I2C_SLAVE_ADDR, I2C_CLK_SOURCE, I2C_EXTRA_CONFIG_OPTIONS);
+       I2C_HOST_INIT(I2C_PERIPHERAL, I2C_CLK_SOURCE, F_CPU, I2C_CLOCK_SPEED, I2C_EXTRA_CONFIG_OPTIONS);
     }
     ...
     ```
