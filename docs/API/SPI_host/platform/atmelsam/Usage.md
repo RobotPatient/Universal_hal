@@ -11,7 +11,6 @@ To correctly utilize the SPI peripheral, certain preparatory steps are essential
 - [ ] Set up the clocks for the SPI peripheral (this step can be skipped when using ASF or Arduino frameworks).
 - [ ] Configure the pins for the SPI peripheral (refer to the GPIO section on this page).
 - [ ] Utilize the spi_host_init function with appropriate configuration settings.
-- [ ] Initialize the SPI hardware peripheral using the spi_host_init() function.
 
 !!! note
     Click on the checkmarks above to track your progress.

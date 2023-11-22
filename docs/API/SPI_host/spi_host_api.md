@@ -391,4 +391,36 @@ The `spi_host_read_non_blocking` and `SPI_HOST_READ_NON_BLOCKING` functions faci
 2. It then initiates the read operation, which is designed to be non-blocking. The function does not wait for the full completion of data reception; instead, it starts the process and then returns control to the calling program immediately.
 3. The function exits quickly after starting the data reception, allowing other operations to proceed concurrently while the SPI peripheral continues to receive data in the background.
 
+## SPI Host IRQ Functionality
 
+The SPI Host driver as part of the Universal HAL includes specific Interrupt Request (IRQ) handlers for managing SPI communication. These handlers are triggered in response to specific actions during SPI transactions. They are declared as weak symbols, allowing for the possibility of overriding them with custom implementations.
+
+### 1. Data Receive IRQ
+
+Activated when a read action is executed by the SPI host. This IRQ handler is essential for processing data received from an SPI slave device.
+
+```c
+void spi_host_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
+```
+
+### 2. Data Send IRQ
+
+Triggered when a write action is performed by the SPI host. This IRQ handler is crucial for managing data transmission to an SPI slave device.
+
+```c
+void spi_host_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
+```
+
+### Use-Case Example:
+
+Consider a scenario where an SPI host (like a microcontroller) is communicating with an SPI slave device (such as a memory chip or sensor).
+
+1. **Data Read Operation**: When the SPI host initiates a read operation to receive data from the slave device, the `spi_host_data_recv_irq` is invoked. This handler can be customized to process and handle the incoming data according to the specific requirements of your application.
+
+2. **Data Write Operation**: Conversely, when the SPI host sends data to the slave device, the `spi_host_data_send_irq` gets triggered. Customizing this handler allows you to control the data transmission process, ensuring that data is sent correctly and efficiently.
+
+By defining custom implementations for these IRQ handlers, developers can tailor the SPI host's response to read and write operations, allowing for more precise control over data handling and communication flow. This level of customization is particularly beneficial in complex systems where standard IRQ behavior may not suffice.
+
+### Important Note:
+
+- Customizing these IRQ handlers can potentially affect the functionality of the standard `spi_host_write` and `spi_host_read` functions provided by the Universal HAL. It's important to ensure that any custom implementation is compatible with the overall SPI communication process and does not inadvertently disrupt standard operations.

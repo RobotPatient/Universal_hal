@@ -1,331 +1,156 @@
-# I2C API
+# SPI Slave API
 
-## API functionality
+## API Functionality
 
-The API for I2C host functionality has the following functions available:
+The API for SPI slave functionality has the following functions available:
 
 ```c
-/* I2C driver initialization function (without compile-time parameter checking)*/
-uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
-							const i2c_clock_sources_t clock_sources,
-                    		const uint32_t periph_clk_freq, 
-                    		const uint32_t baud_rate_freq,
-                    		const i2c_extra_opt_t extra_configuration_options);
-/* I2C driver initialization function (with compile-time parameter checking)   */
-uhal_status_t I2C_HOST_INIT(const i2c_periph_inst_t i2c_peripheral_num, 
-							const i2c_clock_sources_t clock_sources, 
-							const uint32_t periph_clk_freq, 
-							const uint32_t baud_rate_freq, 
-							const i2c_extra_opt_t extra_configuration_options);
+/* SPI slave driver initialization function (without compile-time parameter checking) */
+uhal_status_t spi_slave_init(const spi_host_inst_t spi_peripheral_num,
+                             const uint32_t spi_clock_source,
+                             const uint32_t spi_clock_source_freq,
+                             const unsigned long spi_bus_frequency,
+                             const spi_bus_opt_t spi_extra_configuration_opt);
 
+/* SPI slave driver initialization function (with compile-time parameter checking) */
+uhal_status_t SPI_SLAVE_INIT(const spi_host_inst_t spi_peripheral_num,
+                             const uint32_t spi_clock_source,
+                             const uint32_t spi_clock_source_freq,
+                             const unsigned long spi_bus_frequency,
+                             const spi_bus_opt_t spi_extra_configuration_opt);
 
-/* I2C driver deinitialization function (without compile-time parameter checking) */
-uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
+/* SPI slave driver deinitialization function (without compile-time parameter checking) */
+uhal_status_t spi_slave_deinit(const spi_host_inst_t spi_peripheral_num);
 
-/* I2C driver deinitialization function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_DEINIT(const i2c_periph_inst_t i2c_peripheral_num);
-
-/* I2C driver write blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                             const uint16_t addr,
-                             const uint8_t *write_buff,
-                             const size_t size,
-                             const i2c_stop_bit_t stop_bit);
-
-/* I2C driver write blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_WRITE_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                             const uint16_t addr,
-                             const uint8_t *write_buff,
-                             const size_t size,
-                             const i2c_stop_bit_t stop_bit);
-
-/* I2C driver write non-blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                                 const uint16_t addr,
-                                 const uint8_t *write_buff,
-                                 const size_t size,
-                                 const i2c_stop_bit_t stop_bit);
-
-/* I2C driver write non-blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_WRITE_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                                 const uint16_t addr,
-                                 const uint8_t *write_buff,
-                                 const size_t size,
-                                 const i2c_stop_bit_t stop_bit);
-
-/* I2C driver read blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                            const uint16_t addr,
-                            uint8_t *read_buff,
-                            const size_t amount_of_bytes);
-
-/* I2C driver read blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_READ_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                            const uint16_t addr,
-                            uint8_t *read_buff,
-                            const size_t amount_of_bytes);
-
-/* I2C driver read non-blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                                const uint16_t addr,
-                                uint8_t *read_buff,
-                                const size_t amount_of_bytes);
-
-/* I2C driver read non-blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_READ_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                                const uint16_t addr,
-                                uint8_t *read_buff,
-                                const size_t amount_of_bytes);
-
-
-
+/* SPI slave driver deinitialization function (with compile-time parameter checking) */
+uhal_status_t SPI_SLAVE_DEINIT(const spi_host_inst_t spi_peripheral_num);
 ```
 
-## i2c_host_init function
+## spi_slave_init function
 
 ```c
-/* I2C driver initialization function (without compile-time parameter checking)*/
-uhal_status_t i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
-                            const i2c_clock_sources_t clock_sources,
-                            const uint32_t periph_clk_freq, 
-                            const uint32_t baud_rate_freq,
-                            const i2c_extra_opt_t extra_configuration_options);
-
-/* I2C driver initialization function (with compile-time parameter checking)   */
-uhal_status_t I2C_HOST_INIT(const i2c_periph_inst_t i2c_peripheral_num, 
-                            const i2c_clock_sources_t clock_sources, 
-                            const uint32_t periph_clk_freq, 
-                            const uint32_t baud_rate_freq, 
-                            const i2c_extra_opt_t extra_configuration_options);
+uhal_status_t spi_slave_init(const spi_slave_inst_t spi_peripheral_num, 
+                             const uint32_t spi_clock_source,
+                             const spi_bus_opt_t spi_extra_configuration_opt);
 ```
 
 ### Description:
 
-The `i2c_host_init` and `I2C_HOST_INIT` functions are designed to initialize an I2C peripheral with specific configurations.
+The `spi_slave_init` function is designed for initializing an SPI peripheral in slave mode. It configures the peripheral with specific settings, including the clock source and additional options that dictate the behavior of the SPI bus.
 
 ### Error Checking:
 
-- **I2C_HOST_INIT**: Written in uppercase letters, this version of the function includes compile-time parameter checking to ensure the validity of the provided parameters. The parameters such as `i2c_peripheral_num` and `clock_sources` are checked against valid definitions at compile time. This safeguard helps detect configuration errors early in the development phase.
+- **SPI_SLAVE_INIT**: This function, written in uppercase, includes compile-time parameter checking. It verifies the correctness of the provided `spi_peripheral_num`, `spi_clock_source`, and `spi_extra_configuration_opt`, ensuring that they are valid and suitable for initializing an SPI slave peripheral. This level of verification is crucial for preventing configuration errors, particularly in scenarios where incorrect parameter values could lead to malfunction or improper operation of the SPI peripheral.
+
+    - **Usage Note**: Use this function when there is certainty about the peripheral number, clock source, and configuration options at compile time. It provides an additional layer of safety by ensuring that the parameters used for initialization are correct and within acceptable ranges.
+
+- **spi_slave_init**: This version performs the initialization of the SPI slave peripheral without compile-time parameter checks. It is more adaptable for situations where the peripheral number, clock source, or extra configuration options might be determined at runtime or are subject to change.
+
+    - **Usage Note**: Opt for this function in dynamic systems or when dealing with parameters that are not known beforehand or might vary. This version allows for greater flexibility and is suitable for applications with changing or runtime-determined configurations.
+    
+### Parameters:
+
+1. **spi_peripheral_num (const spi_slave_inst_t)**: 
+   - Specifies the SPI peripheral instance to initialize as a slave. This parameter identifies the particular SPI peripheral that should operate in slave mode.
+
+2. **spi_clock_source (const uint32_t)**: 
+   - Determines the clock source for the SPI peripheral. This setting is critical as it affects the timing and synchronization of SPI communications.
+
+3. **spi_extra_configuration_opt (const spi_bus_opt_t)**: 
+   - Provides additional configuration options for the SPI bus. These options can include settings for clock polarity, phase, data order, character size, and pad-specific configurations necessary for the correct operation of the SPI slave peripheral.
+
+### Return:
+
+- **uhal_status_t**: This function returns a status code that indicates whether the initialization was successful. It provides feedback on the setup process, helping to identify any issues that might have occurred during the initialization.
+
+### Working:
+
+1. The initialization process begins with the assignment of the specified `spi_peripheral_num` to the desired SPI slave peripheral. This step ensures that the correct hardware unit is being configured.
+
+2. The `spi_clock_source` is then configured, setting up the timing and synchronization aspect of the SPI communication based on the microcontroller's clock system.
+
+3. Additional configurations, as specified by `spi_extra_configuration_opt`, are applied. These settings enable the customization of the SPI operation according to the specific requirements of the application, such as adjusting clock polarity, data order, and other bus-specific parameters.
+
+4. The SPI peripheral is then enabled in slave mode, ready to participate in SPI communications governed by an external SPI master device. 
+
+
+
+## spi_slave_deinit function
+
+```c
+/* SPI slave driver deinitialization function (without compile-time parameter checking) */
+uhal_status_t spi_slave_deinit(const spi_host_inst_t spi_peripheral_num);
+
+/* SPI slave driver deinitialization function (with compile-time parameter checking) */
+uhal_status_t SPI_SLAVE_DEINIT(const spi_host_inst_t spi_peripheral_num);
+```
+
+### Description:
+
+The `spi_slave_deinit` and `SPI_SLAVE_DEINIT` functions are used to deinitialize a previously initialized SPI peripheral operating in slave mode. These functions effectively disable the SPI slave operation and release the associated hardware resources.
+
+### Error Checking:
+
+- **SPI_SLAVE_DEINIT**: This function, written in uppercase, includes compile-time parameter checking. It ensures the validity of the provided `spi_peripheral_num`, verifying that it refers to a correctly initialized and existing SPI peripheral. This check is crucial for avoiding errors related to deinitializing a non-existent or already deinitialized peripheral.
   
-	- **Usage Note**: Utilize this function only when the parameters are known at compile time.
+	- **Usage Note**: This function should be used when there is certainty about the peripheral number at compile time, allowing for an additional layer of safety during the deinitialization process.
 
-- **i2c_host_init**: This function provides the same I2C initialization capabilities but without the compile-time parameter check. 
+- **spi_slave_deinit**: This version performs the deinitialization without compile-time checks, offering greater flexibility for scenarios where the peripheral number may be determined at runtime or may change during the course of operation.
   
-	- **Usage Note**: Opt for this function when dealing with parameters that might be determined at runtime.
+	- **Usage Note**: Ideal for dynamic systems where the peripheral to be deinitialized might not be known beforehand or might vary based on runtime conditions.
 
 ### Parameters:
 
-1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to initialize.
-2. **clock_sources (const i2c_clock_sources_t)**: The clock source that will be used for the I2C peripheral.
-3. **periph_clk_freq (const uint32_t)**: The frequency of the peripheral clock in Hertz.
-4. **baud_rate_freq (const uint32_t)**: The desired baud rate frequency in Hertz for I2C communication.
-5. **extra_configuration_options (const i2c_extra_opt_t)**: Additional configuration options to further customize the I2C peripheral behavior.
+- **spi_peripheral_num (const spi_host_inst_t)**: Specifies the SPI peripheral instance to deinitialize. This parameter identifies the specific SPI slave peripheral that should be disabled.
 
 ### Return:
 
-- **uhal_status_t**: The function will return a status indicating the success or failure of the initialization process. The exact definitions of possible return values should be referenced in the "error_checking.h" header file.
+- **uhal_status_t**: The function returns a status indicating the success or failure of the deinitialization process. A successful return value implies that the SPI slave peripheral has been properly disabled and its resources are now free for other uses or reinitialization.
 
 ### Working:
 
-1. The function starts by validating the provided parameters, ensuring they're within acceptable ranges.
-2. It then configures the clock source for the I2C peripheral based on the `clock_sources` parameter.
-3. The function sets the peripheral clock frequency and baud rate as specified.
-4. Any additional configurations specified in `extra_configuration_options` are applied.
-5. Finally, the function activates the I2C peripheral, making it ready for communication.
+1. The function commences by validating the provided SPI peripheral number to ensure it corresponds to an active and previously initialized SPI slave peripheral.
+2. It proceeds to disable the SPI peripheral, terminating any ongoing slave operations and ensuring the peripheral is no longer active in the SPI communication.
+3. The hardware resources associated with the SPI slave peripheral are then released, making them available for other purposes or for reinitialization in the future.
+4. Finally, the function returns a status to indicate whether the deinitialization was successful, providing feedback on the operation's outcome.
 
+## SPI Slave IRQ Functionality
 
-## i2c_host_deinit function
+The SPI Slave driver within the Universal HAL provides several Interrupt Request (IRQ) handlers specifically tailored for SPI interactions. These IRQ handlers are invoked in response to different events occurring on the SPI bus. By default, they are declared as weak symbols, meaning you can override them with custom implementations in your source code outside the Universal HAL.
+
+### 1. Chip Select IRQ
+
+Triggered when the SPI chip select pin is pulled low, indicating the start of a communication session with the SPI slave device.
 
 ```c
-/* I2C driver deinitialization function (without compile-time parameter checking) */
-uhal_status_t i2c_host_deinit(const i2c_periph_inst_t i2c_peripheral_num);
-
-/* I2C driver deinitialization function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_DEINIT(const i2c_periph_inst_t i2c_peripheral_num);
+void spi_slave_chip_select_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 ```
 
-### Description:
-The `i2c_host_deinit` and `I2C_HOST_DEINIT` functions deinitialize a previously initialized I2C peripheral.
+### 2. Data Receive IRQ
 
-### Error Checking:
-- **I2C_HOST_DEINIT**: This uppercase version includes compile-time parameter checking for the peripheral number.
-	- **Usage Note**: Use this when the peripheral number is known at compile time.
-  
-- **i2c_host_deinit**: This function does the deinitialization without compile-time checks.
-	- **Usage Note**: Use this when the peripheral number might be determined at runtime.
-
-### Parameters:
-1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to deinitialize.
-
-### Return:
-- **uhal_status_t**: Success or failure status of the deinitialization.
-
-### Working:
-1. Validates the peripheral number.
-2. Resets the I2C peripheral settings and configurations.
-3. Turns off the I2C peripheral, releasing its resources.
-
-
-
-## i2c_host_write_blocking function
+Executed when a byte of data is received from the SPI master. This handler is crucial for processing incoming data efficiently and effectively.
 
 ```c
-/* I2C driver write blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_write_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                             const uint16_t addr,
-                             const uint8_t *write_buff,
-                             const size_t size,
-                             const i2c_stop_bit_t stop_bit);
-
-/* I2C driver write blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_WRITE_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                             const uint16_t addr,
-                             const uint8_t *write_buff,
-                             const size_t size,
-                             const i2c_stop_bit_t stop_bit);
+void spi_slave_data_recv_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 ```
 
-### Description:
-The `i2c_host_write_blocking` and `I2C_HOST_WRITE_BLOCKING` functions write data to a specified I2C address in a blocking manner.
+### 3. Data Send IRQ
 
-### Error Checking:
-- **I2C_HOST_WRITE_BLOCKING**: This uppercase version includes compile-time parameter checking.
-	- **Usage Note**: Use this when parameters are known at compile time.
-
-- **i2c_host_write_blocking**: Executes the write operation without compile-time checks.
-	- **Usage Note**: Use this when parameters might be determined at runtime.
-
-### Parameters:
-1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to use.
-2. **addr (const uint16_t)**: The I2C address to write to.
-3. **write_buff (const uint8_t*)**: Pointer to the buffer containing data to be written.
-4. **size (const size_t)**: Amount of bytes to write.
-5. **stop_bit (const i2c_stop_bit_t)**: Determines if a stop bit should be sent after the write.
-
-### Return:
-- **uhal_status_t**: Success or failure status of the write operation.
-
-### Working:
-1. Validates the parameters and ensures the I2C bus is ready.
-2. Sends the data from the buffer to the specified address.
-3. Waits for the operation to complete before returning.
-
-
-## i2c_host_write_non_blocking function
+Called when the SPI master requests a byte of data from the SPI slave. This handler is responsible for sending data back to the master.
 
 ```c
-/* I2C driver write non-blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_write_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                                 const uint16_t addr,
-                                 const uint8_t *write_buff,
-                                 const size_t size,
-                                 const i2c_stop_bit_t stop_bit);
-
-/* I2C driver write non-blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_WRITE_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                                 const uint16_t addr,
-                                 const uint8_t *write_buff,
-                                 const size_t size,
-                                 const i2c_stop_bit_t stop_bit);
+void spi_slave_data_send_irq(const void *hw, volatile bustransaction_t *transaction) __attribute__((weak));
 ```
 
-### Description:
-The `i2c_host_write_non_blocking` and `I2C_HOST_WRITE_NON_BLOCKING` functions write data to an I2C address without blocking the executing thread.
+### Use-Case Example:
 
-### Error Checking:
-- **I2C_HOST_WRITE_NON_BLOCKING**: This uppercase version includes compile-time parameter checking.
-	- **Usage Note**: Use this when parameters are known at compile time.
+Consider a scenario where you're developing a system with an SPI slave device (like a sensor) that interacts with an SPI master device (like a microcontroller).
 
-- **i2c_host_write_non_blocking**: Executes the write operation without compile-time checks.
-	- **Usage Note**: Use this when parameters might be determined at runtime.
+1. **Chip Select Activation**: The master initiates communication by pulling the chip select line low, signaling the start of a transaction. This event triggers the `spi_slave_chip_select_irq` in the slave device.
 
-### Parameters:
-The parameters are the same as the blocking version.
+2. **Data Request**: The master may then request data, leading to the invocation of the `spi_slave_data_send_irq` on the slave side. This handler is responsible for preparing and sending the requested data back to the master.
 
-### Return:
-- **uhal_status_t**: Success or failure status of the write operation.
+3. **Data Reception**: As the master sends data to the slave, the `spi_slave_data_recv_irq` is triggered on the slave side to process the received data.
 
-### Working:
-1. Validates the parameters and ensures the I2C bus is ready.
-2. Starts the write operation and immediately returns.
-
-
-## i2c_host_read_blocking function
-
-```c
-/* I2C driver read blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_read_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                            const uint16_t addr,
-                            uint8_t *read_buff,
-                            const size_t amount_of_bytes);
-
-
-
-/* I2C driver read blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_READ_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                            const uint16_t addr,
-                            uint8_t *read_buff,
-                            const size_t amount_of_bytes);
-```
-
-### Description:
-The `i2c_host_read_blocking` and `I2C_HOST_READ_BLOCKING` functions read data from a specified I2C address, waiting for the operation to complete.
-
-### Error Checking:
-- **I2C_HOST_READ_BLOCKING**: This uppercase version includes compile-time parameter checking.
-	- **Usage Note**: Use this when parameters are known at compile time.
-
-- **i2c_host_read_blocking**: Executes the read operation without compile-time checks.
-	- **Usage Note**: Use this when parameters might be determined at runtime.
-
-### Parameters:
-1. **i2c_peripheral_num (const i2c_periph_inst_t)**: The specific I2C peripheral instance to use.
-2. **addr (const uint16_t)**: The I2C address to read from.
-3. **read_buff (uint8_t*)**: Buffer where the read data will be stored.
-4. **amount_of_bytes (const size_t)**: Amount of bytes to read.
-
-### Return:
-- **uhal_status_t**: Success or failure status of the read operation.
-
-### Working:
-1. Validates the parameters and ensures the I2C bus is ready.
-2. Reads the data from the specified address and stores it in the buffer.
-3. Waits for the operation to complete before returning.
-
-
-## i2c_host_read_non_blocking function
-
-```c
-/* I2C driver read non-blocking function (without compile-time parameter checking) */
-uhal_status_t i2c_host_read_non_blocking(const i2c_periph_inst_t i2c_peripheral_num,
-                                const uint16_t addr,
-                                uint8_t *read_buff,
-                                const size_t amount_of_bytes);
-
-/* I2C driver read non-blocking function (with compile-time parameter checking) */
-uhal_status_t I2C_HOST_READ_NON_BLOCKING(const i2c_periph_inst_t i2c_peripheral_num,
-                                const uint16_t addr,
-                                uint8_t *read_buff,
-                                const size_t amount_of_bytes);
-```
-
-### Description:
-The `i2c_host_read_non_blocking` and `I2C_HOST_READ_NON_BLOCKING` functions read data from an I2C address without blocking the executing thread.
-
-### Error Checking:
-- **I2C_HOST_READ_NON_BLOCKING**: This uppercase version includes compile-time parameter checking.
-	- **Usage Note**: Use this when parameters are known at compile time.
-
-- **i2c_host_read_non_blocking**: Executes the read operation without compile-time checks.
-	- **Usage Note**: Use this when parameters might be determined at runtime.
-
-### Parameters:
-The parameters are the same as the blocking version.
-
-### Return:
-- **uhal_status_t**: Success or failure status of the read operation.
-
-### Working:
-1. Validates the parameters and ensures the I2C bus is ready.
-2. Starts the read operation and immediately returns.
+By providing custom implementations for these IRQ handlers, you can define specific actions for the slave device to perform in response to each of these events, ensuring efficient and tailored communication between the master and slave devices.
 
