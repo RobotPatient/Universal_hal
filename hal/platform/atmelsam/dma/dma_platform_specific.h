@@ -44,7 +44,6 @@ typedef enum {
     DMA_CHANNEL_11,
 } dma_channel_t;
 
-
 typedef enum {
     DMA_OPT_USE_DEFAULT = 0,
     DMA_OPT_BEAT_SIZE_8_BITS = 1,
@@ -71,7 +70,6 @@ typedef enum {
     DMA_OPT_EVENT_OUTPUT_BLOCK = 16384,
     DMA_OPT_EVENT_OUTPUT_BEAT = 32768,
 } dma_opt_t;
-
 
 typedef enum {
     DMA_TRIGGER_SOFTWARE,
@@ -130,7 +128,6 @@ typedef enum {
     DMA_PERIPHERAL_0
 } dma_peripheral_t;
 
-
 typedef enum {
     DMA_INIT_OPT_USE_DEFAULT = 0,
     DMA_INIT_OPT_HANDLE_PRIORITY_LEVEL_1,
@@ -180,5 +177,28 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
+#define DMA_INIT_FUNC_PARAMETER_CHECK(dma_peripheral, dma_init_options)                                                                              \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define DMA_SET_TRANSFER_MEM_FUNC_PARAMETER_CHECK(dma_peripheral, dma_channel, src, dst, size, dma_options, do_software_trigger)                     \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define DMA_SET_TRANSFER_PERIPHERAL_TO_MEM_FUNC_PARAMETER_CHECK(dma_peripheral, dma_channel, src, dst, size, dma_options, do_software_trigger)       \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define DMA_SET_TRANSFER_MEM_TO_PERIPHERAL_FUNC_PARAMETER_CHECK(dma_peripheral, dma_channel, src, dst, size, dma_options, do_software_trigger)       \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define DMA_TRIGGER_FUNC_PARAMETER_CHECK(dma_peripheral, dma_channel, trigger)                                                                       \
+    do {                                                                                                                                             \
+    } while (0);
+
+#define DMA_DEINIT_FUNC_PARAMETER_CHECK(dma_peripheral)                                                                                              \
+    do {                                                                                                                                             \
+    } while (0);
 
 #endif //ATMELSAMD21_DMA_PLATFORM_SPECIFIC_H
