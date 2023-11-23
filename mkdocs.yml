@@ -54,19 +54,19 @@ markdown_extensions:
       - quote
 theme:
     name: material
-    logo: assets/mcu_logo_high_res.png
-    favicon: assets/mcu_logo.png
+    logo: assets/Universal_hal_logo_top_bar.svg
+    favicon: assets/Universal_hal_logo_top_bar.svg
     palette: 
     # Palette toggle for light mode
     - scheme: default
-      primary: teal
+      primary: orange
       toggle:
         icon: material/brightness-7 
         name: Switch to dark mode
 
     # Palette toggle for dark mode
     - scheme: slate
-      primary: teal
+      primary: orange
       toggle:
         icon: material/brightness-4
         name: Switch to light mode

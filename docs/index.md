@@ -1,4 +1,4 @@
-# Introduction
+![](assets/Clipart.png)
 
 This is the documentation for the Universal hal framework. The Universal hal framework provides a generic cross platform interface to hardware peripherals/functions of microcontrollers.
 
