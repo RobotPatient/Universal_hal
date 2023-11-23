@@ -21,8 +21,8 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
-#ifndef ATMELSAMD21_HAL_DMA_H
-#define ATMELSAMD21_HAL_DMA_H
+#ifndef HAL_DMA_H
+#define HAL_DMA_H
 
 #include <error_handling.h>
 #include <stddef.h>
@@ -166,4 +166,4 @@ void dma_irq_handler(const void* const hw) __attribute__((weak));
 }
 #endif /* __cplusplus */
 
-#endif //ATMELSAMD21_HAL_DMA_H
+#endif // HAL_DMA_H
