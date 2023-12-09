@@ -8,7 +8,8 @@ extern "C" {
 #include "port_mock.h"
 #include "eic_mock.h"
 #include "sercom_mock.h"
-#include "gclk_mock .h"
+#include "gclk_mock.h"
+#include "nvic_mock.h"
 
 #ifdef __cplusplus
 }

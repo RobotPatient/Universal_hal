@@ -6,12 +6,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define _U_(x)         x ## U            /**< C code: Unsigned integer literal constant value */
+#define _L_(x)         x ## L            /**< C code: Long integer literal constant value */
+#define _UL_(x)        x ## UL           /**< C code: Unsigned Long integer literal constant value */
+
 #include <stdint.h>
-
-#define PINS_PER_PORT 32
-#define PORT_GROUP_NUM 1
-
-typedef volatile       uint8_t  RoReg8;  /**< Read only  8-bit register (volatile const unsigned int) */
+/* -------- PORT_DIR : (PORT Offset: 0x00) (R/W 32) GROUP Data Direction -------- */
 
 typedef union {
   struct {
@@ -20,12 +20,34 @@ typedef union {
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_DIR_Type;
 
+
+#define PORT_DIR_OFFSET             0x00         /**< \brief (PORT_DIR offset) Data Direction */
+#define PORT_DIR_RESETVALUE         _U_(0x00000000) /**< \brief (PORT_DIR reset_value) Data Direction */
+
+#define PORT_DIR_DIR_Pos            0            /**< \brief (PORT_DIR) Port Data Direction */
+#define PORT_DIR_DIR_Msk            (_U_(0xFFFFFFFF) << PORT_DIR_DIR_Pos)
+#define PORT_DIR_DIR(value)         (PORT_DIR_DIR_Msk & ((value) << PORT_DIR_DIR_Pos))
+#define PORT_DIR_MASK               _U_(0xFFFFFFFF) /**< \brief (PORT_DIR) MASK Register */
+
+/* -------- PORT_DIRCLR : (PORT Offset: 0x04) (R/W 32) GROUP Data Direction Clear -------- */
+
 typedef union {
   struct {
     uint32_t DIRCLR:32;        /*!< bit:  0..31  Port Data Direction Clear          */
   } bit;                       /*!< Structure used for bit  access                  */
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_DIRCLR_Type;
+
+
+#define PORT_DIRCLR_OFFSET          0x04         /**< \brief (PORT_DIRCLR offset) Data Direction Clear */
+#define PORT_DIRCLR_RESETVALUE      _U_(0x00000000) /**< \brief (PORT_DIRCLR reset_value) Data Direction Clear */
+
+#define PORT_DIRCLR_DIRCLR_Pos      0            /**< \brief (PORT_DIRCLR) Port Data Direction Clear */
+#define PORT_DIRCLR_DIRCLR_Msk      (_U_(0xFFFFFFFF) << PORT_DIRCLR_DIRCLR_Pos)
+#define PORT_DIRCLR_DIRCLR(value)   (PORT_DIRCLR_DIRCLR_Msk & ((value) << PORT_DIRCLR_DIRCLR_Pos))
+#define PORT_DIRCLR_MASK            _U_(0xFFFFFFFF) /**< \brief (PORT_DIRCLR) MASK Register */
+
+/* -------- PORT_DIRSET : (PORT Offset: 0x08) (R/W 32) GROUP Data Direction Set -------- */
 
 typedef union {
   struct {
@@ -34,12 +56,34 @@ typedef union {
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_DIRSET_Type;
 
+
+#define PORT_DIRSET_OFFSET          0x08         /**< \brief (PORT_DIRSET offset) Data Direction Set */
+#define PORT_DIRSET_RESETVALUE      _U_(0x00000000) /**< \brief (PORT_DIRSET reset_value) Data Direction Set */
+
+#define PORT_DIRSET_DIRSET_Pos      0            /**< \brief (PORT_DIRSET) Port Data Direction Set */
+#define PORT_DIRSET_DIRSET_Msk      (_U_(0xFFFFFFFF) << PORT_DIRSET_DIRSET_Pos)
+#define PORT_DIRSET_DIRSET(value)   (PORT_DIRSET_DIRSET_Msk & ((value) << PORT_DIRSET_DIRSET_Pos))
+#define PORT_DIRSET_MASK            _U_(0xFFFFFFFF) /**< \brief (PORT_DIRSET) MASK Register */
+
+/* -------- PORT_DIRTGL : (PORT Offset: 0x0C) (R/W 32) GROUP Data Direction Toggle -------- */
+
 typedef union {
   struct {
     uint32_t DIRTGL:32;        /*!< bit:  0..31  Port Data Direction Toggle         */
   } bit;                       /*!< Structure used for bit  access                  */
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_DIRTGL_Type;
+
+
+#define PORT_DIRTGL_OFFSET          0x0C         /**< \brief (PORT_DIRTGL offset) Data Direction Toggle */
+#define PORT_DIRTGL_RESETVALUE      _U_(0x00000000) /**< \brief (PORT_DIRTGL reset_value) Data Direction Toggle */
+
+#define PORT_DIRTGL_DIRTGL_Pos      0            /**< \brief (PORT_DIRTGL) Port Data Direction Toggle */
+#define PORT_DIRTGL_DIRTGL_Msk      (_U_(0xFFFFFFFF) << PORT_DIRTGL_DIRTGL_Pos)
+#define PORT_DIRTGL_DIRTGL(value)   (PORT_DIRTGL_DIRTGL_Msk & ((value) << PORT_DIRTGL_DIRTGL_Pos))
+#define PORT_DIRTGL_MASK            _U_(0xFFFFFFFF) /**< \brief (PORT_DIRTGL) MASK Register */
+
+/* -------- PORT_OUT : (PORT Offset: 0x10) (R/W 32) GROUP Data Output Value -------- */
 
 typedef union {
   struct {
@@ -48,12 +92,34 @@ typedef union {
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_OUT_Type;
 
+
+#define PORT_OUT_OFFSET             0x10         /**< \brief (PORT_OUT offset) Data Output Value */
+#define PORT_OUT_RESETVALUE         _U_(0x00000000) /**< \brief (PORT_OUT reset_value) Data Output Value */
+
+#define PORT_OUT_OUT_Pos            0            /**< \brief (PORT_OUT) Port Data Output Value */
+#define PORT_OUT_OUT_Msk            (_U_(0xFFFFFFFF) << PORT_OUT_OUT_Pos)
+#define PORT_OUT_OUT(value)         (PORT_OUT_OUT_Msk & ((value) << PORT_OUT_OUT_Pos))
+#define PORT_OUT_MASK               _U_(0xFFFFFFFF) /**< \brief (PORT_OUT) MASK Register */
+
+/* -------- PORT_OUTCLR : (PORT Offset: 0x14) (R/W 32) GROUP Data Output Value Clear -------- */
+
 typedef union {
   struct {
     uint32_t OUTCLR:32;        /*!< bit:  0..31  Port Data Output Value Clear       */
   } bit;                       /*!< Structure used for bit  access                  */
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_OUTCLR_Type;
+
+
+#define PORT_OUTCLR_OFFSET          0x14         /**< \brief (PORT_OUTCLR offset) Data Output Value Clear */
+#define PORT_OUTCLR_RESETVALUE      _U_(0x00000000) /**< \brief (PORT_OUTCLR reset_value) Data Output Value Clear */
+
+#define PORT_OUTCLR_OUTCLR_Pos      0            /**< \brief (PORT_OUTCLR) Port Data Output Value Clear */
+#define PORT_OUTCLR_OUTCLR_Msk      (_U_(0xFFFFFFFF) << PORT_OUTCLR_OUTCLR_Pos)
+#define PORT_OUTCLR_OUTCLR(value)   (PORT_OUTCLR_OUTCLR_Msk & ((value) << PORT_OUTCLR_OUTCLR_Pos))
+#define PORT_OUTCLR_MASK            _U_(0xFFFFFFFF) /**< \brief (PORT_OUTCLR) MASK Register */
+
+/* -------- PORT_OUTSET : (PORT Offset: 0x18) (R/W 32) GROUP Data Output Value Set -------- */
 
 typedef union {
   struct {
@@ -62,12 +128,34 @@ typedef union {
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_OUTSET_Type;
 
+
+#define PORT_OUTSET_OFFSET          0x18         /**< \brief (PORT_OUTSET offset) Data Output Value Set */
+#define PORT_OUTSET_RESETVALUE      _U_(0x00000000) /**< \brief (PORT_OUTSET reset_value) Data Output Value Set */
+
+#define PORT_OUTSET_OUTSET_Pos      0            /**< \brief (PORT_OUTSET) Port Data Output Value Set */
+#define PORT_OUTSET_OUTSET_Msk      (_U_(0xFFFFFFFF) << PORT_OUTSET_OUTSET_Pos)
+#define PORT_OUTSET_OUTSET(value)   (PORT_OUTSET_OUTSET_Msk & ((value) << PORT_OUTSET_OUTSET_Pos))
+#define PORT_OUTSET_MASK            _U_(0xFFFFFFFF) /**< \brief (PORT_OUTSET) MASK Register */
+
+/* -------- PORT_OUTTGL : (PORT Offset: 0x1C) (R/W 32) GROUP Data Output Value Toggle -------- */
+
 typedef union {
   struct {
     uint32_t OUTTGL:32;        /*!< bit:  0..31  Port Data Output Value Toggle      */
   } bit;                       /*!< Structure used for bit  access                  */
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_OUTTGL_Type;
+
+
+#define PORT_OUTTGL_OFFSET          0x1C         /**< \brief (PORT_OUTTGL offset) Data Output Value Toggle */
+#define PORT_OUTTGL_RESETVALUE      _U_(0x00000000) /**< \brief (PORT_OUTTGL reset_value) Data Output Value Toggle */
+
+#define PORT_OUTTGL_OUTTGL_Pos      0            /**< \brief (PORT_OUTTGL) Port Data Output Value Toggle */
+#define PORT_OUTTGL_OUTTGL_Msk      (_U_(0xFFFFFFFF) << PORT_OUTTGL_OUTTGL_Pos)
+#define PORT_OUTTGL_OUTTGL(value)   (PORT_OUTTGL_OUTTGL_Msk & ((value) << PORT_OUTTGL_OUTTGL_Pos))
+#define PORT_OUTTGL_MASK            _U_(0xFFFFFFFF) /**< \brief (PORT_OUTTGL) MASK Register */
+
+/* -------- PORT_IN : (PORT Offset: 0x20) (R/  32) GROUP Data Input Value -------- */
 
 typedef union {
   struct {
@@ -76,12 +164,34 @@ typedef union {
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_IN_Type;
 
+
+#define PORT_IN_OFFSET              0x20         /**< \brief (PORT_IN offset) Data Input Value */
+#define PORT_IN_RESETVALUE          _U_(0x00000000) /**< \brief (PORT_IN reset_value) Data Input Value */
+
+#define PORT_IN_IN_Pos              0            /**< \brief (PORT_IN) Port Data Input Value */
+#define PORT_IN_IN_Msk              (_U_(0xFFFFFFFF) << PORT_IN_IN_Pos)
+#define PORT_IN_IN(value)           (PORT_IN_IN_Msk & ((value) << PORT_IN_IN_Pos))
+#define PORT_IN_MASK                _U_(0xFFFFFFFF) /**< \brief (PORT_IN) MASK Register */
+
+/* -------- PORT_CTRL : (PORT Offset: 0x24) (R/W 32) GROUP Control -------- */
+
 typedef union {
   struct {
     uint32_t SAMPLING:32;      /*!< bit:  0..31  Input Sampling Mode                */
   } bit;                       /*!< Structure used for bit  access                  */
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_CTRL_Type;
+
+
+#define PORT_CTRL_OFFSET            0x24         /**< \brief (PORT_CTRL offset) Control */
+#define PORT_CTRL_RESETVALUE        _U_(0x00000000) /**< \brief (PORT_CTRL reset_value) Control */
+
+#define PORT_CTRL_SAMPLING_Pos      0            /**< \brief (PORT_CTRL) Input Sampling Mode */
+#define PORT_CTRL_SAMPLING_Msk      (_U_(0xFFFFFFFF) << PORT_CTRL_SAMPLING_Pos)
+#define PORT_CTRL_SAMPLING(value)   (PORT_CTRL_SAMPLING_Msk & ((value) << PORT_CTRL_SAMPLING_Pos))
+#define PORT_CTRL_MASK              _U_(0xFFFFFFFF) /**< \brief (PORT_CTRL) MASK Register */
+
+/* -------- PORT_WRCONFIG : (PORT Offset: 0x28) ( /W 32) GROUP Write Configuration -------- */
 
 typedef union {
   struct {
@@ -101,6 +211,34 @@ typedef union {
   uint32_t reg;                /*!< Type      used for register access              */
 } PORT_WRCONFIG_Type;
 
+
+#define PORT_WRCONFIG_OFFSET        0x28         /**< \brief (PORT_WRCONFIG offset) Write Configuration */
+#define PORT_WRCONFIG_RESETVALUE    _U_(0x00000000) /**< \brief (PORT_WRCONFIG reset_value) Write Configuration */
+
+#define PORT_WRCONFIG_PINMASK_Pos   0            /**< \brief (PORT_WRCONFIG) Pin Mask for Multiple Pin Configuration */
+#define PORT_WRCONFIG_PINMASK_Msk   (_U_(0xFFFF) << PORT_WRCONFIG_PINMASK_Pos)
+#define PORT_WRCONFIG_PINMASK(value) (PORT_WRCONFIG_PINMASK_Msk & ((value) << PORT_WRCONFIG_PINMASK_Pos))
+#define PORT_WRCONFIG_PMUXEN_Pos    16           /**< \brief (PORT_WRCONFIG) Peripheral Multiplexer Enable */
+#define PORT_WRCONFIG_PMUXEN        (_U_(0x1) << PORT_WRCONFIG_PMUXEN_Pos)
+#define PORT_WRCONFIG_INEN_Pos      17           /**< \brief (PORT_WRCONFIG) Input Enable */
+#define PORT_WRCONFIG_INEN          (_U_(0x1) << PORT_WRCONFIG_INEN_Pos)
+#define PORT_WRCONFIG_PULLEN_Pos    18           /**< \brief (PORT_WRCONFIG) Pull Enable */
+#define PORT_WRCONFIG_PULLEN        (_U_(0x1) << PORT_WRCONFIG_PULLEN_Pos)
+#define PORT_WRCONFIG_DRVSTR_Pos    22           /**< \brief (PORT_WRCONFIG) Output Driver Strength Selection */
+#define PORT_WRCONFIG_DRVSTR        (_U_(0x1) << PORT_WRCONFIG_DRVSTR_Pos)
+#define PORT_WRCONFIG_PMUX_Pos      24           /**< \brief (PORT_WRCONFIG) Peripheral Multiplexing */
+#define PORT_WRCONFIG_PMUX_Msk      (_U_(0xF) << PORT_WRCONFIG_PMUX_Pos)
+#define PORT_WRCONFIG_PMUX(value)   (PORT_WRCONFIG_PMUX_Msk & ((value) << PORT_WRCONFIG_PMUX_Pos))
+#define PORT_WRCONFIG_WRPMUX_Pos    28           /**< \brief (PORT_WRCONFIG) Write PMUX */
+#define PORT_WRCONFIG_WRPMUX        (_U_(0x1) << PORT_WRCONFIG_WRPMUX_Pos)
+#define PORT_WRCONFIG_WRPINCFG_Pos  30           /**< \brief (PORT_WRCONFIG) Write PINCFG */
+#define PORT_WRCONFIG_WRPINCFG      (_U_(0x1) << PORT_WRCONFIG_WRPINCFG_Pos)
+#define PORT_WRCONFIG_HWSEL_Pos     31           /**< \brief (PORT_WRCONFIG) Half-Word Select */
+#define PORT_WRCONFIG_HWSEL         (_U_(0x1) << PORT_WRCONFIG_HWSEL_Pos)
+#define PORT_WRCONFIG_MASK          _U_(0xDF47FFFF) /**< \brief (PORT_WRCONFIG) MASK Register */
+
+/* -------- PORT_PMUX : (PORT Offset: 0x30) (R/W  8) GROUP Peripheral Multiplexing n -------- */
+
 typedef union {
   struct {
     uint8_t  PMUXE:4;          /*!< bit:  0.. 3  Peripheral Multiplexing Even       */
@@ -108,6 +246,52 @@ typedef union {
   } bit;                       /*!< Structure used for bit  access                  */
   uint8_t reg;                 /*!< Type      used for register access              */
 } PORT_PMUX_Type;
+
+
+#define PORT_PMUX_OFFSET            0x30         /**< \brief (PORT_PMUX offset) Peripheral Multiplexing n */
+#define PORT_PMUX_RESETVALUE        _U_(0x00)    /**< \brief (PORT_PMUX reset_value) Peripheral Multiplexing n */
+
+#define PORT_PMUX_PMUXE_Pos         0            /**< \brief (PORT_PMUX) Peripheral Multiplexing Even */
+#define PORT_PMUX_PMUXE_Msk         (_U_(0xF) << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE(value)      (PORT_PMUX_PMUXE_Msk & ((value) << PORT_PMUX_PMUXE_Pos))
+#define   PORT_PMUX_PMUXE_A_Val           _U_(0x0)   /**< \brief (PORT_PMUX) Peripheral function A selected */
+#define   PORT_PMUX_PMUXE_B_Val           _U_(0x1)   /**< \brief (PORT_PMUX) Peripheral function B selected */
+#define   PORT_PMUX_PMUXE_C_Val           _U_(0x2)   /**< \brief (PORT_PMUX) Peripheral function C selected */
+#define   PORT_PMUX_PMUXE_D_Val           _U_(0x3)   /**< \brief (PORT_PMUX) Peripheral function D selected */
+#define   PORT_PMUX_PMUXE_E_Val           _U_(0x4)   /**< \brief (PORT_PMUX) Peripheral function E selected */
+#define   PORT_PMUX_PMUXE_F_Val           _U_(0x5)   /**< \brief (PORT_PMUX) Peripheral function F selected */
+#define   PORT_PMUX_PMUXE_G_Val           _U_(0x6)   /**< \brief (PORT_PMUX) Peripheral function G selected */
+#define   PORT_PMUX_PMUXE_H_Val           _U_(0x7)   /**< \brief (PORT_PMUX) Peripheral function H selected */
+#define PORT_PMUX_PMUXE_A           (PORT_PMUX_PMUXE_A_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_B           (PORT_PMUX_PMUXE_B_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_C           (PORT_PMUX_PMUXE_C_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_D           (PORT_PMUX_PMUXE_D_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_E           (PORT_PMUX_PMUXE_E_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_F           (PORT_PMUX_PMUXE_F_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_G           (PORT_PMUX_PMUXE_G_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXE_H           (PORT_PMUX_PMUXE_H_Val         << PORT_PMUX_PMUXE_Pos)
+#define PORT_PMUX_PMUXO_Pos         4            /**< \brief (PORT_PMUX) Peripheral Multiplexing Odd */
+#define PORT_PMUX_PMUXO_Msk         (_U_(0xF) << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO(value)      (PORT_PMUX_PMUXO_Msk & ((value) << PORT_PMUX_PMUXO_Pos))
+#define   PORT_PMUX_PMUXO_A_Val           _U_(0x0)   /**< \brief (PORT_PMUX) Peripheral function A selected */
+#define   PORT_PMUX_PMUXO_B_Val           _U_(0x1)   /**< \brief (PORT_PMUX) Peripheral function B selected */
+#define   PORT_PMUX_PMUXO_C_Val           _U_(0x2)   /**< \brief (PORT_PMUX) Peripheral function C selected */
+#define   PORT_PMUX_PMUXO_D_Val           _U_(0x3)   /**< \brief (PORT_PMUX) Peripheral function D selected */
+#define   PORT_PMUX_PMUXO_E_Val           _U_(0x4)   /**< \brief (PORT_PMUX) Peripheral function E selected */
+#define   PORT_PMUX_PMUXO_F_Val           _U_(0x5)   /**< \brief (PORT_PMUX) Peripheral function F selected */
+#define   PORT_PMUX_PMUXO_G_Val           _U_(0x6)   /**< \brief (PORT_PMUX) Peripheral function G selected */
+#define   PORT_PMUX_PMUXO_H_Val           _U_(0x7)   /**< \brief (PORT_PMUX) Peripheral function H selected */
+#define PORT_PMUX_PMUXO_A           (PORT_PMUX_PMUXO_A_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_B           (PORT_PMUX_PMUXO_B_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_C           (PORT_PMUX_PMUXO_C_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_D           (PORT_PMUX_PMUXO_D_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_E           (PORT_PMUX_PMUXO_E_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_F           (PORT_PMUX_PMUXO_F_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_G           (PORT_PMUX_PMUXO_G_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_PMUXO_H           (PORT_PMUX_PMUXO_H_Val         << PORT_PMUX_PMUXO_Pos)
+#define PORT_PMUX_MASK              _U_(0xFF)    /**< \brief (PORT_PMUX) MASK Register */
+
+/* -------- PORT_PINCFG : (PORT Offset: 0x40) (R/W  8) GROUP Pin Configuration n -------- */
 
 typedef union {
   struct {
@@ -122,6 +306,19 @@ typedef union {
 } PORT_PINCFG_Type;
 
 
+#define PORT_PINCFG_OFFSET          0x40         /**< \brief (PORT_PINCFG offset) Pin Configuration n */
+#define PORT_PINCFG_RESETVALUE      _U_(0x00)    /**< \brief (PORT_PINCFG reset_value) Pin Configuration n */
+
+#define PORT_PINCFG_PMUXEN_Pos      0            /**< \brief (PORT_PINCFG) Peripheral Multiplexer Enable */
+#define PORT_PINCFG_PMUXEN          (_U_(0x1) << PORT_PINCFG_PMUXEN_Pos)
+#define PORT_PINCFG_INEN_Pos        1            /**< \brief (PORT_PINCFG) Input Enable */
+#define PORT_PINCFG_INEN            (_U_(0x1) << PORT_PINCFG_INEN_Pos)
+#define PORT_PINCFG_PULLEN_Pos      2            /**< \brief (PORT_PINCFG) Pull Enable */
+#define PORT_PINCFG_PULLEN          (_U_(0x1) << PORT_PINCFG_PULLEN_Pos)
+#define PORT_PINCFG_DRVSTR_Pos      6            /**< \brief (PORT_PINCFG) Output Driver Strength Selection */
+#define PORT_PINCFG_DRVSTR          (_U_(0x1) << PORT_PINCFG_DRVSTR_Pos)
+#define PORT_PINCFG_MASK            _U_(0x47)    /**< \brief (PORT_PINCFG) MASK Register */
+
 typedef struct {
   volatile PORT_DIR_Type             DIR;         /**< \brief Offset: 0x00 (R/W 32) Data Direction */
   volatile PORT_DIRCLR_Type          DIRCLR;      /**< \brief Offset: 0x04 (R/W 32) Data Direction Clear */
@@ -131,20 +328,20 @@ typedef struct {
   volatile PORT_OUTCLR_Type          OUTCLR;      /**< \brief Offset: 0x14 (R/W 32) Data Output Value Clear */
   volatile PORT_OUTSET_Type          OUTSET;      /**< \brief Offset: 0x18 (R/W 32) Data Output Value Set */
   volatile PORT_OUTTGL_Type          OUTTGL;      /**< \brief Offset: 0x1C (R/W 32) Data Output Value Toggle */
-  volatile PORT_IN_Type              IN;          /**< \brief Offset: 0x20 (R/  32) Data Input Value */
+  volatile const  PORT_IN_Type              IN;          /**< \brief Offset: 0x20 (R/  32) Data Input Value */
   volatile PORT_CTRL_Type            CTRL;        /**< \brief Offset: 0x24 (R/W 32) Control */
-  volatile PORT_WRCONFIG_Type        WRCONFIG;    /**< \brief Offset: 0x28 ( /W 32) Write Configuration */
-       RoReg8                    Reserved1[0x4];
+  volatile  PORT_WRCONFIG_Type        WRCONFIG;    /**< \brief Offset: 0x28 ( /W 32) Write Configuration */
+       const uint8_t                   Reserved1[0x4];
   volatile PORT_PMUX_Type            PMUX[16];    /**< \brief Offset: 0x30 (R/W  8) Peripheral Multiplexing n */
   volatile PORT_PINCFG_Type          PINCFG[32];  /**< \brief Offset: 0x40 (R/W  8) Pin Configuration n */
-       RoReg8                    Reserved2[0x20];
+       const uint8_t                   Reserved2[0x20];
 } PortGroup;
 
 typedef struct {
-       PortGroup                 Group[PORT_GROUP_NUM];    /**< \brief Offset: 0x00 PortGroup groups [GROUPS] */
+       PortGroup                 Group[2];    /**< \brief Offset: 0x00 PortGroup groups [GROUPS] */
 } Port;
 
-extern volatile Port* PORT;
+extern Port* PORT;
 
 #ifdef __cplusplus
 }

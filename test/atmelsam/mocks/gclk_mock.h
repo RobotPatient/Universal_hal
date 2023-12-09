@@ -261,7 +261,7 @@ typedef struct {
 } Gclk;
 
 
-
+extern Gclk* GCLK;
 
 
 #ifdef __cplusplus

@@ -1412,6 +1412,19 @@ typedef union {
        SercomUsart               USART;       /**< \brief Offset: 0x00 USART Mode */
 } Sercom;
 
+
+extern Sercom* SERCOM5;
+
+extern Sercom* SERCOM4;
+
+extern Sercom* SERCOM3;
+
+extern Sercom* SERCOM2;
+
+extern Sercom* SERCOM1;
+
+extern Sercom* SERCOM0;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
