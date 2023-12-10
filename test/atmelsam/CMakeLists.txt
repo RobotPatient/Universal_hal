@@ -1,5 +1,5 @@
 if(UHAL_BUILD_TESTS)
-
+enable_testing()
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -43,6 +43,11 @@ target_include_directories(Universal_hal PUBLIC ${UHAL_FILEPATH}/hal/platform/at
 target_link_libraries(Universal_hal board_sdk)
 
 add_executable(SAMD_GPIO_TEST gpio/gpio.cpp)
-target_link_libraries(SAMD_GPIO_TEST board_sdk gtest_main gmock_main fff)
+target_link_libraries(SAMD_GPIO_TEST Universal_hal board_sdk gtest_main gmock_main fff)
 target_compile_definitions(SAMD_GPIO_TEST PUBLIC "FFF_GENERATE")
+
+add_test(
+        NAME SAMD_GPIO_TEST
+        COMMAND SAMD_GPIO_TEST
+)
 endif()
