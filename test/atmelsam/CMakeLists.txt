@@ -1,5 +1,23 @@
 if(UHAL_BUILD_TESTS)
 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.x
+)
+
+# CMake 3.14+
+FetchContent_MakeAvailable(googletest)
+
+FetchContent_Declare(
+    fff
+    GIT_REPOSITORY https://github.com/meekrosoft/fff.git
+    GIT_TAG master
+)
+
+FetchContent_MakeAvailable(fff)
+
 add_library(board_sdk INTERFACE "mocks/sam.h"
                                      "mocks/port_mock.h"
                                      "mocks/nvic_mock.h"
@@ -24,7 +42,7 @@ target_include_directories(Universal_hal PUBLIC ${UHAL_FILEPATH}/hal/platform/at
 
 target_link_libraries(Universal_hal board_sdk)
 
-add_executable(SAMD_GPIO_TEST gpio/gpio.c)
-target_link_libraries(SAMD_GPIO_TEST board_sdk)
-
+add_executable(SAMD_GPIO_TEST gpio/gpio.cpp)
+target_link_libraries(SAMD_GPIO_TEST board_sdk gtest_main gmock_main fff)
+target_compile_definitions(SAMD_GPIO_TEST PUBLIC "FFF_GENERATE")
 endif()

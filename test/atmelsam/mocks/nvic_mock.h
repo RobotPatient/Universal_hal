@@ -50,11 +50,9 @@ typedef enum IRQn {
     PERIPH_COUNT_IRQn = 28 /**< Number of peripheral IDs */
 } IRQn_Type;
 
-void NVIC_DisableIRQ(IRQn_Type irq_type) {
-}
+void NVIC_DisableIRQ(IRQn_Type irq_type);
 
-void NVIC_ClearPendingIRQ(IRQn_Type irq_type) {
-}
+void NVIC_ClearPendingIRQ(IRQn_Type irq_type);
 
 void NVIC_SetPriority(IRQn_Type irq_type, uint8_t priority);
 
