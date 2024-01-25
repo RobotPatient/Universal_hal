@@ -60,7 +60,7 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
 The i2c slave init function should be used to initialize the hardware peripheral with the right settings. Each setting can be statically validated using the I2C_SLAVE_INIT() macro. This macro will first validate in compile time whether valid settings have been entered. If no compile errors are generated the function call will be replaced with the i2c_host_init function.
 
 ```c
-void i2c_host_init(const i2c_periph_inst_t i2c_peripheral_num, 
+void i2c_slave_init(const i2c_periph_inst_t i2c_peripheral_num, 
                    const uint16_t slave_addr,
                    const i2c_clock_sources_t clock_sources,
                    const i2c_extra_opt_t extra_configuration_options);

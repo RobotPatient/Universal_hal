@@ -54,19 +54,19 @@ markdown_extensions:
       - quote
 theme:
     name: material
-    logo: assets/mcu_logo_high_res.png
-    favicon: assets/mcu_logo.png
+    logo: assets/Universal_hal_logo_top_bar.svg
+    favicon: assets/Universal_hal_logo_top_bar.svg
     palette: 
     # Palette toggle for light mode
     - scheme: default
-      primary: teal
+      primary: orange
       toggle:
         icon: material/brightness-7 
         name: Switch to dark mode
 
     # Palette toggle for dark mode
     - scheme: slate
-      primary: teal
+      primary: orange
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -108,6 +108,30 @@ nav:
              - "About": API/I2C_slave/platform/atmelsam/About.md
              - "Usage": API/I2C_slave/platform/atmelsam/Usage.md
              - "Critical Notes": API/I2C_slave/platform/atmelsam/Critical_notes.md
+      - 'SPI Host':
+        - 'Compatibility': "API/SPI_host/spi_host_compatibility.md"
+        - 'General API': "API/SPI_host/spi_host_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/SPI_host/platform/atmelsam/About.md
+             - "Usage": API/SPI_host/platform/atmelsam/Usage.md
+             - "Critical Notes": API/SPI_host/platform/atmelsam/Critical_notes.md
+      - 'SPI Slave':
+        - 'Compatibility': "API/SPI_slave/spi_slave_compatibility.md"
+        - 'General API': "API/SPI_slave/spi_slave_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/SPI_slave/platform/atmelsam/About.md
+             - "Usage": API/SPI_slave/platform/atmelsam/Usage.md
+             - "Critical Notes": API/SPI_slave/platform/atmelsam/Critical_notes.md
+      - 'DMA':
+        - 'Compatibility': "API/DMA/dma_compatibility.md"
+        - 'General API': "API/DMA/dma_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/DMA/platform/atmelsam/About.md
+             - "Usage": API/DMA/platform/atmelsam/Usage.md
+             - "Critical Notes": API/DMA/platform/atmelsam/Critical_notes.md
   - Contributing:
     - 'General': 'contributing.md'
     - 'Code style': 'code_style.md'

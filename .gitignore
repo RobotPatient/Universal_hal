@@ -35,3 +35,4 @@
 *.app
 .idea/
 cmake-build-debug/
+docs/automation/api_credentials.txt

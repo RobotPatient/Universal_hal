@@ -22,14 +22,14 @@ Clockgenerators are not set by this implementation. It only hooks the peripheral
 
 Some frameworks like Arduino and ASF using the Atmel Start tool will configure most of the stuff under the hood. It is almost pure coincidence that both frameworks use the same default clockgenerators for the main clock and peripheral clocking.
 
-Both frameworks have clockgenerator 0 set-up with a frequency of 48 (Arduino) or 8 MHz (ASF). And clockgenerator 3 set-up with a frequency of 32.768KHz. 
+Both frameworks have clockgenerator 0 set-up with a frequency of 48 (Arduino) or 8 MHz (ASF). And clockgenerator 1 set-up with a frequency of 32.768KHz. 
 
 !!! Warning
     The Sercom needs two clocks to function, a slow one (< 100 KHz) and a fast one (>= $2 \cdot f_{SCL}$ ). The fast clock is used for operation in host-mode, the slow one is used for used for internal timing and synchronisation.
 
 ### GPIO pinmux settings
 
-Besides setting the i2c_inst_t struct the pins have to be linked to the hardware peripheral using the SAMD's built-in pinmux. This can be done with the gpio_set_pin_mode function:
+Besides setting the right settings inside the i2c_host_init() function, the pins have to be linked to the hardware peripheral using the SAMD's built-in pinmux. This can be done with the gpio_set_pin_mode function:
 
 ```c
 void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);

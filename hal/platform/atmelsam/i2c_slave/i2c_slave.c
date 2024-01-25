@@ -21,8 +21,12 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+
+#ifndef DISABLE_I2C_SLAVE_MODULE
+
 #include <stdbool.h>
 #include <hal_i2c_slave.h>
+#include "irq/irq_bindings.h"
 
 static Sercom *i2c_slave_peripheral_mapping_table[6] = {SERCOM0, SERCOM1, SERCOM2, SERCOM3, SERCOM4, SERCOM5};
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
@@ -68,7 +72,7 @@ uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
                              const i2c_extra_opt_t extra_configuration_options) {
     const bool InvalidSercomInstNum = (i2c_instance < 0 || i2c_instance);
     //const bool InvalidClockGen = (i2c_instance->clk_gen_slow < 0 || i2c_instance->clk_gen_slow > 6 || i2c_instance->clk_gen_fast < 0 || i2c_instance->clk_gen_fast > 6);
-    if (InvalidSercomInstNum){
+    if (InvalidSercomInstNum) {
         return UHAL_STATUS_INVALID_PARAMETERS;
     }
 // Set the clock system
@@ -124,15 +128,17 @@ uhal_status_t i2c_slave_init(const i2c_periph_inst_t i2c_instance,
     NVIC_EnableIRQ(irq_type);
     const uint16_t irq_options = extra_configuration_options >> 8;
     if (irq_options) {
-        NVIC_SetPriority(irq_type, irq_options - 1);
+        enable_irq_handler(irq_type, irq_options - 1);
     } else {
-        NVIC_SetPriority(irq_type, 2);
+        enable_irq_handler(irq_type, 2);
     }
     return UHAL_STATUS_OK;
 }
 
 uhal_status_t i2c_slave_deinit(const i2c_periph_inst_t i2c_instance) {
-    Sercom* sercom_inst = get_sercom_inst(i2c_instance);
+    Sercom *sercom_inst = get_sercom_inst(i2c_instance);
     disable_i2c_interface(sercom_inst);
     return UHAL_STATUS_OK;
 }
+
+#endif /* DISABLE_I2C_SLAVE_MODULE*/
