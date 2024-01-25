@@ -21,12 +21,14 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
             "hal/platform/atmelsam/i2c_host/i2c.c"
             "hal/platform/atmelsam/i2c_slave/i2c_slave.c"
             "hal/platform/atmelsam/spi_host/spi_host.c"
+            "hal/platform/atmelsam/uart/uart.c"
             "hal/hal_spi_slave.h"
             "hal/platform/atmelsam/spi_slave/spi_slave.c"
             "hal/platform/atmelsam/spi_common/spi_platform_specific.h"
             "hal/platform/atmelsam/clock_system/peripheral_clocking.h"
             "hal/platform/atmelsam/irq/sercom_stuff.h"
-            "hal/hal_i2c_host.h")
+            "hal/hal_i2c_host.h"
+            "hal/hal_uart.h")
     target_include_directories(Universal_hall PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hall INTERFACE board_sdk)
 else ()
