@@ -22,21 +22,14 @@
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
 
-<<<<<<< HEAD
-#include <assert.h>
-=======
 #ifndef DISABLE_I2C_HOST_MODULE
 
->>>>>>> stable
 #include <hal_i2c_host.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include "bit_manipulation.h"
 #include "error_handling.h"
-<<<<<<< HEAD
-=======
 #include "irq/irq_bindings.h"
->>>>>>> stable
 
 /**
  * @brief This formula is used to calculate the baud rate steps.
