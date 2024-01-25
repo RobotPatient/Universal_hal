@@ -30,6 +30,7 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
             "hal/platform/atmelsam/spi_host/spi_host.c"
             "hal/platform/atmelsam/spi_slave/spi_slave.c"
             "hal/platform/atmelsam/dma/dma.c"
+            "hal/platform/atmelsam/uart/uart.c"
             )
     target_include_directories(Universal_hal PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hal INTERFACE board_sdk)
