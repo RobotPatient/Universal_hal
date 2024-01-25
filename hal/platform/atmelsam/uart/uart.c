@@ -77,23 +77,26 @@ if (clock_source != UART_CLK_SOURCE_USE_DEFAULT) {
 Sercom* sercom_inst = uart_peripheral_mapping[uart_peripheral];
 sercom_inst->USART.CTRLA.reg = SERCOM_USART_CTRLA_SWRST;
 uart_wait_for_sync(sercom_inst, (SERCOM_USART_SYNCBUSY_SWRST | SERCOM_USART_SYNCBUSY_ENABLE));
+// uint32_t baudTimes8 = (clock_source_freq * 8) / (16 * baudrate);
 
+// sercom_inst->USART.BAUD.FRAC.FP   = (baudTimes8 % 8);
+// sercom_inst->USART.BAUD.FRAC.BAUD = (baudTimes8 / 8);
+volatile uint64_t baud = 65536 - ((65536 * 16.0f * baudrate) / clock_source_freq);
+ sercom_inst->USART.BAUD.reg = baud;
 const uint32_t lsb_first = uart_extra_opt & UART_EXTRA_OPT_LSB_FIRST;
 const uint32_t cpol = uart_extra_opt & UART_EXTRA_OPT_INVERSE_CLOCK_POLARITY;
 const uint32_t cmode = uart_extra_opt & UART_EXTRA_OPT_SYNCHRONOUS_COMMUNICATION;
 const uint32_t FORM = (uart_extra_opt & UART_EXTRA_OPT_AUTO_BAUD);
 const uint32_t RXPO = (uart_extra_opt & UART_EXTRA_OPT_RX_PAD_3);
 const uint32_t TXPO = (uart_extra_opt & UART_EXTRA_OPT_TX_PAD_2);
-const uint32_t SAMPR = (uart_extra_opt & UART_EXTRA_OPT_OVERSAMPL_3X_ARITH);
-sercom_inst->USART.CTRLA.reg = SERCOM_USART_CTRLA_ENABLE | SERCOM_USART_CTRLA_MODE(1) | SERCOM_USART_CTRLA_RXPO(1) | SERCOM_USART_CTRLA_SAMPR(1);
-
+const uint32_t SAMPR = (uart_extra_opt & UART_EXTRA_OPT_OVERSAMPL_3X_ARITH) << 3;
+const uint32_t MODE = (uart_extra_opt & UART_EXTRA_OPT_SYNCHRONOUS_COMMUNICATION);
+sercom_inst->USART.CTRLA.reg = SERCOM_USART_CTRLA_ENABLE | SERCOM_USART_CTRLA_MODE(1) | SERCOM_USART_CTRLA_RXPO(1) | SERCOM_USART_CTRLA_SAMPR(0) | SERCOM_USART_CTRLA_DORD | SERCOM_USART_CTRLA_CPOL;
+uart_wait_for_sync(sercom_inst, (SERCOM_USART_SYNCBUSY_SWRST | SERCOM_USART_SYNCBUSY_ENABLE));
 // Asynchronous fractional mode (Table 24-2 in datasheet)
 //   BAUD = fref / (sampleRateValue * fbaud)
 // (multiply by 8, to calculate fractional piece)
-uint32_t baudTimes8 = (clock_source_freq * 8) / (16 * baudrate);
 
-sercom_inst->USART.BAUD.FRAC.FP   = (baudTimes8 % 8);
-sercom_inst->USART.BAUD.FRAC.BAUD = (baudTimes8 / 8);
 
 return UHAL_STATUS_OK;
 }

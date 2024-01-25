@@ -30,7 +30,7 @@ extern "C" {
 #include "uart/uart_platform_specific.h"
 
 
-uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint32_t baudrate, const uart_clock_sources_t clock_source, const uint32_t clock_source_freq, const uart_extra_config_opt_t uart_exta_opt);
+uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint32_t baudrate, const uart_clock_sources_t clock_source, const uint32_t clock_source_freq, const uart_extra_config_opt_t uart_extra_opt);
 
 uhal_status_t uart_transmit(const uart_peripheral_inst_t uart_peripheral, const uint8_t* transmit_buffer, const size_t size);
 
