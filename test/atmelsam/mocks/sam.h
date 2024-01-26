@@ -8,5 +8,6 @@
 #include "sercom_mock.h"
 #include "gclk_mock.h"
 #include "nvic_mock.h"
+#include "pm_mock.h"
 
 #endif

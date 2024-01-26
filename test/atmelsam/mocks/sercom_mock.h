@@ -1120,7 +1120,7 @@ typedef union {
 #define SERCOM_USART_SYNCBUSY_SWRST_Pos 0            /**< \brief (SERCOM_USART_SYNCBUSY) Software Reset Synchronization Busy */
 #define SERCOM_USART_SYNCBUSY_SWRST (_U_(0x1) << SERCOM_USART_SYNCBUSY_SWRST_Pos)
 #define SERCOM_USART_SYNCBUSY_ENABLE_Pos 1            /**< \brief (SERCOM_USART_SYNCBUSY) SERCOM Enable Synchronization Busy */
-#define SERCOM_USART_SYNCBUSY_ENABLE (_U_(0x1) << SERCOM_USART_SYNCBUSY_ENABLE_Pos)RoReg8
+#define SERCOM_USART_SYNCBUSY_ENABLE (_U_(0x1) << SERCOM_USART_SYNCBUSY_ENABLE_Pos)
 #define SERCOM_USART_SYNCBUSY_CTRLB_Pos 2            /**< \brief (SERCOM_USART_SYNCBUSY) CTRLB Synchronization Busy */
 #define SERCOM_USART_SYNCBUSY_CTRLB (_U_(0x1) << SERCOM_USART_SYNCBUSY_CTRLB_Pos)
 #define SERCOM_USART_SYNCBUSY_MASK  _U_(0x00000007) /**< \brief (SERCOM_USART_SYNCBUSY) MASK Register */
@@ -1412,18 +1412,19 @@ typedef union {
        SercomUsart               USART;       /**< \brief Offset: 0x00 USART Mode */
 } Sercom;
 
+extern Sercom MockSercom[6];
 
-extern Sercom* SERCOM5;
+#define SERCOM0 ((Sercom*) &MockSercom[0])
 
-extern Sercom* SERCOM4;
+#define SERCOM1 ((Sercom*) &MockSercom[1])
 
-extern Sercom* SERCOM3;
+#define SERCOM2 ((Sercom*) &MockSercom[2])
 
-extern Sercom* SERCOM2;
+#define SERCOM3 ((Sercom*) &MockSercom[3])
 
-extern Sercom* SERCOM1;
+#define SERCOM4 ((Sercom*) &MockSercom[4])
 
-extern Sercom* SERCOM0;
+#define SERCOM5 ((Sercom*) &MockSercom[5])
 
 #ifdef __cplusplus
 }

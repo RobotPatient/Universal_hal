@@ -16,7 +16,7 @@
 cmake_minimum_required(VERSION 3.27)
 project(Universal_hal)
 
-option(UHAL_BUILD_TESTS NO)
+option(UHAL_BUILD_TESTS Yes)
 
 set(UHAL_FILEPATH ${CMAKE_CURRENT_SOURCE_DIR})
 

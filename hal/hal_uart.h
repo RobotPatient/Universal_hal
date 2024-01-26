@@ -27,6 +27,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#ifndef DISABLE_UART_MODULE
 #include "uart/uart_platform_specific.h"
 
 
@@ -35,7 +37,7 @@ uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint
 uhal_status_t uart_transmit(const uart_peripheral_inst_t uart_peripheral, const uint8_t* transmit_buffer, const size_t size);
 
 uhal_status_t uart_receive(const uart_peripheral_inst_t uart_peripheral, uint8_t* receive_buffer, const size_t size);
-
+#endif /* DISABLE_UART_MODULE */
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

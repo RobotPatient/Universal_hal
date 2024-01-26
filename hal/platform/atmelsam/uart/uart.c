@@ -21,8 +21,10 @@
 *
 * Author:          Victor Hogeweij <hogeweyv@gmail.com>
 */
+#ifndef DISABLE_UART_MODULE
 #include "hal_uart.h"
 #include "sam.h"
+
 
 
 #define SERCOM_SLOW_CLOCK_SOURCE(x)               (x >> 8)
@@ -81,7 +83,7 @@ uart_wait_for_sync(sercom_inst, (SERCOM_USART_SYNCBUSY_SWRST | SERCOM_USART_SYNC
 
 // sercom_inst->USART.BAUD.FRAC.FP   = (baudTimes8 % 8);
 // sercom_inst->USART.BAUD.FRAC.BAUD = (baudTimes8 / 8);
-volatile uint64_t baud = 65536 - ((65536 * 16.0f * baudrate) / clock_source_freq);
+volatile uint64_t baud = 65536 - ((65536 * 16.0f * (baudrate/100)) / (clock_source_freq/100));
  sercom_inst->USART.BAUD.reg = baud;
 const uint32_t lsb_first = uart_extra_opt & UART_EXTRA_OPT_LSB_FIRST;
 const uint32_t cpol = uart_extra_opt & UART_EXTRA_OPT_INVERSE_CLOCK_POLARITY;
@@ -121,3 +123,4 @@ for(uint8_t i = 0; i < size; i++ ) {
 }
 return UHAL_STATUS_OK;
 }
+#endif /* DISABLE_UART_MODULE */

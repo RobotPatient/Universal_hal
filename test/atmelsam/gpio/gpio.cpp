@@ -7,8 +7,6 @@ static Port MockPort = {};
 
 static Eic MockEic = {};
 
-static Sercom MockSercom[6] = {};
-
 static Gclk MockGclk = {};
 
 Gclk* GCLK = &MockGclk;
@@ -17,17 +15,7 @@ Port* PORT = &MockPort;
 
 Eic* EIC = &MockEic;
 
-Sercom* SERCOM0 = &MockSercom[0];
-
-Sercom* SERCOM1 = &MockSercom[1];
-
-Sercom* SERCOM2 = &MockSercom[2];
-
-Sercom* SERCOM3 = &MockSercom[3];
-
-Sercom* SERCOM4 = &MockSercom[4];
-
-Sercom* SERCOM5 = &MockSercom[5];
+Sercom MockSercom[6] = {};
 
 DEFINE_FFF_GLOBALS;
 FAKE_VOID_FUNC(NVIC_EnableIRQ, IRQn_Type);
