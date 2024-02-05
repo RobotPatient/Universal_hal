@@ -99,7 +99,6 @@ TEST(HAL_GPIO, gpio_set_pin_options_pull_down) {
                 PORT->Group[port_num].CTRL.reg = 0;
                 input = (pin_num | ((port_num + 1) << 8));
                 function_option = GPIO_OPT_PULL_DOWN;
-                printf("\n\n TESTING WITH PARAMETERS: %x , %d \n\n", input, function_option);
                 gpio_set_pin_options(input, function_option);
                 EXPECT_EQ(gpio_get_pin_options(input), function_option);
                 PORT->Group[port_num].PINCFG[pin_num].reg = 0;

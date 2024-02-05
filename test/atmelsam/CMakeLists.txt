@@ -74,4 +74,9 @@ add_test(
         NAME SAMD_GPIO_TEST
         COMMAND SAMD_GPIO_TEST
 )
+
+add_test(
+  NAME SAMD_UART_TEST
+  COMMAND SAMD_UART_TEST
+)
 endif()
