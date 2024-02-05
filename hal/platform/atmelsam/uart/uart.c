@@ -125,7 +125,7 @@ uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint
 
     const uint32_t not_auto_baud = (uart_extra_opt & UART_EXTRA_OPT_AUTO_BAUD) == 0;
     uint32_t       cmode = (uart_extra_opt & UART_EXTRA_OPT_SYNCHRONOUS_COMMUNICATION);
-    uint32_t       sampr = (uart_extra_opt & UART_EXTRA_OPT_OVERSAMPL_3X_ARITH) << 5;
+    uint32_t       sampr = (uart_extra_opt & UART_EXTRA_OPT_BAUD_RANGE_BITMASK) << 5;
 
     if (not_auto_baud) {
         set_baud_rate(sercom_inst, clock_source_freq, baudrate, uart_extra_opt);
