@@ -146,6 +146,11 @@ uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint
     const uint32_t txpo = (uart_extra_opt & UART_EXTRA_OPT_TX_PAD_2);
     sercom_inst->USART.CTRLA.reg = SERCOM_USART_CTRLA_ENABLE | sampr | txpo | rxpo | form | cmode | cpol;
 
+    const uint32_t mode_def_opt = (uart_extra_opt & UART_EXTRA_OPT_EXTERNAL_CLOCK) == 0;
+    if(mode_def_opt) {
+        sercom_inst->USART.CTRLA.reg |= SERCOM_USART_CTRLA_MODE(1);
+    }
+
     uint32_t dord_def_opt = (uart_extra_opt & UART_EXTRA_OPT_MSB_FIRST) == 0;
     if (dord_def_opt) {
         sercom_inst->USART.CTRLA.reg |= SERCOM_USART_CTRLA_DORD;
