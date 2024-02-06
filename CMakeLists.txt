@@ -13,6 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 ]]
+cmake_minimum_required(VERSION 3.27)
+project(Universal_hal)
+
+option(UHAL_BUILD_TESTS Yes)
+
+set(UHAL_FILEPATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 get_directory_property(PLATFORM_DEFINED COMPILE_DEFINITIONS)
 if (PLATFORM_DEFINED MATCHES "^__SAMD21")
@@ -30,6 +36,7 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
             "hal/platform/atmelsam/spi_host/spi_host.c"
             "hal/platform/atmelsam/spi_slave/spi_slave.c"
             "hal/platform/atmelsam/dma/dma.c"
+            "hal/platform/atmelsam/uart/uart.c"
             )
     target_include_directories(Universal_hal PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
     target_link_libraries(Universal_hal INTERFACE board_sdk)
@@ -53,8 +60,12 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
     if(UHAL_DISABLE_SPI_SLAVE_MODULE)
     add_compile_definitions("DISABLE_SPI_SLAVE_MODULE")
     endif()
-
 else ()
     # You can define your OS here if desired
-    MESSAGE(STATUS "PLATFORM NOT DETECTED")
+    MESSAGE(STATUS "No MCU platform selected!")
 endif ()
+
+if(UHAL_BUILD_TESTS)
+MESSAGE(STATUS "Building tests!")
+add_subdirectory(test/atmelsam)
+endif()
