@@ -101,7 +101,7 @@ static inline void set_uart_clocks(const uart_peripheral_inst_t uart_peripheral,
         while (GCLK->STATUS.bit.SYNCBUSY)
             ;
     } else {
-        const uint8_t clk_gen_slow = 3;
+        const uint8_t clk_gen_slow = 1;
         GCLK->CLKCTRL.reg = GCLK_CLKCTRL_GEN(clk_gen_slow) | GCLK_CLKCTRL_ID_SERCOMX_SLOW | GCLK_CLKCTRL_CLKEN;
         while (GCLK->STATUS.bit.SYNCBUSY)
             ;
@@ -144,7 +144,7 @@ uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint
     const uint32_t form = (uart_extra_opt & UART_EXTRA_OPT_AUTO_BAUD);
     const uint32_t rxpo = (uart_extra_opt & UART_EXTRA_OPT_RX_PAD_3);
     const uint32_t txpo = (uart_extra_opt & UART_EXTRA_OPT_TX_PAD_2);
-    sercom_inst->USART.CTRLA.reg = SERCOM_USART_CTRLA_ENABLE | sampr | txpo | rxpo | form | cmode | cpol;
+    sercom_inst->USART.CTRLA.reg = sampr | txpo | rxpo | form | cmode | cpol;
 
     const uint32_t mode_def_opt = (uart_extra_opt & UART_EXTRA_OPT_EXTERNAL_CLOCK) == 0;
     if(mode_def_opt) {
@@ -156,6 +156,7 @@ uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, const uint
         sercom_inst->USART.CTRLA.reg |= SERCOM_USART_CTRLA_DORD;
     }
 
+    sercom_inst->USART.CTRLA.reg |= SERCOM_USART_CTRLA_ENABLE;
     uart_wait_for_sync(sercom_inst, (SERCOM_USART_SYNCBUSY_SWRST | SERCOM_USART_SYNCBUSY_ENABLE));
 
     return UHAL_STATUS_OK;
