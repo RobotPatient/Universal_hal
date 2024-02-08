@@ -91,6 +91,13 @@ uhal_status_t usb_serial_write_string(const usb_serial_inst_t serial_instance, c
  */
 uhal_status_t usb_serial_read_string(const usb_serial_inst_t serial_instance, char* buffer, const size_t size, const uint8_t read_until_newline);
 
+/**
+ * \brief Read a single character from the USB serial bus
+ * 
+ * \param serial_instance The serial cdc class instance number
+ * \return uint8_t 
+ */
+static inline uint8_t usb_serial_read_char(const usb_serial_inst_t serial_instance);
 
 /**
  * \brief De-initializes serial cdc bus on USB peripheral
@@ -99,6 +106,9 @@ uhal_status_t usb_serial_read_string(const usb_serial_inst_t serial_instance, ch
  * \return uhal_status_t 0 if successfull, negative if unsuccesfull
  */
 uhal_status_t usb_serial_deinit(const usb_serial_inst_t serial_instance);
+
+
+
 
 
 /**
