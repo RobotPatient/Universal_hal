@@ -27,6 +27,7 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
     option(UHAL_DISABLE_I2C_SLAVE_MODULE "Disable the I2C Slave module" NO)
     option(UHAL_DISABLE_SPI_HOST_MODULE "Disable the SPI Host module" NO)
     option(UHAL_DISABLE_SPI_SLAVE_MODULE "Disable the SPI Slave module" NO)
+    option(UHAL_ENABLE_USB_SERIAL_MODULE "Enable the USB serial module" YES)
 
     add_library(Universal_hal 
             "hal/platform/atmelsam/irq/irq_bindings.c"
@@ -60,6 +61,27 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
     if(UHAL_DISABLE_SPI_SLAVE_MODULE)
     add_compile_definitions("DISABLE_SPI_SLAVE_MODULE")
     endif()
+
+    if(UHAL_ENABLE_USB_SERIAL_MODULE)
+    option(UHAL_NUM_OF_SERIAL_PORTS "Number of serial ports to initialize" 1)
+    add_library(Universal_hal_usb STATIC "middleware/usb/platform/atmelsam/usb_serial_samd.c"
+                                         "middleware/usb/lib/src/portable/microchip/samd/dcd_samd.c")
+    target_include_directories(Universal_hal_usb PUBLIC "middleware/usb/"
+                                                        "middleware/usb/platform/atmelsam/")
+
+    target_link_libraries(Universal_hal_usb PRIVATE Universal_hal)
+
+    add_library(tinyusb_config INTERFACE)
+
+    add_subdirectory(middleware/usb/lib/src)    
+
+    add_library(Universal_hal_usb_conf INTERFACE )
+
+    target_link_libraries(tinyusb_config INTERFACE Universal_hal_usb_conf)
+    target_link_libraries(Universal_hal_usb PUBLIC Universal_hal_usb_conf)
+    target_link_libraries(Universal_hal_usb_conf INTERFACE tinyusb)
+    target_include_directories(Universal_hal_usb_conf INTERFACE "middleware/usb/lib/hw/bsp/")
+  endif()
 else ()
     # You can define your OS here if desired
     MESSAGE(STATUS "No MCU platform selected!")
