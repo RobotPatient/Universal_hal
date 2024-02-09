@@ -10,14 +10,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.1
-
-      - name: Configure Project
-        uses: threeal/cmake-action@v1.3.0
-
-      - name: Build Project
-        runs: cmake -DUHAL_BUILD_TESTS=1 . -B build  && cd build && make -j2
-
-      - name: Test Project
-        runs: ctest --test-dir build
+      - uses: actions/checkout@v3
+      - uses: threeal/cmake-action@v1.3.0
+      - runs: cmake -DUHAL_BUILD_TESTS=1 . -B build  && cd build && make -j2
+      - runs: ctest --test-dir build
