@@ -88,5 +88,6 @@ endif ()
 
 if(UHAL_BUILD_TESTS)
 MESSAGE(STATUS "Building tests!")
+enable_testing()
 add_subdirectory(test/atmelsam)
 endif()

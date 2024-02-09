@@ -1,5 +1,4 @@
 if(UHAL_BUILD_TESTS)
-enable_testing()
 include(FetchContent)
 FetchContent_Declare(
   googletest
