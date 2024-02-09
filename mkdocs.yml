@@ -124,6 +124,14 @@ nav:
              - "About": API/SPI_slave/platform/atmelsam/About.md
              - "Usage": API/SPI_slave/platform/atmelsam/Usage.md
              - "Critical Notes": API/SPI_slave/platform/atmelsam/Critical_notes.md
+      - 'UART':
+        - 'Compatibility': "API/UART/uart_compatibility.md"
+        - 'General API': "API/UART/uart_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/UART/platform/atmelsam/About.md
+             - "Usage": API/UART/platform/atmelsam/Usage.md
+             - "Critical Notes": API/UART/platform/atmelsam/Critical_notes.md
       - 'DMA':
         - 'Compatibility': "API/DMA/dma_compatibility.md"
         - 'General API': "API/DMA/dma_api.md"
