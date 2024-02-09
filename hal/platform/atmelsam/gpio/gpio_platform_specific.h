@@ -177,7 +177,7 @@ static_assert(pin_mode <= GPIO_MODE_OUTPUT, "Selected pin mode not supported!");
 
 #define GPIO_PIN_LEVEL_PARAMETER_CHECK(level) \
 do {                                                          \
-static_assert(pin_mode <= GPIO_HIGH, "Selected pin level not supported!");   \
+static_assert(level <= GPIO_HIGH, "Selected pin level not supported!");   \
 }while(0);
 
 #define GPIO_PIN_OPTIONS_PARAMETER_CHECK(options) \

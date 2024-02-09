@@ -33,36 +33,6 @@ static inline uint8_t get_fast_clk_gen_val(const usb_clock_sources_t clock_sourc
     return fast_clk_val;
 }
 
-static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count) {
-    uint8_t const case_diff = 'a' - 'A';
-
-    for (uint32_t i = 0; i < count; i++) {
-        tud_cdc_n_write_char(itf, buf[i]);
-    }
-    tud_cdc_n_write_flush(itf);
-}
-
-//--------------------------------------------------------------------+
-// USB CDC
-//--------------------------------------------------------------------+
-static void cdc_task(void) {
-    uint8_t itf;
-
-    for (itf = 0; itf < CFG_TUD_CDC; itf++) {
-        // connected() check for DTR bit
-        // Most but not all terminal client set this when making connection
-        // if ( tud_cdc_n_connected(itf) )
-        {
-            if (tud_cdc_n_available(itf)) {
-                uint8_t buf[64];
-
-                uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
-                echo_serial_port(0, buf, count);
-            }
-        }
-    }
-}
-
 uhal_status_t usb_serial_init(const usb_serial_inst_t serial_instance, const usb_clock_sources_t clock_source, const uint32_t clock_frequency) {
     uint8_t clk_gen_fast = 0;
 
@@ -88,10 +58,11 @@ uhal_status_t usb_serial_init(const usb_serial_inst_t serial_instance, const usb
 #endif
 
     volatile uint8_t res = tud_init(serial_instance);
+
     if (board_init_after_tusb) {
         board_init_after_tusb();
     }
-    return UHAL_STATUS_OK;
+    return res;
 }
 
 const uint8_t usb_serial_available(const usb_serial_inst_t serial_instance) {
@@ -143,7 +114,7 @@ uhal_status_t usb_serial_read_string(const usb_serial_inst_t serial_instance, ch
 }
 
 
-static inline uint8_t usb_serial_read_char(const usb_serial_inst_t serial_instance) {
+const uint8_t usb_serial_read_char(const usb_serial_inst_t serial_instance) {
   char ch = tud_cdc_n_read_char(serial_instance);
   tud_cdc_n_read_flush(serial_instance);
   return ch;

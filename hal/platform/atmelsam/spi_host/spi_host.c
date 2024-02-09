@@ -131,7 +131,7 @@ uhal_status_t spi_host_init(const spi_host_inst_t spi_peripheral_num, const uint
     sercom_instance->SPI.CTRLA.reg =
             SERCOM_SPI_CTRLA_MODE_SPI_MASTER | (0 << SERCOM_SPI_CTRLA_CPHA_Pos)
             | (0 << SERCOM_SPI_CTRLA_CPOL_Pos) | (SERCOM_SPI_CTRLA_DIPO(dipo_pad))
-            | (SERCOM_SPI_CTRLA_DOPO(dopo_pad));
+            | (SERCOM_SPI_CTRLA_DOPO(dopo_pad)) | data_order | clock_polarity;
     sercom_instance->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_PLOADEN | SERCOM_SPI_CTRLB_CHSIZE(character_size);
     sercom_instance->SPI.BAUD.reg = spi_clock_source_freq / spi_bus_frequency / 2;
 //    sercom_instance->SPI.INTENSET.reg = SERCOM_SPI_INTENSET_RXC | SERCOM_SPI_INTENSET_TXC | SERCOM_SPI_INTENSET_SSL;

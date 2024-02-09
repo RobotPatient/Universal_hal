@@ -27,7 +27,7 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
     option(UHAL_DISABLE_I2C_SLAVE_MODULE "Disable the I2C Slave module" NO)
     option(UHAL_DISABLE_SPI_HOST_MODULE "Disable the SPI Host module" NO)
     option(UHAL_DISABLE_SPI_SLAVE_MODULE "Disable the SPI Slave module" NO)
-    option(UHAL_ENABLE_USB_SERIAL_MODULE "Enable the USB serial module" YES)
+    option(UHAL_ENABLE_USB_SERIAL_MODULE "Enable the USB serial module" NO)
 
     add_library(Universal_hal 
             "hal/platform/atmelsam/irq/irq_bindings.c"
@@ -40,7 +40,6 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
             "hal/platform/atmelsam/uart/uart.c"
             )
     target_include_directories(Universal_hal PUBLIC "hal/" "utils/" "hal/platform/atmelsam/")
-    target_link_libraries(Universal_hal INTERFACE board_sdk)
 
     if(UHAL_DISABLE_GPIO_MODULE)
     add_compile_definitions("DISABLE_GPIO_MODULE")
@@ -64,16 +63,16 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
 
     if(UHAL_ENABLE_USB_SERIAL_MODULE)
     option(UHAL_NUM_OF_SERIAL_PORTS "Number of serial ports to initialize" 1)
-    add_library(Universal_hal_usb STATIC "middleware/usb/platform/atmelsam/usb_serial_samd.c"
-                                         "middleware/usb/lib/src/portable/microchip/samd/dcd_samd.c")
-    target_include_directories(Universal_hal_usb PUBLIC "middleware/usb/"
-                                                        "middleware/usb/platform/atmelsam/")
+    add_library(Universal_hal_usb STATIC "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/platform/atmelsam/usb_serial_samd.c"
+                                         "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/lib/src/portable/microchip/samd/dcd_samd.c")
+    target_include_directories(Universal_hal_usb PUBLIC "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/"
+                                                        "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/platform/atmelsam/")
 
     target_link_libraries(Universal_hal_usb PRIVATE Universal_hal)
 
     add_library(tinyusb_config INTERFACE)
 
-    add_subdirectory(middleware/usb/lib/src)    
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/middleware/usb/lib/src)    
 
     add_library(Universal_hal_usb_conf INTERFACE )
 
