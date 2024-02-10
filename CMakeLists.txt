@@ -62,7 +62,6 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
     endif()
 
     if(UHAL_ENABLE_USB_SERIAL_MODULE)
-    option(UHAL_NUM_OF_SERIAL_PORTS "Number of serial ports to initialize" 1)
     add_library(Universal_hal_usb STATIC "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/platform/atmelsam/usb_serial_samd.c"
                                          "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/lib/src/portable/microchip/samd/dcd_samd.c")
     target_include_directories(Universal_hal_usb PUBLIC "${CMAKE_CURRENT_LIST_DIR}/middleware/usb/"
@@ -79,6 +78,7 @@ if (PLATFORM_DEFINED MATCHES "^__SAMD21")
     target_link_libraries(tinyusb_config INTERFACE Universal_hal_usb_conf)
     target_link_libraries(Universal_hal_usb PUBLIC Universal_hal_usb_conf)
     target_link_libraries(Universal_hal_usb_conf INTERFACE tinyusb)
+    target_compile_definitions(Universal_hal_usb_conf INTERFACE "-DCFG_TUSB_MCU=OPT_MCU_SAMD21")
     target_include_directories(Universal_hal_usb_conf INTERFACE "middleware/usb/lib/hw/bsp/")
   endif()
 else ()

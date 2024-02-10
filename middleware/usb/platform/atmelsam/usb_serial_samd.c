@@ -114,7 +114,7 @@ uhal_status_t usb_serial_read_string(const usb_serial_inst_t serial_instance, ch
 }
 
 
-const uint8_t usb_serial_read_char(const usb_serial_inst_t serial_instance) {
+const int8_t usb_serial_read_char(const usb_serial_inst_t serial_instance) {
   char ch = tud_cdc_n_read_char(serial_instance);
   tud_cdc_n_read_flush(serial_instance);
   return ch;

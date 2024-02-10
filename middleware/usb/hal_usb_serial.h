@@ -97,7 +97,7 @@ uhal_status_t usb_serial_read_string(const usb_serial_inst_t serial_instance, ch
  * \param serial_instance The serial cdc class instance number
  * \return uint8_t 
  */
-const uint8_t usb_serial_read_char(const usb_serial_inst_t serial_instance);
+const int8_t usb_serial_read_char(const usb_serial_inst_t serial_instance);
 
 /**
  * \brief De-initializes serial cdc bus on USB peripheral

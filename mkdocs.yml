@@ -140,6 +140,14 @@ nav:
              - "About": API/DMA/platform/atmelsam/About.md
              - "Usage": API/DMA/platform/atmelsam/Usage.md
              - "Critical Notes": API/DMA/platform/atmelsam/Critical_notes.md
+      - 'USB':
+        - 'Compatibility': "API/USB/usb_compatibility.md"
+        - 'General API': "API/USB/usb_api.md"
+        - 'API platform':
+           - SAMD:
+             - "About": API/USB/platform/atmelsam/About.md
+             - "Usage": API/USB/platform/atmelsam/Usage.md
+             - "Critical Notes": API/USB/platform/atmelsam/Critical_notes.md
   - Contributing:
     - 'General': 'contributing.md'
     - 'Code style': 'code_style.md'

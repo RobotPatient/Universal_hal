@@ -20,7 +20,7 @@ The UART implementation does not set up clock generators; it connects the UART p
 Frameworks like Arduino and ASF typically handle most configurations. Both set clock generator 0 at 48 MHz (Arduino) or 8 MHz (ASF) and clock generator 1 at 32.768 KHz.
 
 !!! Warning
-    The UART peripheral needs two clocks: a slow one (< 100 KHz) for internal timing and synchronization, and a fast one (≥ 2x SCK frequency) for operational purposes in slave mode.
+    The UART peripheral needs two clocks: a slow one (< 100 KHz) for internal timing and synchronization, and a fast one (≥ (oversampling, default 16)x baud frequency)
 
 ### GPIO Pinmux Settings
 
@@ -36,8 +36,8 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
     const gpio_pin_t RX_PIN = GPIO_PIN_PA4;
     const gpio_pin_t TX_PIN = GPIO_PIN_PA5;
 
-    gpio_set_pin_mode(SDA_PIN, GPIO_MODE_D);
-    gpio_set_pin_mode(SCL_PIN, GPIO_MODE_D);
+    gpio_set_pin_mode(RX_PIN, GPIO_MODE_D);
+    gpio_set_pin_mode(TX_PIN, GPIO_MODE_D);
     ```
 
 ### uart_init Function
@@ -164,7 +164,7 @@ Set the following parameters:
     #define RX_PIN GPIO_PIN_PA13
     #define TX_PIN GPIO_PIN_PA12
 
-    /* SPI settings */
+    /* UART settings */
     #define UART_BAUDRATE 115200
     #define UART_PERIPHERAL UART_PERIPHERAL_4
     #define UART_CLOCK_SOURCE UART_CLK_SOURCE_USE_DEFAULT
