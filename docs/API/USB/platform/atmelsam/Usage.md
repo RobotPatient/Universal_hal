@@ -4,27 +4,31 @@ The USB API for Atmel SAMD21/51 microcontrollers is designed with platform-speci
 
 ## Platform Specific Settings
 
-For effective use of the UART peripheral, follow these essential steps:
+For effective use of the USB peripheral, follow these essential steps:
 
-- [ ] Configure the system clocks for the UART peripheral (skip if using ASF or Arduino).
-- [ ] Set up the GPIO pins for the UART peripheral (details in the GPIO section).
-- [ ] Use the `uart_init` function with the right configuration settings.
+- [ ] Include the device descriptors (`usb_descriptors.c`) and `tusb_config.h` in the build (link them to target `Universal_hal_usb_conf`)
+- [ ] Set up the GPIO pins for the USB peripheral (details in the GPIO section, USB_DM and USB_DP pin).
+- [ ] Use the `usb_serial_init` function with the right configuration settings.
 
 !!! note
     You can click on the checkmarks above to mark your progress.
 
 ### Clocks
 
-The UART implementation does not set up clock generators; it connects the UART peripheral to existing clock generators. This setup is the responsibility of the integrating code or software framework.
+The USB implementation does not set up clock generators; it connects the USB peripheral to existing clock generators. This setup is the responsibility of the integrating code or software framework.
 
 Frameworks like Arduino and ASF typically handle most configurations. Both set clock generator 0 at 48 MHz (Arduino) or 8 MHz (ASF) and clock generator 1 at 32.768 KHz.
 
 !!! Warning
-    The UART peripheral needs two clocks: a slow one (< 100 KHz) for internal timing and synchronization, and a fast one (≥ 2x SCK frequency) for operational purposes in slave mode.
+    The USB peripheral needs one clock: a fast one (≥ 8MHz) to be operational.
+
+
+### Build system configuration
+
 
 ### GPIO Pinmux Settings
 
-Apart from configuring the `uart_init()` function, you must link the GPIO pins to the hardware peripheral using the SAMD's pinmux with `gpio_set_pin_mode`.
+Apart from configuring the `usb_serial_init()` function, you must link the GPIO pins to the hardware peripheral using the SAMD's pinmux with `gpio_set_pin_mode` and make sure the pin has no pull(-ups or -downs) enabled.
 
 ```c
 void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
@@ -33,65 +37,56 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
 ??? question "Setting the right pin mode"
     Consult the SAMD21 or SAMD51 datasheet for the correct `pin_mode`. For example, to configure PA4 and PA5 of the SAMD21 for SERCOM 0's RX and TX:
     ```c
-    const gpio_pin_t RX_PIN = GPIO_PIN_PA4;
-    const gpio_pin_t TX_PIN = GPIO_PIN_PA5;
+    const gpio_pin_t USB_DM_PIN = GPIO_PIN_PA24;
+    const gpio_pin_t USB_DP_PIN = GPIO_PIN_PA25;
 
-    gpio_set_pin_mode(SDA_PIN, GPIO_MODE_D);
-    gpio_set_pin_mode(SCL_PIN, GPIO_MODE_D);
+    GPIO_SET_PIN_MODE(USB_DM_PIN, GPIO_MODE_OUTPUT);
+    GPIO_SET_PIN_MODE(USB_DP_PIN, GPIO_MODE_OUTPUT);
+    GPIO_SET_PIN_LVL(USB_DM_PIN, 0);
+    GPIO_SET_PIN_LVL(USB_DP_PIN, 0);
+    gpio_set_pin_mode(USB_DM_PIN, GPIO_MODE_G);
+    gpio_set_pin_mode(USB_DP_PIN, GPIO_MODE_G);
     ```
 
-### uart_init Function
+### usb_serial_init Function
 
-Use `uart_init` to initialize the UART hardware peripheral.
+Use `usb_serial_init` to initialize the USB hardware peripheral with USB Serial CDC class functionality.
 
 ```c
-uhal_status_t uart_init(const uart_peripheral_inst_t uart_peripheral, 
-                        const uint32_t baudrate, 
-                        const uart_clock_sources_t clock_source, 
-                        const uint32_t clock_source_freq, 
-                        const uart_extra_config_opt_t uart_extra_opt);
+uhal_status_t usb_serial_init(const usb_serial_inst_t serial_instance, 
+                              const usb_clock_sources_t clock_source, 
+                              const uint32_t clock_frequency);
 ```
 
 Set the following parameters:
 
-??? info "uart_peripheral"
-    Specifies the SERCOM number for the UART module.
-
-    !!! Warning
-        These peripherals are shared with UART, SPI, and I2C. Ensure exclusive use to avoid configuration conflicts.
+??? info "serial_instance"
+    Specifies the USB serial bus to instantiate, the amount of busses available depends on the settings configured in `tusb_config.h`.
+    The macro `CFG_TUD_CDC` specifies the amount of busses available.
     
     Configuration for SAMD21:
     
     ```c
     typedef enum {
-        UART_PERIPHERAL_0,
+        USB_SERIAL_0,
         ...
-        UART_PERIPHERAL_5
-    } spi_host_inst_t;
+    } usb_serial_inst_t;
     ```
+    If not sure what value to set? Set the default serial bus; USB_SERIAL0
 
-??? info "baudrate"
-    The desired UART baudrate (600-1M baud supported).
-
-
-??? info "clock_sources"
-    Identifies the clock sources for the SPI peripheral.
+??? info "clock_source"
+    Identifies the clock source for the USB peripheral.
 
     SAMD21 options:
     ```c
     typedef enum {
-        UART_CLK_SOURCE_USE_DEFAULT = 0x00,
+        USB_CLK_SOURCE_USE_DEFAULT = 0x00,
         ...
-        UART_CLK_SOURCE_SLOW_CLKGEN7 = 0x800,
-    } uart_clock_sources_t;
-    ```
-    Combine a fast and a slow clock using an OR operation.
-    ```c
-    #define uart_clocks (UART_CLK_SOURCE_FAST_CLKGEN0 | UART_CLK_SOURCE_SLOW_CLKGEN1)
+    } usb_clock_sources_t;
     ```
 
-??? info "clock_source_freq"
-    The output frequency of the fast clock generator.
+??? info "clock_freq"
+    The output frequency of the main cpu clock generator.
 
     Typical values:
     
@@ -103,77 +98,33 @@ Set the following parameters:
 
     Use `F_CPU` with Arduino.
 
-??? info "uart_extra_opt"
-    Extra configuration options for the UART peripheral.
-
-    Available options:
-
-    - **UART_EXTRA_OPT_USE_DEFAULT**: Default UART settings.
-
-    - **UART_EXTRA_OPT_MSB_FIRST**: Transfer bytes MSB first.
-
-    - **UART_EXTRA_OPT_INVERSE_CLOCK_POLARITY**: Invert the clock polarity.
-
-    - **UART_EXTRA_OPT_SYNCHRONOUS_COMMUNICATION**: Enable synchronous communication.
-
-    - **UART_EXTRA_OPT_AUTO_BAUD**: Enable automatic baudrate negotiation.
-
-    - **UART_EXTRA_OPT_PARITY**: Enable parity bit
-
-    - **UART_EXTRA_OPT_RX_PAD_x**: Corresponds to SERCOM_PAD[x] in the mux table (possible values range from 1 to 3, default 0)
-
-    - **UART_EXTRA_OPT_TX_PAD_x**: Corresponds to SERCOM_PAD[x] as well (possible values; 1 or 2, default 0)
-
-    - **UART_EXTRA_OPT_OVERSAMPL_3X_ARITH**: UART baudrate calculation using 3x oversampling with arithmetic baud calculation
-
-    - **UART_EXTRA_OPT_OVERSAMPL_8X_FRACT**: UART baudrate calculation using 8x oversampling with fractional baud calculation
-
-    - **UART_EXTRA_OPT_OVERSAMPL_8X_ARITH**: UART baudrate calculation using 8x oversampling with arithmetic baud calculation
-
-    - **UART_EXTRA_OPT_OVERSAMPL_16X_FRACT**: UART baudrate calculation using 16x oversampling with fractional baud calculation
-
-    - **UART_EXTRA_OPT_EXTERNAL_CLOCK**: Force the usage of external clock source (mapped to pin) for the UART module
-
-    - **UART_EXTRA_OPT_ENABLE_RX**: Enable the Receiver of the UART module preconditionally
-
-    - **UART_EXTRA_OPT_IRDA_ENCODING**: Enable IRDA encoding for usage with IR remotes
-
-    - **UART_EXTRA_OPT_COLLISION_DETECT**: Enable collision detection for the UART bus
-
-    - **UART_EXTRA_OPT_TWO_STOP_BITS**: Enable the usage of two stop-bits
-
-    - **UART_EXTRA_OPT_CHAR_SIZE_x_BITS**: Set custom character sizes (possible values range from 5 to 9, default 8)
-
-    Combine options with OR:
-    ```c
-    uart_extra_config_opt_t config = (UART_EXTRA_OPT_AUTO_BAUD | UART_EXTRA_OPT_PARITY);
-    ```
-
 ## Example Configuration
 
-!!! example "Adafruit Feather M0 (SAMD21) SPI Slave"
+!!! example "Adafruit Feather M0 (SAMD21) USB Setup"
     ```c
     #include <hal_gpio.h>
-    #include <hal_spi_slave.h>
+    #include <hal_usb_serial.h>
 
     #ifndef F_CPU
     #define F_CPU 48000000
     #endif
 
     /* Define GPIO pins */
-    #define RX_PIN GPIO_PIN_PA13
-    #define TX_PIN GPIO_PIN_PA12
+    #define USB_DM_PIN GPIO_PIN_PA24
+    #define USB_DP_PIN GPIO_PIN_PA25
 
-    /* SPI settings */
-    #define UART_BAUDRATE 115200
-    #define UART_PERIPHERAL UART_PERIPHERAL_4
-    #define UART_CLOCK_SOURCE UART_CLK_SOURCE_USE_DEFAULT
-    #define UART_CONFIG_OPTIONS UART_OPT_RX_PAD_1
+    /* USB settings */
+    #define USB_SERIAL_PERIPHERAL USB_SERIAL_0
+    #define USB_CLOCK_SOURCE UART_CLK_SOURCE_USE_DEFAULT
 
     void setup() {
-       GPIO_SET_PIN_MODE(RX_PIN, GPIO_MODE_D);
-       GPIO_SET_PIN_MODE(TX_PIN, GPIO_MODE_D);
-       uart_init(UART_PERIPHERAL,UART_BAUDRATE, UART_CLOCK_SOURCE, F_CPU, UART_CONFIG_OPTIONS);
+       GPIO_SET_PIN_MODE(USB_DM_PIN, GPIO_MODE_OUTPUT);
+       GPIO_SET_PIN_MODE(USB_DP_PIN, GPIO_MODE_OUTPUT);
+       GPIO_SET_PIN_LVL(USB_DM_PIN, 0);
+       GPIO_SET_PIN_LVL(USB_DP_PIN, 0);
+       GPIO_SET_PIN_MODE(USB_DM_PIN, GPIO_MODE_G);
+       GPIO_SET_PIN_MODE(USB_DP_PIN, GPIO_MODE_G);
+       usb_serial_init(USB_SERIAL_PERIPHERAL, USB_CLOCK_SOURCE, F_CPU);
     }
     ...
     ```

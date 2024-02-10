@@ -67,7 +67,7 @@ Set the following parameters:
         UART_PERIPHERAL_0,
         ...
         UART_PERIPHERAL_5
-    } spi_host_inst_t;
+    } uart_peripheral_inst_t;
     ```
 
 ??? info "baudrate"
@@ -75,7 +75,7 @@ Set the following parameters:
 
 
 ??? info "clock_sources"
-    Identifies the clock sources for the SPI peripheral.
+    Identifies the clock sources for the SERCOM peripheral.
 
     SAMD21 options:
     ```c
@@ -151,10 +151,10 @@ Set the following parameters:
 
 ## Example Configuration
 
-!!! example "Adafruit Feather M0 (SAMD21) SPI Slave"
+!!! example "Adafruit Feather M0 (SAMD21) UART setup"
     ```c
     #include <hal_gpio.h>
-    #include <hal_spi_slave.h>
+    #include <hal_uart.h>
 
     #ifndef F_CPU
     #define F_CPU 48000000
