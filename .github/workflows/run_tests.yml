@@ -1,4 +1,4 @@
-name: ci
+name: run tests
 on:
   push:
     branches:
@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: threeal/cmake-action@v1.3.0
 
       - name: Build Project
         run: cmake -DUHAL_BUILD_TESTS=1 . -B build  && cd build && make -j2
