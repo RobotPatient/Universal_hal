@@ -1,1 +1,1 @@
-# UART compatibility
+# USB compatibility
