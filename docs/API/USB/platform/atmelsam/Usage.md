@@ -24,7 +24,19 @@ Frameworks like Arduino and ASF typically handle most configurations. Both set c
 
 
 ### Build system configuration
+To use the USB serial module some build system settings need to be set. By default the Universal_hal exposes the `Universal_hal_usb_conf` build_target in CMake. This target has to be linked with the `device_descriptors.c` and usb configuration file `tusb_config.h`. Besides this the USB serial module has to be manually enabled, by setting the option `UHAL_ENABLE_USB_SERIAL_MODULE`, do this before importing the Universal hal! As the check inside the Universal_hal CMakeLists may miss this statement inside the check!
 
+ This is easily done by these lines of CMake, this example assumes that the `usb_descriptors.c` and `tusb_config.h` are in the `src/` folder:
+```cmake
+...
+set(UHAL_ENABLE_USB_SERIAL_MODULE ON)
+...
+# Include the Universal_hal here
+...
+target_sources(Universal_hal_usb_conf INTERFACE "src/usb_descriptors.c")
+target_include_directories(Universal_hal_usb_conf INTERFACE src/)
+```
+If not sure you can always look at the CMakeLists of the usb_serial example.
 
 ### GPIO Pinmux Settings
 
@@ -47,6 +59,15 @@ void gpio_set_pin_mode(const gpio_pin_t pin, gpio_mode_t pin_mode);
     gpio_set_pin_mode(USB_DM_PIN, GPIO_MODE_G);
     gpio_set_pin_mode(USB_DP_PIN, GPIO_MODE_G);
     ```
+
+### FreeRTOS compatibility
+The library used (tinyusb) has FreeRTOS compatibility, enabling this offers better functionality and thread safety for use within a RTOS. It is highly suggested to enable this option when using a RTOS. 
+
+Do this in `tusb_config.h`:
+```c
+#define CFG_TUSB_OS           OPT_OS_FREERTOS
+```
+
 
 ### usb_serial_init Function
 
@@ -129,3 +150,4 @@ Set the following parameters:
     ...
     ```
 
+For example usb_descriptors.c and tusb_config.h see the usb_serial example.

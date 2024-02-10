@@ -15,7 +15,6 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/../SDK/samd21g18_toolchain_ar
 project(atmelsam_usb_echo)
 
 set(UHAL_ENABLE_USB_SERIAL_MODULE ON)
-set(UHAL_USB_NO_OS ON)
 
 add_subdirectory(./../../../ Universal_hal)
 
